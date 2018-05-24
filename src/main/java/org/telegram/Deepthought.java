@@ -31,10 +31,9 @@ import org.telegram.tl.TLObject;
  * @date 16 of October of 2016
  */
 public class Deepthought {
-    private static final int APIKEY = 0; // your api key
-    private static final String APIHASH = "<your-api-hash"; // your api hash
-    private static final String PHONENUMBER = "<your-phone-number>"; // Your phone number
-
+    private static final int APIKEY = 208853; // your api key
+    private static final String APIHASH = "2b0149b45cfc13f5b272ad832608066b"; // your api hash
+    private static final String PHONENUMBER = "8613751867473"; // Your phone number
     public static void main(String[] args) {
         Logger.getGlobal().addHandler(new ConsoleHandler());
         Logger.getGlobal().setLevel(Level.ALL);
