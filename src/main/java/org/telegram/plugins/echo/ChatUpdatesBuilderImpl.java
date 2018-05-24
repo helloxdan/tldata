@@ -162,11 +162,11 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 				for (TLAbsChat ch : chats) { 
 					System.out.println(ch+"---:"+ch.getId());
 					if(ch instanceof TLChannel)
-					{
+					{  
 						requestGetChats(kernel, ch.getId());
 					}
 				}
-				System.out.println("--------------user---");
+				System.out.println("------33--------user---");
 				TLVector<TLAbsUser> users = dl.getUsers();
 				for (TLAbsUser u : users) {
 					TLUser tu=(TLUser)u;
