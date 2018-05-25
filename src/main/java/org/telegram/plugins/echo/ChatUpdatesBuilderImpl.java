@@ -68,7 +68,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 					 
 					e.printStackTrace();
 				}
-				gotoCmd(kernelComm);
+				 gotoCmd(kernelComm);
 			}
 		};
 		t.start();
@@ -163,7 +163,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 					System.out.println(ch+"---:"+ch.getId());
 					if(ch instanceof TLChannel)
 					{  
-						requestGetChats(kernel, ch.getId());
+//						requestGetChats(kernel, ch.getId());
 					}
 				}
 				System.out.println("------33--------user---");
