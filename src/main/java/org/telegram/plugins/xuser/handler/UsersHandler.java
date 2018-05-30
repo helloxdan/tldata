@@ -9,7 +9,7 @@ import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
 import org.telegram.bot.handlers.interfaces.IUsersHandler;
 import org.telegram.bot.services.BotLogger;
-import org.telegram.plugins.echo.structure.User;
+import org.telegram.plugins.xuser.entity.User;
 import org.telegram.plugins.xuser.db.DefaultDatabaseManager;
 
 /**
