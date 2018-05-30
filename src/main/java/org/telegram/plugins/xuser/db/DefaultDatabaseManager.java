@@ -269,7 +269,8 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		final HashMap<Integer, int[]> differencesDatas = new HashMap<>();
 		try {
 			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("SELECT * FROM tl_DifferencesData");
+					.getPreparedStatement("SELECT * FROM tl_DifferencesData where account=?");
+			preparedStatement.setString(1, getPhone());
 			final ResultSet result = preparedStatement.executeQuery();
 			while (result.next()) {
 				final int[] differencesData = new int[3];
@@ -290,11 +291,16 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		int updatedRows = 0;
 		try {
 			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("REPLACE INTO tl_DifferencesData (botId, pts, date, seq) VALUES (?, ?, ?, ?);");
-			preparedStatement.setInt(1, botId);
-			preparedStatement.setInt(2, pts);
-			preparedStatement.setInt(3, date);
-			preparedStatement.setInt(4, seq);
+					.getPreparedStatement("REPLACE INTO tl_DifferencesData (id,account,botId, pts, date, seq,update_date) VALUES (?, ?, ?, ?, ?, ?, ?);");
+			preparedStatement.setString(1, getPhone()+botId);
+			preparedStatement.setString(2, getPhone() );
+			
+			preparedStatement.setInt(3, botId);
+			preparedStatement.setInt(4, pts);
+			preparedStatement.setInt(5, date);
+			preparedStatement.setTimestamp(6,
+					new Timestamp(System.currentTimeMillis()));
+			
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
