@@ -22,6 +22,7 @@ class CreationStrings {
     static final String createChatTable = "CREATE TABLE IF NOT EXISTS Chat (" +
             "id INTEGER PRIMARY KEY NOT NULL," +
             "isChannel BOOLEAN NOT NULL DEFAULT FALSE, " +
+            "title VARCHAR(100) , " +
             "accessHash BIGINT DEFAULT NULL" +
             ");";
 }

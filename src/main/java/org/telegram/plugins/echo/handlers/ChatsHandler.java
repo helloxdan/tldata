@@ -46,20 +46,22 @@ public class ChatsHandler implements IChatsHandler {
     }
 
     private void onChatForbidden(TLChatForbidden chat) {
-        onChat(chat.getId());
+        onChat(chat.getId(),"forbidden");
     }
 
 
     private void onChat(TLChat chat) {
-        onChat(chat.getId());
+     
+        onChat(chat.getId(),chat.getTitle());
     }
 
-    private void onChat(int chatId) {
+    private void onChat(int chatId,String title) {
         boolean updating = true;
         ChatImpl current = (ChatImpl) databaseManager.getChatById(chatId);
         if (current == null) {
             updating = false;
-            current = new ChatImpl(chatId);
+          //  current = new ChatImpl(chatId);
+            current = new ChatImpl(chatId,title);
         }
         current.setChannel(false);
 
@@ -76,7 +78,8 @@ public class ChatsHandler implements IChatsHandler {
         ChatImpl current = (ChatImpl) databaseManager.getChatById(channel.getId());
         if (current == null) {
             updating = false;
-            current = new ChatImpl(channel.getId());
+//            current = new ChatImpl(channel.getId());
+            current = new ChatImpl(channel.getId(),channel.getTitle());
         }
         current.setChannel(true);
         current.setAccessHash(channel.getAccessHash());
@@ -93,7 +96,8 @@ public class ChatsHandler implements IChatsHandler {
         ChatImpl current = (ChatImpl) databaseManager.getChatById(channel.getId());
         if (current == null) {
             updating = false;
-            current = new ChatImpl(channel.getId());
+//            current = new ChatImpl(channel.getId());
+            current = new ChatImpl(channel );
         }
         current.setChannel(true);
         if (channel.hasAccessHash()) {

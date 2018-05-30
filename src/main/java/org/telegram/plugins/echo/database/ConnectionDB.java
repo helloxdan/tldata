@@ -71,7 +71,8 @@ public class ConnectionDB {
             final ResultSet res = metaData.getTables(null, null, "",
                     new String[]{"TABLE"});
             while (res.next()) {
-                if (res.getString("TABLE_NAME").compareTo("Versions") == 0) {
+//            System.out.println("tableName:"+res.getString("TABLE_NAME"));
+                if (res.getString("TABLE_NAME").compareTo("versions") == 0) {
                     final ResultSet result = runSqlQuery("SELECT Max(Version) FROM Versions");
                     while (result.next()) {
                         max = (max > result.getInt(1)) ? max : result.getInt(1);

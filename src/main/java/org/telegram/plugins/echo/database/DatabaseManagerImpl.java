@@ -1,5 +1,15 @@
 package org.telegram.plugins.echo.database;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.telegram.bot.kernel.database.DatabaseManager;
@@ -8,12 +18,6 @@ import org.telegram.bot.structure.Chat;
 import org.telegram.bot.structure.IUser;
 import org.telegram.plugins.echo.structure.ChatImpl;
 import org.telegram.plugins.echo.structure.User;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.HashMap;
 
 /**
  * @author Ruben Bermudez
@@ -36,7 +40,21 @@ public class DatabaseManagerImpl implements DatabaseManager {
             recreateTable(currentVersion);
         }
     }
-
+public void begin() {
+	try {
+		connetion.initTransaction();
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+}
+public void commit() {
+	try {
+		connetion.commitTransaction();
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+}
+ 
     /**
      * Recreates the DB
      */
@@ -85,7 +103,26 @@ public class DatabaseManagerImpl implements DatabaseManager {
         }
         return user;
     }
-
+  
+    public @Nullable  List<User> findUsers() {
+        User user = null;
+        List<User> users=new ArrayList<User>();
+        try {
+            final PreparedStatement preparedStatement = connetion.getPreparedStatement("SELECT * FROM Users order by update_date desc");
+         
+            final ResultSet result = preparedStatement.executeQuery(); 
+           
+            while (result.next()) {
+                user = new User(result.getInt("userId"));
+                user.setUserHash(result.getLong("userHash"));
+                users.add(user);
+            }
+            result.close();
+        } catch (SQLException e) {
+            BotLogger.error(LOGTAG, e);
+        }
+        return users;
+    }
     /**
      * Adds an user to the database
      *
@@ -96,14 +133,16 @@ public class DatabaseManagerImpl implements DatabaseManager {
     public boolean addUser(@NotNull User user) {
         int updatedRows = 0;
         try {
-            final PreparedStatement preparedStatement = connetion.getPreparedStatement("INSERT INTO Users (userId, userHash) " +
-                    "VALUES (?,?)");
+            final PreparedStatement preparedStatement = connetion.getPreparedStatement("INSERT INTO Users (userId, userHash,username,update_date) " +
+                    "VALUES (?,?,?,?)");
             preparedStatement.setInt(1, user.getUserId());
             if ((user.getUserHash() == null) || (user.getUserHash() == 0L)) {
                 preparedStatement.setNull(2, Types.NUMERIC);
             } else {
                 preparedStatement.setLong(2, user.getUserHash());
             }
+            preparedStatement.setString(3, user.getUsername());
+            preparedStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             updatedRows = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             BotLogger.error(LOGTAG, e);
@@ -114,14 +153,16 @@ public class DatabaseManagerImpl implements DatabaseManager {
     public boolean updateUser(@NotNull User user) {
         int updatedRows = 0;
         try {
-            final PreparedStatement preparedStatement = connetion.getPreparedStatement("UPDATE Users SET userHash=? " +
+            final PreparedStatement preparedStatement = connetion.getPreparedStatement("UPDATE Users SET userHash=? ,username=?,update_date=?" +
                     "WHERE userId=?");
             if ((user.getUserHash() == null) || (user.getUserHash() == 0L)) {
                 preparedStatement.setNull(1, Types.NUMERIC);
             } else {
                 preparedStatement.setLong(1, user.getUserHash());
             }
-            preparedStatement.setInt(2, user.getUserId());
+            preparedStatement.setString(2, user.getUsername());
+            preparedStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            preparedStatement.setInt(4, user.getUserId());
             updatedRows = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             BotLogger.error(LOGTAG, e);
@@ -159,8 +200,8 @@ public class DatabaseManagerImpl implements DatabaseManager {
     public boolean addChat(@NotNull ChatImpl chat) {
         int updatedRows = 0;
         try {
-            final PreparedStatement preparedStatement = connetion.getPreparedStatement("INSERT INTO Chat (id, accessHash, isChannel) " +
-                    "VALUES (?,?,?)");
+            final PreparedStatement preparedStatement = connetion.getPreparedStatement("INSERT INTO Chat (id, accessHash, isChannel,title) " +
+                    "VALUES (?,?,?,?)");
             preparedStatement.setInt(1, chat.getId());
             if (chat.getAccessHash() == null) {
                 preparedStatement.setNull(2, Types.BIGINT);
@@ -168,6 +209,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
                 preparedStatement.setLong(2, chat.getAccessHash());
             }
             preparedStatement.setBoolean(3, chat.isChannel());
+            preparedStatement.setString(4, chat.getTitle());
             updatedRows = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             BotLogger.error(LOGTAG, e);

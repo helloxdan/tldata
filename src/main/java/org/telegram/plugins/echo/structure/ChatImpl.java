@@ -1,5 +1,6 @@
 package org.telegram.plugins.echo.structure;
 
+import org.telegram.api.chat.channel.TLChannel;
 import org.telegram.bot.structure.Chat;
 
 /**
@@ -12,6 +13,7 @@ public class ChatImpl implements Chat {
     private int id;
     private Long accessHash;
     private boolean isChannel;
+    private String title;
 
     public ChatImpl(int id) {
         this.id = id;
@@ -20,7 +22,17 @@ public class ChatImpl implements Chat {
     public ChatImpl() {
     }
 
-    @Override
+    public ChatImpl(TLChannel channel) {
+		this.id=channel.getId();
+		this.title=channel.getTitle();
+	}
+
+	public ChatImpl(int id2, String title2) {
+		this.id=id2;
+		this.title=title2;
+	}
+
+	@Override
     public int getId() {
         return id;
     }
@@ -46,4 +58,13 @@ public class ChatImpl implements Chat {
     public void setChannel(boolean channel) {
         isChannel = channel;
     }
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+    
 }

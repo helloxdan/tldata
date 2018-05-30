@@ -63,6 +63,8 @@ public class UsersHandler implements IUsersHandler {
             } else {
                 BotLogger.info(LOGTAG, "Bot received");
             }
+            if(user!=null)
+            user.setUsername(tlUser.getUserName());
         }
         if ((currentUser == null) && (user != null)) {
             databaseManager.addUser(user);
