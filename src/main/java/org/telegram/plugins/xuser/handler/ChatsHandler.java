@@ -9,7 +9,7 @@ import org.telegram.api.chat.channel.TLChannel;
 import org.telegram.api.chat.channel.TLChannelForbidden;
 import org.telegram.bot.handlers.interfaces.IChatsHandler;
 import org.telegram.bot.services.BotLogger;
-import org.telegram.plugins.echo.structure.ChatImpl;
+import org.telegram.plugins.xuser.entity.ChatImpl;
 import org.telegram.plugins.xuser.db.DefaultDatabaseManager;
 
 /**

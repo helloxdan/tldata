@@ -38,8 +38,7 @@ import org.telegram.bot.kernel.IKernelComm;
 import org.telegram.bot.kernel.database.DatabaseManager;
 import org.telegram.bot.kernel.differenceparameters.IDifferenceParametersService;
 import org.telegram.bot.structure.BotConfig;
-import org.telegram.plugins.echo.database.DatabaseManagerImpl;
-import org.telegram.plugins.echo.structure.User;
+import org.telegram.plugins.xuser.entity.User;
 import org.telegram.plugins.xuser.db.DefaultDatabaseManager;
 import org.telegram.plugins.xuser.handler.MessageHandler;
 import org.telegram.plugins.xuser.handler.TLMessageHandler;
@@ -205,7 +204,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 
 		int snum = 250;
 		int len = snum + 50;
-		DatabaseManagerImpl dbm = (DatabaseManagerImpl) databaseManager;
+		DefaultDatabaseManager dbm = (DefaultDatabaseManager) databaseManager;
 
 		TLVector<TLAbsInputUser> users = new TLVector<TLAbsInputUser>();
 
@@ -306,7 +305,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 	private void requestGetDialogs(IKernelComm kernel) {
 		IChatsHandler chatsHandler1 = chatsHandler;
 		IUsersHandler userHandler2 = usersHandler;
-		DatabaseManagerImpl dbm = (DatabaseManagerImpl) databaseManager;
+		DefaultDatabaseManager dbm = (DefaultDatabaseManager) databaseManager;
 		//
 		TelegramApi api = kernel.getApi();
 		TLRequestMessagesGetDialogs req = new TLRequestMessagesGetDialogs();
@@ -376,7 +375,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 		req.setLimit(1000);
 		req.setFilter(new TLChannelParticipantsFilterRecent());
 
-		DatabaseManagerImpl dbm = (DatabaseManagerImpl) databaseManager;
+		DefaultDatabaseManager dbm = (DefaultDatabaseManager) databaseManager;
 		IUsersHandler userHandler2 = usersHandler;
 		api.doRpcCall(req, new RpcCallback() {
 

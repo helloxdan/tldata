@@ -16,8 +16,8 @@ import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.Chat;
 import org.telegram.bot.structure.IUser;
-import org.telegram.plugins.echo.structure.ChatImpl;
-import org.telegram.plugins.echo.structure.User;
+import org.telegram.plugins.xuser.entity.ChatImpl;
+import org.telegram.plugins.xuser.entity.User;
 
 /**
  * @author Ruben Bermudez
@@ -28,7 +28,8 @@ import org.telegram.plugins.echo.structure.User;
 public class DefaultDatabaseManager implements DatabaseManager {
 	private static final String LOGTAG = "DATABASEMANAGER";
 	private static volatile ConnectionDB connetion;
-	BotConfig botConfig =null;
+	BotConfig botConfig = null;
+
 	/**
 	 * Private constructor (due to Singleton)
 	 */
@@ -39,6 +40,10 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		if (currentVersion < CreationStrings.version) {
 			recreateTable(currentVersion);
 		}
+	}
+
+	private String getPhone() {
+		return getBotConfig().getPhoneNumber();
 	}
 
 	public void begin() {
@@ -94,8 +99,9 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		User user = null;
 		try {
 			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("SELECT * FROM Users WHERE userId= ?");
+					.getPreparedStatement("SELECT * FROM Users WHERE userId= ? and account=?");
 			preparedStatement.setInt(1, userId);
+			preparedStatement.setString(2, getPhone());
 			final ResultSet result = preparedStatement.executeQuery();
 			if (result.next()) {
 				user = new User(userId);
@@ -120,6 +126,8 @@ public class DefaultDatabaseManager implements DatabaseManager {
 			while (result.next()) {
 				user = new User(result.getInt("userId"));
 				user.setUserHash(result.getLong("userHash"));
+				user.setAccount(result.getString("account"));
+				user.setUsername(result.getString("username"));
 				users.add(user);
 			}
 			result.close();
@@ -141,16 +149,18 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		int updatedRows = 0;
 		try {
 			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("INSERT INTO Users (userId, userHash,username,update_date) "
+					.getPreparedStatement("INSERT INTO Users (id,account,userId, userHash,username,update_date) "
 							+ "VALUES (?,?,?,?)");
-			preparedStatement.setInt(1, user.getUserId());
+			preparedStatement.setString(1, getPhone() + user.getUserId());
+			preparedStatement.setString(2, getPhone());
+			preparedStatement.setInt(3, user.getUserId());
 			if ((user.getUserHash() == null) || (user.getUserHash() == 0L)) {
-				preparedStatement.setNull(2, Types.NUMERIC);
+				preparedStatement.setNull(4, Types.NUMERIC);
 			} else {
-				preparedStatement.setLong(2, user.getUserHash());
+				preparedStatement.setLong(4, user.getUserHash());
 			}
-			preparedStatement.setString(3, user.getUsername());
-			preparedStatement.setTimestamp(4,
+			preparedStatement.setString(5, user.getUsername());
+			preparedStatement.setTimestamp(6,
 					new Timestamp(System.currentTimeMillis()));
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
@@ -164,7 +174,7 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		try {
 			final PreparedStatement preparedStatement = connetion
 					.getPreparedStatement("UPDATE Users SET userHash=? ,username=?,update_date=?"
-							+ "WHERE userId=?");
+							+ "WHERE userId=? and account=?");
 			if ((user.getUserHash() == null) || (user.getUserHash() == 0L)) {
 				preparedStatement.setNull(1, Types.NUMERIC);
 			} else {
@@ -174,6 +184,7 @@ public class DefaultDatabaseManager implements DatabaseManager {
 			preparedStatement.setTimestamp(3,
 					new Timestamp(System.currentTimeMillis()));
 			preparedStatement.setInt(4, user.getUserId());
+			preparedStatement.setString(5, getPhone());
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
@@ -186,8 +197,9 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		ChatImpl channel = null;
 		try {
 			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("SELECT * FROM Chat WHERE id= ?");
+					.getPreparedStatement("SELECT * FROM Chat WHERE chatid= ? and account=?");
 			preparedStatement.setInt(1, chatId);
+			preparedStatement.setString(2, getPhone());
 			final ResultSet result = preparedStatement.executeQuery();
 			if (result.next()) {
 				channel = new ChatImpl(chatId);
@@ -214,16 +226,20 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		int updatedRows = 0;
 		try {
 			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("INSERT INTO Chat (id, accessHash, isChannel,title) "
+					.getPreparedStatement("INSERT INTO Chat (id,account,chatid, accessHash, isChannel,title,update_date) "
 							+ "VALUES (?,?,?,?)");
-			preparedStatement.setInt(1, chat.getId());
+			preparedStatement.setString(1, getPhone() + chat.getId());
+			preparedStatement.setString(2, getPhone());
+			preparedStatement.setInt(3, chat.getId());
 			if (chat.getAccessHash() == null) {
-				preparedStatement.setNull(2, Types.BIGINT);
+				preparedStatement.setNull(4, Types.BIGINT);
 			} else {
-				preparedStatement.setLong(2, chat.getAccessHash());
+				preparedStatement.setLong(4, chat.getAccessHash());
 			}
-			preparedStatement.setBoolean(3, chat.isChannel());
-			preparedStatement.setString(4, chat.getTitle());
+			preparedStatement.setBoolean(5, chat.isChannel());
+			preparedStatement.setString(6, chat.getTitle());
+			preparedStatement.setTimestamp(7,
+					new Timestamp(System.currentTimeMillis()));
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
@@ -236,10 +252,11 @@ public class DefaultDatabaseManager implements DatabaseManager {
 		try {
 			final PreparedStatement preparedStatement = connetion
 					.getPreparedStatement("UPDATE Chat SET accessHash=?, isChannel=? "
-							+ "WHERE id=?");
+							+ "WHERE chatid=? and account=?");
 			preparedStatement.setLong(1, chat.getAccessHash());
 			preparedStatement.setBoolean(2, chat.isChannel());
 			preparedStatement.setInt(3, chat.getId());
+			preparedStatement.setString(4, getPhone());
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
