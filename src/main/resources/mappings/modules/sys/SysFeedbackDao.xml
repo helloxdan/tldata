@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.SysFeedbackDao">
+    
+	<sql id="sysFeedbackColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.title AS "title",
+		a.content AS "content",
+		a.report_by AS "reportBy.id",
+		a.report_date AS "reportDate",
+		a.remarks AS "remarks",
+		a.reply_by AS "replyBy.id",
+		a.reply_content AS "replyContent",
+		a.attachment AS "attachment",
+		a.state AS "state",
+		a.tenant_id AS "tenantId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		u5.name AS "reportBy.name",
+		u8.name AS "replyBy.name"
+	</sql>
+	
+	<sql id="sysFeedbackJoins">
+		LEFT JOIN sys_user u5 ON u5.id = a.report_by
+		LEFT JOIN sys_user u8 ON u8.id = a.reply_by
+	</sql>
+    
+	<select id="get" resultType="SysFeedback">
+		SELECT 
+			<include refid="sysFeedbackColumns"/>
+		FROM sys_feedback a
+		<include refid="sysFeedbackJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SysFeedback">
+		SELECT 
+			<include refid="sysFeedbackColumns"/>
+		FROM sys_feedback a
+		<include refid="sysFeedbackJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.tenant_id = #{tenantId}
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="reportBy != null and reportBy.id != null and reportBy.id != ''">
+				AND a.report_by = #{reportBy.id}
+			</if>
+			<if test="beginReportDate != null and endReportDate != null and beginReportDate != '' and endReportDate != ''">
+				AND a.report_date BETWEEN #{beginReportDate} AND #{endReportDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SysFeedback">
+		SELECT 
+			<include refid="sysFeedbackColumns"/>
+		FROM sys_feedback a
+		<include refid="sysFeedbackJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.tenant_id = #{tenantId}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_feedback(
+			id,
+			type,
+			title,
+			content,
+			report_by,
+			report_date,
+			remarks,
+			reply_by,
+			reply_content,
+			attachment,
+			state,
+			tenant_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{type},
+			#{title},
+			#{content},
+			#{reportBy.id},
+			#{reportDate},
+			#{remarks},
+			#{replyBy.id},
+			#{replyContent},
+			#{attachment},
+			#{state},
+			#{tenantId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_feedback SET 	
+			type = #{type},
+			title = #{title},
+			content = #{content},
+			report_by = #{reportBy.id},
+			report_date = #{reportDate},
+			remarks = #{remarks},
+			reply_by = #{replyBy.id},
+			reply_content = #{replyContent},
+			attachment = #{attachment},
+			state = #{state},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sys_feedback SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

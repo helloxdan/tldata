@@ -1,0 +1,116 @@
+{	"color": [
+        "#3333cc","#ffffff"
+    ],
+    "tooltip": {
+        "trigger": "item", 
+        "formatter": "{a} {b}: {c} ({d}%)"
+    }, 
+    "title": {
+        "show": true, 
+        "text": "形象进度", 
+        "left": "35%",
+        "bottom":0, 
+        "textStyle": { 
+        	"fontSize": 14,
+            "color": "#6a6979"
+        }
+    }, 
+   "toolbox": {
+        "show": false,
+        "feature": {          
+            "saveAsImage": {}
+        }
+    },
+    "grid": {
+		"show": false,
+		"left": 100000,
+		"right": 0,
+		"top": 30,
+		"bottom": 0,
+		"borderColor": "#000000"
+	},
+    "series": [
+        {
+            "name": "访问来源", 
+            "type": "pie", 
+            "radius": [
+                "55%", 
+                "70%"
+            ], 
+            "center": ["50%","40%"],
+            "avoidLabelOverlap": false, 
+            "label": {
+                "normal": {
+                    "show": false, 
+                    "position": "outside", 
+                   "formatter": "{b}:{c}%", 
+                    "textStyle": {  
+                        "fontWeight": "normal"
+                    }
+                }, 
+                "emphasis": {
+                    "show": false,
+                    "formatter": "{b}:{c}%"
+                }
+            }, 
+            "tooltip": {
+                "show": true,
+                "formatter": "{b}:{c}%"
+            }, 
+            "labelLine": {
+                "normal": {
+                    "show": false,
+                    "smooth":0.1,
+                    "length": 2,
+                    "length2": 2
+                }
+            }, 
+            "zlevel":1,
+            "data": [
+                {
+                    "value": 67, 
+                    "name": "进度"
+                }, 
+                {
+                    "value": 33, 
+                    "name": "未完成"
+                }
+            ], 
+            "markPoint": {
+                "symbol": "emptycircle", 
+                "symbolSize": 100, 
+                 "itemStyle": {
+               	 	"normal": {
+                    	"borderWidth": 0,
+                    	"opacity":1
+               	 	}
+         		},
+         		"tooltip": {
+			        "show":false
+			    }, 
+                "label": {
+                    "normal": {
+                        "show": true, 
+                        "formatter": "{c}%", 
+                        "textStyle": {
+                            "fontSize": "24", 
+                            "fontWeight": "bold", 
+                            "color": "#000000"
+                        }
+                    },
+                   "emphasis": {
+                    	"show": true
+                	}
+                }, 
+                "data": [
+                    {
+                        "name": "某个屏幕坐标", 
+                        "value": 66, 
+                        "x": "50%", 
+                        "y": "50%"
+                    }
+                ]
+            }
+        }
+    ]
+}

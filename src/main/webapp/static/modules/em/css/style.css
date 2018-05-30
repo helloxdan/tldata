@@ -1,0 +1,460 @@
+html,body {
+	background-color: #eeeeee;
+}
+
+[v-locak] {
+	display: none;
+}
+
+.i-img-logo {
+	width: 100%;
+	height: 100%;
+}
+
+.i-box-text {
+	border-bottom: 1px solid #f0f0f0;
+	margin: 10px 0px;
+}
+
+.i-box-text>.row {
+	margin: 10px 10px;
+}
+
+.i-box-text b {
+	margin-right: 10px;
+}
+
+.i-box-top {
+	min-height: 310px;
+}
+
+.i-box-top .i-echart {
+	height: 217px;
+	border: 0px solid #f0f0f0;
+}
+
+.dataTables_length,.dataTables_info {
+	display: inline-block;
+}
+
+.dataTables_paginate {
+	display: inline-block;
+	float: right !important;
+}
+
+.krajee-default.i-file-logo.file-preview-frame .kv-file-content {
+	height: 90px;
+}
+
+.krajee-default.i-file-logo.file-preview-frame .file-thumbnail-footer {
+	height: 15px;
+}
+
+.krajee-default.i-file-logo .file-footer-caption {
+	display: none;
+}
+
+.i-file-preview .file-drop-zone-title {
+	padding: 5px;
+}
+
+.i-file-preview .file-drop-zone {
+	border: 0px dashed #aaa;
+	margin: 0px;
+	padding: 0px;
+}
+
+.i-file-preview .krajee-default.file-preview-frame {
+	margin: 2px;
+}
+
+.navbar-inner {
+	background-color: #fff;
+}
+
+tr.details td.details-control  .glyphicon-chevron-down:before {
+	content: "\e113";
+}
+
+#menu .menu {
+	line-height: 32px !important;
+}
+
+#userControl li {
+	line-height: 32px !important;
+}
+
+#header {
+	min-width: 1200px;
+}
+
+section.content-wrapper {
+	background-color: #eeeeee;
+}
+
+.content .box .box-header .box-tools .btn-primary {
+	background-color: #0098d4 !important;
+}
+
+.nav-collapse ul#menu li.active {
+	border-bottom: 1px solid #0098d4 !important;
+}
+
+ul.nav li.active a.menu {
+	box-shadow: none !important;
+	background-color: transparent !important;
+	color: #0098d4 !important;
+}
+
+#checkAll {
+	vertical-align: middle;
+}
+
+.cxtj {
+	white-space: nowrap !important;
+	overflow-x: auto;
+}
+
+.cxtj .cxtj_text,.cxtj .cxtj_select,.cxtj .serach {
+	margin-bottom: 10px !important;
+}
+/* 首页头部和尾部 */
+html,body {
+	height: 100%;
+}
+
+#main {
+	padding: 0;
+	margin: 0;
+	height: 100%;
+}
+
+#main .container-fluid {
+	padding: 0 6px;
+}
+
+#header {
+	position: static;
+	margin: 0 0 8px;
+}
+
+#header li {
+	font-size: 14px;
+	_font-size: 12px;
+}
+
+#header .brand {
+	font-family: Helvetica, Georgia, Arial, sans-serif, 黑体;
+	font-size: 26px;
+	padding-left: 23px;
+}
+
+#main #footer {
+	position: fixed;
+	bottom: 0;
+	padding: 10px 0;
+	font-size: 11px;
+	text-align: center;
+	border-top: 2px solid #0663A2;
+}
+
+.wf_rome:hover {
+	background: white !important;
+}
+
+#footer,#footer a {
+	color: #999;
+}
+
+#left {
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+#left .collapse {
+	position: static;
+}
+
+#userControl>li>a { /*color:#fff;*/
+	text-shadow: none;
+}
+
+#userControl>li>a:hover,#user #userControl>li.open>a {
+	background: transparent;
+}
+/* 首页医院简介，智能统计，表单 */
+thead tr th,tbody tr td {
+	text-align: center !important;
+	vertical-align: middle !important;
+	
+}
+.header-normal th{
+	white-space: nowrap !important;
+}
+tbody {
+	background-color: #fdfdfd;
+}
+
+table th,td {
+	border-color: #ddd !important;
+}
+
+table thead tr {
+	background-color: #f5f5f5 !important;
+}
+
+table tbody tr:hover {
+	background-color: #eee !important;
+}
+
+.table-bordered>thead>tr>td,.table-bordered>thead>tr>th {
+	border-bottom-width: 1px !important;
+}
+
+.dataTables_scrollBody .header-normal th {
+	border-bottom-width: 0 !important
+}
+
+#tableAsset tbody tr td a {
+	color: #3066d4 !important;
+}
+
+.box-tools .wf_rome {
+	color: #0098d4 !important;
+}
+/* 资产台账 */
+.content {
+	min-height: 250px;
+	padding: 0px !important;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+
+
+.content .box-solid,.addData>.box-solid {
+	padding: 10px;
+}
+.form-horizontal {
+	margin: 0px !important;
+}
+/* .box-header {
+	padding: 10px 15px !important;
+} */
+.btn-blue {
+	background-color: #0098d4 !important;
+	color: white;
+}
+
+.btn-blue:focus,.btn-blue:hover {
+	color: white;
+}
+
+#btnSubmit:focus,#btnReset:focus,#btnCancel:focus {
+	outline: 0;
+}
+
+/* .pull-right>.btn:nth-child(1) {
+	color: #999999;
+} */
+.box-header h3.box-title {
+	color: #0098d4;
+}
+
+.btn-flat {
+	padding: 4px 10px !important;
+}
+
+.input-group-btn #typeButton {
+	background-color: white !important;
+	border-color: #ddd !important;
+}
+
+.row .form-group .input-group input,span button {
+	background-color: white !important;
+	border-color: #ddd !important;
+}
+
+/* .form-group label {
+	padding-top: 7px !important;
+	padding-left: 7px !important;
+	padding-right: 0 !important;
+	text-align: center;
+} */
+/* .form-group .col-xs-2 {
+	padding-left: 0;
+	padding-right: 7px;
+}
+
+.form-group .col-xs-10 {
+	padding-left: 0;
+	padding-right: 7px;
+} */
+
+.content .box .box-header .box-tools .btn,input.form-control,.btn-blue {
+	height: 30px !important;
+	padding: 4px 10px !important;
+}
+
+.content .box .box-header .box-tools .btn-primary {
+	background-color: #0098d4 !important;
+}
+/* 资产维护 */
+.addData {
+	padding: 0px !important;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.cxtj_text .form-control {
+	width: 160px !important;
+}
+
+.serach .input-group,.cxtj_text .input-group {
+	width: 160px;
+}
+
+#ssks .input-group {
+	width: 160px !important;
+}
+
+#fzr .input-group {
+	width: 160px;
+}
+
+.form-group label {
+	text-align: right;
+	/* width: 70px !important; */
+}
+
+#contentTable tbody tr td a {
+	color: #3066d4 !important;
+}
+
+#contentTable thead tr {
+	background-color: #f5f5f5 !important;
+}
+
+.input-group input,span button {
+	background-color: white !important;
+	border-color: #ddd !important;
+}
+
+.cxtj_select select {
+	width: 160px !important;
+}
+
+.moreData,.lessData {
+	color: #0098d4;
+	padding: 4px 10px;
+	cursor: pointer;
+}
+
+.pagination>li>a {
+	margin-left: 0 !important;
+}
+
+.pagination>li:nth-last-child(2)>a,.pagination>li:nth-last-child(2)>span
+	{
+	margin-left: 0;
+	border-top-right-radius: 4px !important;
+	border-bottom-right-radius: 4px !important;
+}
+
+#btnSubmit:focus,#btnReset:focus,#btnCancel:focus {
+	outline: 0;
+}
+
+/* .cxtj .form-group label {
+	width: 80px !important;
+} */
+/* 资产维护新增 */
+.row .form-group .input-group input,span button {
+	background-color: white !important;
+	border-color: #ddd !important;
+}
+
+.Wdate {
+	background-color: white !important;
+	border-color: #d2d6de !important;
+}
+
+.form-group textarea {
+	border-color: #d2d6de;
+}
+
+.cxtj_text label {
+	text-align: right;
+}
+
+.input-medium {
+	background-color: white !important;
+	border-color: #d2d6de !important;
+}
+/* 保修单新增 */
+.input-medium {
+	height: 30px !important;
+	line-height: 3.428571;
+	box-sizing: border-box;
+}
+
+.input-medium {
+	width: 100%;
+}
+#contentTable thead tr th,#contentTable tbody tr td {
+	white-space: nowrap !important;
+	vertical-align: middle !important;
+}
+.marginBottom0 {
+	margin-bottom:0!important;
+}
+table tbody tr td .closeBtn {
+	font-size: 21px;
+	font-weight: 700;
+	line-height: 1;
+	color: #000;
+	text-shadow: 0 1px 0 #fff;
+	filter: alpha(opacity = 20);
+	opacity: .3;
+	cursor: pointer;
+}
+/* 个人中心 */
+.Btn {
+	display: inline-block;
+	padding: 4px 10px;
+	margin-bottom: 0;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.42857143;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: middle;
+	-ms-touch-action: manipulation;
+	touch-action: manipulation;
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	background-image: none;
+	border: 1px solid transparent;
+	border-radius: 3px;
+    box-sizing: border-box;
+}
+.btn-self {
+	border: 1px solid #dddddd;
+    background: #dddddd;
+    color: black;
+}
+
+.btn-self:hover,.btn-self:focus {
+	color:black;
+}
+
+.Btn:hover,.Btn:focus {
+	color:white;
+	text-decoration: none;
+}
+.divWrapMarginTop {
+	padding-top: 10px;
+}

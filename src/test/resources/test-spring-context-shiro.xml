@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-4.3.xsd"
+	default-lazy-init="true">
+
+
+	<!-- 单元测试，单元测试，单元测试，单元测试，单元测试，单元测试， -->
+	<!-- 定义Shiro安全管理配置 -->
+	<!-- <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager"> -->
+	<!-- <bean id="testSecurityManager" class="org.apache.shiro.mgt.DefaultSecurityManager">
+		<property name="realm" ref="systemAuthorizingRealm" />
+		<property name="sessionManager" ref="sessionManager" />
+		<property name="cacheManager" ref="shiroCacheManager" />
+	</bean> -->
+
+</beans>

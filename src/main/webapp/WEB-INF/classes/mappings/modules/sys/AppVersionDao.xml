@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.AppVersionDao">
+    
+	<sql id="appVersionColumns">
+		a.id AS "id",
+		a.apptype AS "type",
+		a.version AS "version",
+		a.code AS "code",
+		a.name AS "name",
+		a.url  AS "url",
+		a.description  AS "description",
+		a.state AS "state",
+		a.tenant_id,
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="appVersionJoins">
+	</sql>
+    
+	<select id="get" resultType="AppVersion">
+		SELECT 
+			<include refid="appVersionColumns"/>
+		FROM sys_app_version a
+		<include refid="appVersionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AppVersion">
+		SELECT 
+			<include refid="appVersionColumns"/>
+		FROM sys_app_version a
+		<include refid="appVersionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.tenant_id = #{tenantId}
+			<if test="type != null and type != ''">
+				AND a.apptype = #{type}
+			</if>
+			<if test="version != null and version != ''">
+				AND a.version LIKE 
+					<if test="dbName == 'oracle'">'%'||#{version}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{version}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{version},'%')</if>
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+		</where>
+		<!-- 总是按创建时间倒序排序 -->
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy} DESC
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="AppVersion">
+		SELECT 
+			<include refid="appVersionColumns"/>
+		FROM sys_app_version a
+		<include refid="appVersionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.tenant_id = #{tenantId}
+			<if test="type != null and type != ''">
+				AND a.apptype = #{type}
+			</if>
+			<if test="version != null and version != ''">
+				AND a.version LIKE 
+					<if test="dbName == 'oracle'">'%'||#{version}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{version}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{version},'%')</if>
+			</if>
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
+		</where>
+		<!-- 总是按创建时间倒序排序 -->
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy} DESC
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_app_version(
+			id,
+			apptype,
+			version,
+			code,
+			name,
+			url,description,
+			state,
+			tenant_id, 
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{type},
+			#{version},
+			#{code},
+			#{name},
+			#{url},#{description},
+			#{state},
+			#{tenantId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_app_version SET 	
+			apptype = #{type},
+			version = #{version},
+			code = #{code},
+			name = #{name},
+			url = #{url},
+			description = #{description},
+			state = #{state}, 
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sys_app_version SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

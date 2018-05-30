@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.MsgDao">
+
+	<sql id="baseMsgColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.title AS "title",
+		a.content
+		AS "content",
+		a.send_time AS "sendTime",
+		a.send_state AS "sendState",
+		a.from_ AS "from",
+		a.user_desc AS "userDesc",
+		a.user_type AS "userType",
+		a.user_data AS "userData",
+		a.ticket AS "ticket",
+		a.remark AS "remark",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS
+		"updateDate",
+		a.del_flag AS "delFlag",
+		a.tenant_id AS "tenantId"
+	</sql>
+	<sql id="msgColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.title AS "title",
+		a.content
+		AS "content",
+		a.send_time AS "sendTime",
+		a.send_state AS "sendState",
+		a.from_ AS "from",
+		a.user_desc AS "userDesc",
+		a.user_type AS "userType",
+		a.user_data AS "userData",
+		a.ticket AS "ticket",
+		a.remark AS "remark",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS
+		"updateDate",
+		a.del_flag AS "delFlag",
+		a.tenant_id AS "tenantId",
+		b.read_num,
+		b.un_read_num
+	</sql>
+
+	<sql id="msgJoins">
+		<!-- 查询已读和未读条数 -->
+		LEFT JOIN (
+		SELECT r.msg_id,
+		sum(case when r.read_flag = '1' then 1 else 0 end) read_num,
+		sum(case when r.read_flag != '1' then 1 else 0 end) un_read_num
+		FROM sys_msg_user r GROUP BY r.msg_id
+		) b ON b.msg_id = a.id
+	</sql>
+
+	<select id="get" resultType="Msg">
+		SELECT
+		<include refid="msgColumns" />
+		FROM sys_msg a
+		<include refid="msgJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="Msg">
+		SELECT
+		<include refid="msgColumns" />
+		<if test="isSelf">,
+			r.read_flag AS "read_flag"
+		</if>
+		FROM sys_msg a
+		<include refid="msgJoins" />
+		<!-- 我的通知 -->
+		<if test="isSelf">
+			JOIN sys_msg_user r ON r.msg_id = a.id AND r.user_id =
+			#{currentUser.id}
+		</if>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<!-- AND a.tenant_id = #{tenantId} -->
+			<if test="isSelf">
+				AND r.read_flag !='2'
+			</if>
+			<if test="isSelf==false">
+				AND a.tenant_id = #{tenantId}
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE
+				<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<!-- 非草稿状态 -->
+			<if test="isDraft==false">
+				AND a.send_state != '0'
+			</if>
+			<if test="sendState != null and sendState != ''">
+				AND a.send_state = #{sendState}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 查询定时发送的消息 -->
+	<select id="findTaskList" resultType="Msg">
+		SELECT
+		<include refid="baseMsgColumns" />
+		FROM sys_msg a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="sendTime != null and sendTime != ''">
+				AND a.send_time >= #{sendTime}
+			</if>
+		</where>
+	</select>
+	<!-- 公告列表，公告是发送给所有人的，所以查询条件有点区别 -->
+	<select id="findAnnounceList" resultType="Msg">
+		SELECT
+		<include refid="msgColumns" />
+		<if test="isSelf">,
+			(select read_flag from sys_msg_user mu where mu.msg_id=a.id and
+			mu.user_id=#{currentUser.id} and rownum=1) AS "read_flag"
+		</if>
+		FROM sys_msg a
+		<include refid="msgJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.tenant_id = #{tenantId}
+			<if test="title != null and title != ''">
+				AND a.title LIKE
+				<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="Msg">
+		SELECT
+		<include refid="msgColumns" />
+		FROM sys_msg a
+		<include refid="msgJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.tenant_id = #{tenantId}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 查找记录数 -->
+	<select id="findCount" resultType="Long">
+		select sum(num) from (
+		SELECT
+		count(1) num
+		FROM sys_msg a
+		<if test="isSelf">
+			JOIN sys_msg_user r ON r.msg_id = a.id AND r.user_id =
+			#{currentUser.id}
+			<if test="readFlag != null and readFlag != ''">
+				AND r.read_flag = #{readFlag}
+			</if>
+		</if>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.type IN ('3','2') AND
+		a.tenant_id = #{tenantId}
+
+		<!-- 公告 -->
+		union
+		SELECT count(1) num
+		FROM sys_msg a
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} and a.type='1' AND a.tenant_id =
+		#{tenantId}
+		and not exists (select id from sys_msg_user mu where mu.msg_id=a.id)
+		)
+
+	</select>
+
+
+	<insert id="insert">
+		INSERT INTO sys_msg(
+		id,
+		type,
+		title,
+		content,
+		send_time,
+		send_state,
+		from_,
+		user_desc,
+		user_type,
+		user_data,
+		ticket,remark,
+		status,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		del_flag,
+		tenant_id
+		) VALUES (
+		#{id},
+		#{type},
+		#{title},
+		#{content},
+		#{sendTime},
+		#{sendState},
+		#{from},
+		#{userDesc},
+		#{userType},
+		#{userData},
+		#{ticket},
+		#{remark},
+		#{status},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{delFlag},
+		#{tenantId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE sys_msg SET
+		type = #{type},
+		title = #{title},
+		content = #{content},
+		send_time = #{sendTime},
+		send_state = #{sendState},
+		from_ = #{from},
+		user_desc = #{userDesc},
+		user_type = #{userType},
+		user_data = #{userData},
+		ticket = #{ticket},
+		remark = #{remark},
+		status = #{status},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		tenant_id = #{tenantId}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE sys_msg SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<update id="updateSendState">
+		UPDATE sys_msg SET
+		send_state = #{sendState},ticket=#{ticket},remark=#{remark},update_date =
+		#{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 根据短信发送票据更新状态 -->
+	<update id="updateSmsStateByTicket">
+		UPDATE sys_msg SET
+		send_state = #{sendState},remark=#{remark},update_date = #{updateDate}
+		WHERE
+		ticket = #{ticket}
+	</update>
+</mapper>
