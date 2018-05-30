@@ -11,7 +11,7 @@ import org.telegram.bot.structure.IUser;
 public class User implements IUser {
     private final int userId; ///< ID of the user (provided by Telegram server)
     private Long userHash; ///< Hash of the user (provide by Telegram server)
-
+private String username;
     public User(int uid) {
         this.userId = uid;
     }
@@ -35,7 +35,15 @@ public class User implements IUser {
         this.userHash = userHash;
     }
 
-    @Override
+    public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	@Override
     public String toString() {
         return "" + this.userId;
     }
