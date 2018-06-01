@@ -110,6 +110,7 @@ public class DefaultDatabaseManager implements DatabaseManager {
 			result.close();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
+			e.printStackTrace();
 		}
 		return user;
 	}
@@ -133,6 +134,7 @@ public class DefaultDatabaseManager implements DatabaseManager {
 			result.close();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
+			e.printStackTrace();
 		}
 		return users;
 	}
@@ -148,9 +150,8 @@ public class DefaultDatabaseManager implements DatabaseManager {
 	public boolean addUser(@NotNull User user) {
 		int updatedRows = 0;
 		try {
-			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("INSERT INTO tl_Users (id,account,userId, userHash,username,update_date) "
-							+ "VALUES (?,?,?,?)");
+			final PreparedStatement preparedStatement = connetion.getPreparedStatement(
+					"INSERT INTO tl_Users (id,account,userId, userHash,username,update_date) " + "VALUES (?,?,?,?,?,?)");
 			preparedStatement.setString(1, getPhone() + user.getUserId());
 			preparedStatement.setString(2, getPhone());
 			preparedStatement.setInt(3, user.getUserId());
@@ -160,11 +161,11 @@ public class DefaultDatabaseManager implements DatabaseManager {
 				preparedStatement.setLong(4, user.getUserHash());
 			}
 			preparedStatement.setString(5, user.getUsername());
-			preparedStatement.setTimestamp(6,
-					new Timestamp(System.currentTimeMillis()));
+			preparedStatement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
+			e.printStackTrace();
 		}
 		return updatedRows > 0;
 	}
@@ -172,22 +173,21 @@ public class DefaultDatabaseManager implements DatabaseManager {
 	public boolean updateUser(@NotNull User user) {
 		int updatedRows = 0;
 		try {
-			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("UPDATE tl_Users SET userHash=? ,username=?,update_date=?"
-							+ "WHERE userId=? and account=?");
+			final PreparedStatement preparedStatement = connetion.getPreparedStatement(
+					"UPDATE tl_Users SET userHash=? ,username=?,update_date=?" + "WHERE userId=? and account=?");
 			if ((user.getUserHash() == null) || (user.getUserHash() == 0L)) {
 				preparedStatement.setNull(1, Types.NUMERIC);
 			} else {
 				preparedStatement.setLong(1, user.getUserHash());
 			}
 			preparedStatement.setString(2, user.getUsername());
-			preparedStatement.setTimestamp(3,
-					new Timestamp(System.currentTimeMillis()));
+			preparedStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
 			preparedStatement.setInt(4, user.getUserId());
 			preparedStatement.setString(5, getPhone());
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
+			e.printStackTrace();
 		}
 		return updatedRows > 0;
 	}
@@ -209,6 +209,7 @@ public class DefaultDatabaseManager implements DatabaseManager {
 			result.close();
 		} catch (SQLException e) {
 			BotLogger.severe(LOGTAG, e);
+			e.printStackTrace();
 		}
 
 		return channel;
@@ -225,9 +226,9 @@ public class DefaultDatabaseManager implements DatabaseManager {
 	public boolean addChat(@NotNull ChatImpl chat) {
 		int updatedRows = 0;
 		try {
-			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("INSERT INTO tl_Chat (id,account,chatid, accessHash, isChannel,title,update_date) "
-							+ "VALUES (?,?,?,?)");
+			final PreparedStatement preparedStatement = connetion.getPreparedStatement(
+					"INSERT INTO tl_Chat (id,account,chatid, accessHash, isChannel,title,update_date) "
+							+ "VALUES (?,?,?,?,?,?,?)");
 			preparedStatement.setString(1, getPhone() + chat.getId());
 			preparedStatement.setString(2, getPhone());
 			preparedStatement.setInt(3, chat.getId());
@@ -238,11 +239,11 @@ public class DefaultDatabaseManager implements DatabaseManager {
 			}
 			preparedStatement.setBoolean(5, chat.isChannel());
 			preparedStatement.setString(6, chat.getTitle());
-			preparedStatement.setTimestamp(7,
-					new Timestamp(System.currentTimeMillis()));
+			preparedStatement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
+			e.printStackTrace();
 		}
 		return updatedRows > 0;
 	}
@@ -250,9 +251,8 @@ public class DefaultDatabaseManager implements DatabaseManager {
 	public boolean updateChat(ChatImpl chat) {
 		int updatedRows = 0;
 		try {
-			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("UPDATE tl_Chat SET accessHash=?, isChannel=? "
-							+ "WHERE chatid=? and account=?");
+			final PreparedStatement preparedStatement = connetion.getPreparedStatement(
+					"UPDATE tl_Chat SET accessHash=?, isChannel=? " + "WHERE chatid=? and account=?");
 			preparedStatement.setLong(1, chat.getAccessHash());
 			preparedStatement.setBoolean(2, chat.isChannel());
 			preparedStatement.setInt(3, chat.getId());
@@ -260,6 +260,7 @@ public class DefaultDatabaseManager implements DatabaseManager {
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
+			e.printStackTrace();
 		}
 		return updatedRows > 0;
 	}
@@ -282,6 +283,7 @@ public class DefaultDatabaseManager implements DatabaseManager {
 			result.close();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
+			e.printStackTrace();
 		}
 		return differencesDatas;
 	}
@@ -290,20 +292,21 @@ public class DefaultDatabaseManager implements DatabaseManager {
 	public boolean updateDifferencesData(int botId, int pts, int date, int seq) {
 		int updatedRows = 0;
 		try {
-			final PreparedStatement preparedStatement = connetion
-					.getPreparedStatement("REPLACE INTO tl_DifferencesData (id,account,botId, pts, date, seq,update_date) VALUES (?, ?, ?, ?, ?, ?, ?);");
-			preparedStatement.setString(1, getPhone()+botId);
-			preparedStatement.setString(2, getPhone() );
-			
+			final PreparedStatement preparedStatement = connetion.getPreparedStatement(
+					"REPLACE INTO tl_DifferencesData (id,account,botId, pts, date, seq,update_date) VALUES (?, ?, ?, ?, ?, ?, ?);");
+			preparedStatement.setString(1, getPhone() + botId);
+			preparedStatement.setString(2, getPhone());
+
 			preparedStatement.setInt(3, botId);
 			preparedStatement.setInt(4, pts);
 			preparedStatement.setInt(5, date);
-			preparedStatement.setTimestamp(6,
-					new Timestamp(System.currentTimeMillis()));
-			
+			 preparedStatement.setInt(6, seq);
+			preparedStatement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+
 			updatedRows = preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			BotLogger.error(LOGTAG, e);
+			e.printStackTrace();
 		}
 		return updatedRows > 0;
 	}

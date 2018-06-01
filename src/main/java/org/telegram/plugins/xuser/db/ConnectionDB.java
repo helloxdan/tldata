@@ -17,95 +17,120 @@ import java.sql.Statement;
  * @date 16 of October of 2016
  */
 public class ConnectionDB {
-    private static final String LOGTAG = "CONNECTIONDB";
-    private Connection currentConection;
+	private static final String LOGTAG = "CONNECTIONDB";
+	private Connection currentConection;
 
-    public ConnectionDB() {
-        this.currentConection = openConexion();
-    }
+	public ConnectionDB() {
+		this.currentConection = openConexion();
+		initCharacter();
+		
+	}
 
-    private Connection openConexion() {
-        Connection connection = null;
-        try {
-            Class.forName(DatabaseConstants.controllerDB).newInstance();
-            connection = DriverManager.getConnection(DatabaseConstants.linkDB, DatabaseConstants.userDB, DatabaseConstants.password);
-        } catch (SQLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-            BotLogger.error(LOGTAG, e);
-        }
+	private Connection openConexion() {
+		Connection connection = null;
+		try {
+			Class.forName(DatabaseConstants.controllerDB).newInstance();
+			connection = DriverManager.getConnection(DatabaseConstants.linkDB, DatabaseConstants.userDB,
+					DatabaseConstants.password);
+		} catch (SQLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+			BotLogger.error(LOGTAG, e);
+		}
+		return connection;
+	}
 
-        return connection;
-    }
+	public void closeConexion() {
+		try {
+			this.currentConection.close();
+		} catch (SQLException e) {
+			BotLogger.error(LOGTAG, e);
+		}
 
-    public void closeConexion() {
-        try {
-            this.currentConection.close();
-        } catch (SQLException e) {
-            BotLogger.error(LOGTAG, e);
-        }
+	}
 
-    }
+	public ResultSet runSqlQuery(String query) throws SQLException {
+		final Statement statement;
+		statement = this.currentConection.createStatement();
+		return statement.executeQuery(query);
+	}
 
-    public ResultSet runSqlQuery(String query) throws SQLException {
-        final Statement statement;
-        statement = this.currentConection.createStatement();
-        return statement.executeQuery(query);
-    }
+	public void initCharacter() {
+		Statement stmt = null;
+		try {
+			stmt = this.currentConection.createStatement();
+			stmt.executeUpdate("SET names utf8mb4");
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (stmt != null) {
+				
+				try {
+					stmt.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
-    public Boolean executeQuery(String query) throws SQLException {
-        final Statement statement = this.currentConection.createStatement();
-        return statement.execute(query);
-    }
+	public Boolean executeQuery(String query) throws SQLException {
+		final Statement statement = this.currentConection.createStatement();
+		return statement.execute(query);
+	}
 
-    public PreparedStatement getPreparedStatement(String query) throws SQLException {
-        return this.currentConection.prepareStatement(query);
-    }
+	public PreparedStatement getPreparedStatement(String query) throws SQLException {
+		return this.currentConection.prepareStatement(query);
+	}
 
-    public PreparedStatement getPreparedStatement(String query, int flags) throws SQLException {
-        return this.currentConection.prepareStatement(query, flags);
-    }
+	public PreparedStatement getPreparedStatement(String query, int flags) throws SQLException {
+		return this.currentConection.prepareStatement(query, flags);
+	}
 
-    public int checkVersion() {
-        int max = 0;
-        try {
-            final DatabaseMetaData metaData = this.currentConection.getMetaData();
-            final ResultSet res = metaData.getTables(null, null, "",
-                    new String[]{"TABLE"});
-            while (res.next()) {
-//            System.out.println("tableName:"+res.getString("TABLE_NAME"));
-                if (res.getString("TABLE_NAME").compareTo("versions") == 0) {
-                    final ResultSet result = runSqlQuery("SELECT Max(Version) FROM Versions");
-                    while (result.next()) {
-                        max = (max > result.getInt(1)) ? max : result.getInt(1);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            BotLogger.error(LOGTAG, e);
-        }
-        return max;
-    }
+	public int checkVersion() {
+		int max = 0;
+		try {
+			final DatabaseMetaData metaData = this.currentConection.getMetaData();
+			final ResultSet res = metaData.getTables(null, null, "", new String[] { "TABLE" });
+			while (res.next()) {
+				// System.out.println("tableName:"+res.getString("TABLE_NAME"));
+				if (res.getString("TABLE_NAME").toLowerCase().compareTo("tl_versions") == 0) {
+					final ResultSet result = runSqlQuery("SELECT Max(Version) FROM tl_versions");
+					while (result.next()) {
+						max = (max > result.getInt(1)) ? max : result.getInt(1);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			BotLogger.error(LOGTAG, e);
+		}
+		return max;
+	}
 
-    /**
-     * Initilize a transaction in database
-     * @throws SQLException If initialization fails
-     */
-    public void initTransaction() throws SQLException {
-        this.currentConection.setAutoCommit(false);
-    }
+	/**
+	 * Initilize a transaction in database
+	 * 
+	 * @throws SQLException
+	 *             If initialization fails
+	 */
+	public void initTransaction() throws SQLException {
+		this.currentConection.setAutoCommit(false);
+	}
 
-    /**
-     * Finish a transaction in database and commit changes
-     * @throws SQLException If a rollback fails
-     */
-    public void commitTransaction() throws SQLException {
-        try {
-            this.currentConection.commit();
-        } catch (SQLException e) {
-            if (this.currentConection != null) {
-                this.currentConection.rollback();
-            }
-        } finally {
-            this.currentConection.setAutoCommit(false);
-        }
-    }
+	/**
+	 * Finish a transaction in database and commit changes
+	 * 
+	 * @throws SQLException
+	 *             If a rollback fails
+	 */
+	public void commitTransaction() throws SQLException {
+		try {
+			this.currentConection.commit();
+		} catch (SQLException e) {
+			if (this.currentConection != null) {
+				this.currentConection.rollback();
+			}
+		} finally {
+			this.currentConection.setAutoCommit(false);
+		}
+	}
 }

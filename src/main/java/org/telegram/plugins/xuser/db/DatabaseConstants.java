@@ -10,7 +10,8 @@ class DatabaseConstants {
 //    static final String controllerDB = "com.mysql.cj.jdbc.Driver";
     static final String controllerDB = "com.mysql.jdbc.Driver";
     static final String userDB = "telegram";
-    private static final String databaseName = "tlbot";
+    private static final String databaseName = "tlbot2";
     static final String password = "tlbot";
+//    static final String linkDB = "jdbc:mysql://localhost:3306/" + databaseName + "?useUnicode=true&characterEncoding=utf-8";
     static final String linkDB = "jdbc:mysql://localhost:3306/" + databaseName + "?useUnicode=true&characterEncoding=utf-8";
 }
