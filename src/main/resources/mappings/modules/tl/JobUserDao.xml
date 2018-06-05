@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.tl.dao.JobUserDao">
+    
+	<sql id="jobUserColumns">
+		a.id AS "id",
+		a.job_id AS "jobId",
+		a.account AS "account",
+		a.from_group AS "fromGroup",
+		a.userid AS "userid",
+		a.username AS "username",
+		a.user_hash AS "userHash",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="jobUserJoins">
+	</sql>
+    
+	<select id="get" resultType="JobUser">
+		SELECT 
+			<include refid="jobUserColumns"/>
+		FROM tl_job_user a
+		<include refid="jobUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="JobUser">
+		SELECT 
+			<include refid="jobUserColumns"/>
+		FROM tl_job_user a
+		<include refid="jobUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			
+			<if test="jobId != null and jobId != ''">
+				AND a.job_id = #{jobId}
+			</if>
+			<if test="account != null and account != ''">
+				AND a.account = #{account}
+			</if>
+			<if test="fromGroup != null and fromGroup != ''">
+				AND a.from_group = #{fromGroup}
+			</if>
+			<if test="userid != null and userid != ''">
+				AND a.userid = #{userid}
+			</if>
+			<if test="username != null and username != ''">
+				AND a.username = #{username}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="JobUser">
+		SELECT 
+			<include refid="jobUserColumns"/>
+		FROM tl_job_user a
+		<include refid="jobUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tl_job_user(
+			id,
+			job_id,
+			account,
+			from_group,
+			userid,
+			username,
+			user_hash,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{jobId},
+			#{account},
+			#{fromGroup},
+			#{userid},
+			#{username},
+			#{userHash},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tl_job_user SET 	
+			job_id = #{jobId},
+			account = #{account},
+			from_group = #{fromGroup},
+			userid = #{userid},
+			username = #{username},
+			user_hash = #{userHash},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tl_job_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

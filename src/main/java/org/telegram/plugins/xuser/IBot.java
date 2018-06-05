@@ -1,23 +1,26 @@
 package org.telegram.plugins.xuser;
 
+import org.telegram.api.user.TLAbsUser;
 import org.telegram.bot.structure.LoginStatus;
+import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
 
 public interface IBot {
 	LoginStatus start(String phone, int apikey, String apihash);
 
-	boolean stop(String phone);
+	boolean stop();
 
 	boolean setAuthCode(String phone, String code);
 
-	boolean setAdmin(String chatId, String userId, boolean isAdmin);
+	boolean setAdmin(int chatId, int userId, boolean isAdmin);
 
 	boolean importInvite(String url);
 
-	void collectUsers(String chatId);
+	TLVector<TLAbsUser> collectUsers(int chatId,long accessHash,int offset,int limit);
 
-	void addUsers(String chatId);
+	void addUsers(int chatId);
 
 	JSONObject getState();
+
 }

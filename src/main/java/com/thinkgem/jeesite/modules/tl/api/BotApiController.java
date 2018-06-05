@@ -29,7 +29,38 @@ public class BotApiController extends BaseController {
 
 	@Autowired
 	private BotService botService;
-
+	
+	@RequestMapping(value = "/account/init")
+	public ReturnWrap accountInit(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			String status = botService.accountInit(data);
+			result.setData(status);
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+		}
+		return result;
+	}
+	/**批量启动
+	 * @param data
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/startBatch")
+	public ReturnWrap startBatch(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			String status = botService.startBatch(data);
+			result.setData(status);
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+		}
+		return result;
+	}
+	
 	@RequestMapping(value = "/start")
 	public ReturnWrap sendImMessage(RequestData data,
 			HttpServletRequest request, HttpServletResponse response) {

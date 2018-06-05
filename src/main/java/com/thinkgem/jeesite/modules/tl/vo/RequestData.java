@@ -5,16 +5,22 @@ import java.io.Serializable;
 public class RequestData implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private String jobid;
+	private String taskid;
 	private String phone;
-	private String chatId;
-	private String chatAccessHash;
-	private String userId;
+	private int chatId;
+	private long chatAccessHash;
+	private int userId;
 	private String userName;
 	private String userAccessHash;
 	private boolean isChannel;
 	private String code;
 	private String url;
+	private String hash;
 	private boolean isAdmin;
+	private int num;
+	private int offset;
+	private int limit;
 	private String ids;
 
 	public String getPhone() {
@@ -25,27 +31,27 @@ public class RequestData implements Serializable {
 		this.phone = phone;
 	}
 
-	public String getChatId() {
+	public int getChatId() {
 		return chatId;
 	}
 
-	public void setChatId(String chatId) {
+	public void setChatId(int chatId) {
 		this.chatId = chatId;
 	}
 
-	public String getChatAccessHash() {
+	public long getChatAccessHash() {
 		return chatAccessHash;
 	}
 
-	public void setChatAccessHash(String chatAccessHash) {
+	public void setChatAccessHash(long chatAccessHash) {
 		this.chatAccessHash = chatAccessHash;
 	}
 
-	public String getUserId() {
+	public int getUserId() {
 		return userId;
 	}
 
-	public void setUserId(String userId) {
+	public void setUserId(int userId) {
 		this.userId = userId;
 	}
 
@@ -103,6 +109,54 @@ public class RequestData implements Serializable {
 
 	public void setAdmin(boolean isAdmin) {
 		this.isAdmin = isAdmin;
+	}
+
+	public String getJobid() {
+		return jobid;
+	}
+
+	public void setJobid(String jobid) {
+		this.jobid = jobid;
+	}
+
+	public int getNum() {
+		return num;
+	}
+
+	public void setNum(int num) {
+		this.num = num;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+
+	public int getLimit() {
+		return limit;
+	}
+
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+
+	public String getTaskid() {
+		return taskid;
+	}
+
+	public void setTaskid(String taskid) {
+		this.taskid = taskid;
 	}
 
 }

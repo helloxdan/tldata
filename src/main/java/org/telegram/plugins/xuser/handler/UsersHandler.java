@@ -9,8 +9,8 @@ import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
 import org.telegram.bot.handlers.interfaces.IUsersHandler;
 import org.telegram.bot.services.BotLogger;
+import org.telegram.plugins.xuser.IBotDataService;
 import org.telegram.plugins.xuser.entity.User;
-import org.telegram.plugins.xuser.db.DefaultDatabaseManager;
 
 /**
  * @author Ruben Bermudez
@@ -21,9 +21,9 @@ public class UsersHandler implements IUsersHandler {
     private static final String LOGTAG = "USERSHANDLER";
     private final ConcurrentHashMap<Integer, TLAbsUser> temporalUsers = new ConcurrentHashMap<>();
     private static final int MAXTEMPORALUSERS = 4000;
-    private final DefaultDatabaseManager databaseManager;
+    private final IBotDataService databaseManager;
 
-    public UsersHandler(DefaultDatabaseManager databaseManager) {
+    public UsersHandler(IBotDataService databaseManager) {
         this.databaseManager = databaseManager;
     }
 
