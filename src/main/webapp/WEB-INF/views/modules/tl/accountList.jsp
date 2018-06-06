@@ -77,7 +77,7 @@
 		}
 		
 		function initAccount(){
-			var url="${ctx}/api/tl/account/init"; 
+			var url="${rctx}/api/tl/account/init"; 
 			 $.post(url,{},function(res){
 				 if(res.success){
 					 alert("操作完成");
@@ -88,7 +88,7 @@
 		}
 		
 		function startBatch(){
-			var url="${ctx}/api/tl/startBatch";
+			var url="${rctx}/api/tl/startBatch";
 			 var num = window.prompt('输入启动账号数量', '');
 			 $.post(url,{num:num},function(res){
 				 if(res.success){
@@ -101,7 +101,7 @@
 		
 		//加入群组
 		function joinGroup(account){
-			var url="${ctx}/api/tl/importInvite";
+			var url="${rctx}/api/tl/importInvite";
 			 var link = window.prompt('输入群组邀请链接', '');
 			 $.post(url,{phone:account,url:link},function(res){
 				 if(res.success){
@@ -121,7 +121,7 @@
 				 }
 			 }).done(function(){
 				 var code = window.prompt('输入验证码', '');
-				 $.post('${ctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
+				 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
 					 if(res.success){
 						 alert("操作完成");
 					 }else{
@@ -137,18 +137,21 @@
 			 $.post(url,{phone:account },function(res){
 				 if(res.success){
 					 alert("操作完成11");
+					 if(res.data!='ALREADYLOGGED'){
+						 var code = window.prompt('输入验证码', '');
+						 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
+							 if(res.success){
+								 alert("操作完成");
+							 }else{
+								 alert(res.msg);
+							 }
+						 })
+					 }
 				 }else{
 					 alert(res.msg);
 				 }
 			 }).done(function(){
-				 var code = window.prompt('输入验证码', '');
-				 $.post('${ctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
-					 if(res.success){
-						 alert("操作完成");
-					 }else{
-						 alert(res.msg);
-					 }
-				 })
+				
 				 
 			 }).fail(function() {
 				    alert( "error" );
