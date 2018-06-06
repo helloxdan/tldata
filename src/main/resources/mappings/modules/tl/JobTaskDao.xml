@@ -138,7 +138,7 @@
 		WHERE id = #{id}
 	</update>
 	
-	<select id="findList" resultType="com.alibaba.fastjson.JSONObject">
+	<select id="getRpcCallInfo" resultType="com.alibaba.fastjson.JSONObject">
 		SELECT  a.id,a.job_id as "jobId",a.account,a.offset_ as "offsetNum",a.limit_ as "limitNum"
 		c.chatid ,c.accesshash,c.ischannel
 		FROM tl_task a 

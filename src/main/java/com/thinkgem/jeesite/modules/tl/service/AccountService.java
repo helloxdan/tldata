@@ -63,11 +63,12 @@ public class AccountService extends CrudService<AccountDao, Account> {
 	 * @param data
 	 * @return
 	 */
+	@Transactional(readOnly = false)
 	public String addBatch(RequestData data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	@Transactional(readOnly = false)
 	public void resetAccountStatus() {
 		logger.info("恢复账号状态");
 		this.dao.resetAccountStatus();

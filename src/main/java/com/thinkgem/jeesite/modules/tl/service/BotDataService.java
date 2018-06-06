@@ -1,6 +1,7 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.Chat;
@@ -133,27 +135,35 @@ public class BotDataService implements IBotDataService {
 	}
 
 	@Override
-	@Transactional(readOnly = false)
+	@Transactional(readOnly = false,propagation=Propagation.REQUIRES_NEW)
 	public boolean updateDifferencesData(int botId, int pts, int date, int seq) {
 		// 检查是否存在记录，没有则新增，否则更新
-		String id = getPhone() + botId;
-		DifferencesData diff = differencesDataService.get(id);
-		if (diff == null) {
-			diff = new DifferencesData();
-			diff.setIsNewRecord(true);
-			diff.setId(id);
-			diff.setBotid(botId);
-			diff.setPts(pts);
-			diff.setDate(date);
-			diff.setSeq(seq);
-		} else {
-			diff.setIsNewRecord(false);
-			diff.setBotid(botId);
-			diff.setPts(pts);
-			diff.setDate(date);
-			diff.setSeq(seq);
+		try {
+			String id = getPhone() + botId;
+			DifferencesData diff = differencesDataService.get(id);
+			if (diff == null) {
+				diff = new DifferencesData();
+				diff.setIsNewRecord(true);
+				diff.setId(id);
+				diff.setAccount(getPhone());
+				diff.setBotid(botId);
+				diff.setPts(pts);
+				diff.setDate(date);
+				diff.setSeq(seq);
+				diff.setUpdateDate(new Date());
+			} else {
+				diff.setIsNewRecord(false);
+				diff.setBotid(botId);
+				diff.setAccount(getPhone());
+				diff.setPts(pts);
+				diff.setDate(date);
+				diff.setSeq(seq);
+				diff.setUpdateDate(new Date());
+			}
+			differencesDataService.save(diff);
+		} catch (Exception e) { 
+			e.printStackTrace();
 		}
-		differencesDataService.save(diff);
 		return false;
 	}
 

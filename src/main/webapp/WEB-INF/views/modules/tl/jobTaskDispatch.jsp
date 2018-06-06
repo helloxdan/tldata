@@ -85,7 +85,7 @@
 		function fetchUser(id) {
 			confirmx("确定开始执行收集用户任务吗？",function(){
 				loading('系统处理中，请稍候……');
-				$.post('${ctx}/api/tl/collectUsers', {
+				$.post('${rctx}/api/tl/collectUsers', {
 					jobid : id
 				}, function(result) {
 					if (result.success) { 
@@ -231,7 +231,7 @@
 					${fns:getDictLabel(jobTask.status, 'yes_no', '')}
 				</td>
 				<td>
-					<a href="${ctx}/api/tl/collectUsers?taskid=${jobTask.id}">分配任务</a>
+					<a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">执行拉人</a>
 				</td>
 			</tr>
 		</c:forEach>

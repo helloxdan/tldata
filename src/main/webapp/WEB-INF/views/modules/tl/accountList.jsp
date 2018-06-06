@@ -112,7 +112,7 @@
 			 });
 		}
 		function signup(account){
-			var url="${ctx}/api/tl/start";
+			var url="${rctx}/api/tl/start";
 			 $.post(url,{phone:account},function(res){
 				 if(res.success){
 					 alert("操作完成");
@@ -133,10 +133,10 @@
 			  });
 		}
 		function signin(account){
-			var url="${ctx}/api/tl/start";
+			var url="${rctx}/api/tl/start";
 			 $.post(url,{phone:account },function(res){
 				 if(res.success){
-					 alert("操作完成");
+					 alert("操作完成11");
 				 }else{
 					 alert(res.msg);
 				 }

@@ -59,7 +59,7 @@ public class MessageHandler {
      * @param message Message received
      */
     private void handleMessageInternal(@NotNull IUser user, String message) throws RpcException {
-        kernelComm.sendMessage(user, message);
-        kernelComm.performMarkAsRead(user, 0);
+//        kernelComm.sendMessage(user, message);
+//        kernelComm.performMarkAsRead(user, 0);
     }
 }

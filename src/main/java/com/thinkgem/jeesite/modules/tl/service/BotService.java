@@ -23,6 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.modules.sys.entity.Log;
 import com.thinkgem.jeesite.modules.sys.utils.LogUtils;
+import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
@@ -56,6 +57,7 @@ public class BotService {
 	 * 程序启动初始化入口。
 	 */
 	@PostConstruct
+	@Transactional(readOnly = false)
 	public void startInit() {
 		System.out.println("Telegram bot 开始初始化……");
 		if (!"true".equals(Global.getConfig("autoRun"))) {
@@ -64,6 +66,7 @@ public class BotService {
 		}
 	}
 
+	@Transactional(readOnly = false)
 	public String accountInit(RequestData data) {
 		// 1.将所有注册过的账号设置为就绪状态
 		accountService.resetAccountStatus();
@@ -80,10 +83,14 @@ public class BotService {
 		// 3.管理员账号登录
 		logger.info("启动管理员账号");
 		XUserBot bot = new XUserBot();
+		bot.setBotDataService(botDataService);
 		LoginStatus status = bot.start(getAdminAccount(), APIKEY, APIHASH);
 		if (status == LoginStatus.ALREADYLOGGED) {
 			bots.put(getAdminAccount(), bot);
 			bot.setStatus(XUserBot.STATUS_OK);
+
+			// 更改帐号状态为run
+			updateAccountState(getAdminAccount(), "run");
 		} else {
 			String title = getAdminAccount() + "管理员登录失败，status" + status;
 			logger.error(title);
@@ -119,14 +126,38 @@ public class BotService {
 	/**
 	 * @param data
 	 */
+	@Transactional(readOnly = false)
 	public LoginStatus start(RequestData data) {
-		IBot bot = bots.get(data.getPhone());
+		XUserBot bot = (XUserBot) bots.get(data.getPhone());
 		if (bot == null) {
 			bot = new XUserBot();
+			bot.setBotDataService(botDataService);
 			bots.put(data.getPhone(), bot);
+		} else {
+			//已经登陆过l
+			if (XUserBot.STATUS_OK.equals(bot.getStatus())) {
+				return LoginStatus.ALREADYLOGGED;
+			}
 		}
 		LoginStatus status = bot.start(data.getPhone(), APIKEY, APIHASH);
+		logger.info("{} start status={}", data.getPhone(), status);
+		if (status == LoginStatus.ALREADYLOGGED) {
+			// bots.put(getAdminAccount(), bot);
+			bot.setStatus(XUserBot.STATUS_OK);
+			// 更改帐号状态为run
+			updateAccountState(data.getPhone(), "run");
+		} else {
+			String title = getAdminAccount() + "管理员登录失败，status" + status;
+			logger.error(title);
+			LogUtils.saveLog(new Log("tl", title), null);
+		}
 		return status;
+	}
+
+	private void updateAccountState(String phone, String status) {
+		Account acc = accountService.get(phone);
+		acc.setStatus(status);
+		accountService.save(acc);
 	}
 
 	public JSONObject getState(RequestData data) {
@@ -135,6 +166,7 @@ public class BotService {
 		return status;
 	}
 
+	@Transactional(readOnly = false)
 	public boolean setAuthCode(RequestData data) {
 		IBot bot = getBot(data);
 		XUserBot b = (XUserBot) bot;
@@ -165,13 +197,11 @@ public class BotService {
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
 
 		IBot bot = getBot(data);
-		TLVector<TLAbsUser> users = bot.collectUsers(
-				task.getIntValue("chatid"), task.getLongValue("accesshash"),
+		TLVector<TLAbsUser> users = bot.collectUsers(task.getIntValue("chatid"), task.getLongValue("accesshash"),
 				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}",
-				task.getString("jobId"), task.getString("account"),
+		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
 				users.size());
-		
+
 		// 将数据存储到数据库
 		for (TLAbsUser tluser : users) {
 			TLUser u = (TLUser) tluser;
