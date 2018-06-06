@@ -230,9 +230,12 @@
 				<td>
 					<fmt:formatDate value="${account.updateDate}" pattern="yyyy-MM-dd HH:mm:ss"/>
 				</td>
-				<td>
+				<td> <c:if test="${account.status=='none' }">
 					 <a href="javascript:signup('${account.id}')">注册</a>
+					  </c:if>
+					 <c:if test="${account.status=='ready' }">
 					 <a href="javascript:signin('${account.id}')">启动</a>
+					 </c:if>
 					 <a href="javascript:joinGroup('${account.id}')">入群</a>
 				</td>
 			</tr>
