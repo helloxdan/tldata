@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.tl.dao.DifferencesDataDao">
+    
+	<sql id="differencesDataColumns">
+		a.id AS "id",
+		a.account AS "account",
+		a.botid AS "botid",
+		a.pts AS "pts",
+		a.date AS "date",
+		a.seq AS "seq",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="differencesDataJoins">
+	</sql>
+    
+	<select id="get" resultType="DifferencesData">
+		SELECT 
+			<include refid="differencesDataColumns"/>
+		FROM tl_differencesdata a
+		<include refid="differencesDataJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="DifferencesData">
+		SELECT 
+			<include refid="differencesDataColumns"/>
+		FROM tl_differencesdata a
+		<include refid="differencesDataJoins"/>
+		<where>
+			
+			
+			<if test="account != null and account != ''">
+				AND a.account = #{account}
+			</if>
+			<if test="botid != null and botid != ''">
+				AND a.botid = #{botid}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="DifferencesData">
+		SELECT 
+			<include refid="differencesDataColumns"/>
+		FROM tl_differencesdata a
+		<include refid="differencesDataJoins"/>
+		<where>
+			
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tl_differencesdata(
+			id,
+			account,
+			botid,
+			pts,
+			date,
+			seq,
+			update_date
+		) VALUES (
+			#{id},
+			#{account},
+			#{botid},
+			#{pts},
+			#{date},
+			#{seq},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tl_differencesdata SET 	
+			account = #{account},
+			botid = #{botid},
+			pts = #{pts},
+			date = #{date},
+			seq = #{seq},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM tl_differencesdata
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

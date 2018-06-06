@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.tl.dao.GroupDao">
+    
+	<sql id="groupColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.url AS "url",
+		a.is_channel AS "isChannel",
+		a.usernum AS "usernum",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.upcate_date AS "upcateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="groupJoins">
+	</sql>
+    
+	<select id="get" resultType="Group">
+		SELECT 
+			<include refid="groupColumns"/>
+		FROM tl_group a
+		<include refid="groupJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Group">
+		SELECT 
+			<include refid="groupColumns"/>
+		FROM tl_group a
+		<include refid="groupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="url != null and url != ''">
+				AND a.url = #{url}
+			</if>
+			<if test="isChannel != null and isChannel != ''">
+				AND a.is_channel = #{isChannel}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Group">
+		SELECT 
+			<include refid="groupColumns"/>
+		FROM tl_group a
+		<include refid="groupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tl_group(
+			id,
+			name,
+			url,
+			is_channel,
+			usernum,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			upcate_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{url},
+			#{isChannel},
+			#{usernum},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{upcateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tl_group SET 	
+			name = #{name},
+			url = #{url},
+			is_channel = #{isChannel},
+			usernum = #{usernum},
+			status = #{status},
+			update_by = #{updateBy.id},
+			upcate_date = #{upcateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tl_group SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -11,11 +11,11 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.telegram.bot.kernel.database.DatabaseManager;
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.Chat;
 import org.telegram.bot.structure.IUser;
+import org.telegram.plugins.xuser.IBotDataService;
 import org.telegram.plugins.xuser.entity.ChatImpl;
 import org.telegram.plugins.xuser.entity.User;
 
@@ -25,7 +25,7 @@ import org.telegram.plugins.xuser.entity.User;
  * @brief TODO
  * @date 16 of October of 2016
  */
-public class DefaultDatabaseManager implements DatabaseManager {
+public class DefaultDatabaseManager implements IBotDataService {
 	private static final String LOGTAG = "DATABASEMANAGER";
 	private static volatile ConnectionDB connetion;
 	BotConfig botConfig = null;

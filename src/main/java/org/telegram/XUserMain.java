@@ -33,12 +33,12 @@ import org.telegram.tl.TLObject;
 public class XUserMain {
     private static final int APIKEY = 202491; // your api key
     private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; // your api hash
-    private static final String PHONENUMBER = "8618566104318"; // Your phone number
+//    private static final String PHONENUMBER = "8618566104318"; // Your phone number
 	
     
 //  private static final int APIKEY = 208853; // your api key  
 //  private static final String APIHASH = "2b0149b45cfc13f5b272ad832608066b"; // your api hash
-//  private static final String PHONENUMBER = "8613751867473"; // Your phone number
+  private static final String PHONENUMBER = "8613751867473"; // Your phone number
     public static void main(String[] args) {
         Logger.getGlobal().addHandler(new ConsoleHandler());
         Logger.getGlobal().setLevel(Level.ALL);

@@ -38,8 +38,8 @@ import org.telegram.bot.kernel.IKernelComm;
 import org.telegram.bot.kernel.database.DatabaseManager;
 import org.telegram.bot.kernel.differenceparameters.IDifferenceParametersService;
 import org.telegram.bot.structure.BotConfig;
+import org.telegram.plugins.xuser.IBotDataService;
 import org.telegram.plugins.xuser.entity.User;
-import org.telegram.plugins.xuser.db.DefaultDatabaseManager;
 import org.telegram.plugins.xuser.handler.MessageHandler;
 import org.telegram.plugins.xuser.handler.TLMessageHandler;
 import org.telegram.tl.TLObject;
@@ -204,7 +204,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 
 		int snum = 250;
 		int len = snum + 50;
-		DefaultDatabaseManager dbm = (DefaultDatabaseManager) databaseManager;
+		IBotDataService dbm = (IBotDataService) databaseManager;
 
 		TLVector<TLAbsInputUser> users = new TLVector<TLAbsInputUser>();
 
@@ -305,7 +305,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 	private void requestGetDialogs(IKernelComm kernel) {
 		IChatsHandler chatsHandler1 = chatsHandler;
 		IUsersHandler userHandler2 = usersHandler;
-		DefaultDatabaseManager dbm = (DefaultDatabaseManager) databaseManager;
+		IBotDataService dbm = (IBotDataService) databaseManager;
 		//
 		TelegramApi api = kernel.getApi();
 		TLRequestMessagesGetDialogs req = new TLRequestMessagesGetDialogs();
@@ -319,7 +319,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 			public void onResult(TLObject result) {
 				System.out.println(result);
 
-				dbm.begin();
+//				dbm.begin();
 
 				TLAbsDialogs dl = (TLAbsDialogs) result;
 				TLVector<TLAbsChat> chats = dl.getChats();
@@ -351,7 +351,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 
 				userHandler2.onUsers(users);
 
-				dbm.commit();
+//				dbm.commit();
 			}
 
 			@Override
@@ -375,7 +375,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 		req.setLimit(1000);
 		req.setFilter(new TLChannelParticipantsFilterRecent());
 
-		DefaultDatabaseManager dbm = (DefaultDatabaseManager) databaseManager;
+		IBotDataService dbm = (IBotDataService) databaseManager;
 		IUsersHandler userHandler2 = usersHandler;
 		api.doRpcCall(req, new RpcCallback() {
 
@@ -391,9 +391,9 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 				System.out.println("---u.size");
 				System.out.println(c.getUsers().size());
 
-				dbm.begin();
+//				dbm.begin();
 				userHandler2.onUsers(c.getUsers());
-				dbm.commit();
+//				dbm.commit();
 			}
 
 			@Override
@@ -577,7 +577,7 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 		return this;
 	}
 
-	public ChatUpdatesBuilderImpl setDatabaseManager(DefaultDatabaseManager databaseManager) {
+	public ChatUpdatesBuilderImpl setDatabaseManager(IBotDataService databaseManager) {
 		this.databaseManager = databaseManager;
 		return this;
 	}

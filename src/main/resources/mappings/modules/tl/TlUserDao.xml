@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.tl.dao.TlUserDao">
+    
+	<sql id="tlUserColumns">
+		a.id AS "id",
+		a.username AS "username",
+		a.firstname AS "firstname",
+		a.lastname AS "lastname",
+		a.langcode AS "langcode",
+		a.msg_time AS "msgTime"
+	</sql>
+	
+	<sql id="tlUserJoins">
+	</sql>
+    
+	<select id="get" resultType="TlUser">
+		SELECT 
+			<include refid="tlUserColumns"/>
+		FROM tl_user a
+		<include refid="tlUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TlUser">
+		SELECT 
+			<include refid="tlUserColumns"/>
+		FROM tl_user a
+		<include refid="tlUserJoins"/>
+		<where>
+			
+			
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="username != null and username != ''">
+				AND a.username = #{username}
+			</if>
+			<if test="langcode != null and langcode != ''">
+				AND a.langcode = #{langcode}
+			</if>
+			<if test="beginMsgTime != null and endMsgTime != null and beginMsgTime != '' and endMsgTime != ''">
+				AND a.msg_time BETWEEN #{beginMsgTime} AND #{endMsgTime}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TlUser">
+		SELECT 
+			<include refid="tlUserColumns"/>
+		FROM tl_user a
+		<include refid="tlUserJoins"/>
+		<where>
+			
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tl_user(
+			id,
+			username,
+			firstname,
+			lastname,
+			langcode,
+			msg_time
+		) VALUES (
+			#{id},
+			#{username},
+			#{firstname},
+			#{lastname},
+			#{langcode},
+			#{msgTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tl_user SET 	
+			username = #{username},
+			firstname = #{firstname},
+			lastname = #{lastname},
+			langcode = #{langcode},
+			msg_time = #{msgTime}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM tl_user
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

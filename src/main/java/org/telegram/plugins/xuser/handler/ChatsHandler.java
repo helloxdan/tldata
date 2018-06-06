@@ -9,8 +9,8 @@ import org.telegram.api.chat.channel.TLChannel;
 import org.telegram.api.chat.channel.TLChannelForbidden;
 import org.telegram.bot.handlers.interfaces.IChatsHandler;
 import org.telegram.bot.services.BotLogger;
+import org.telegram.plugins.xuser.IBotDataService;
 import org.telegram.plugins.xuser.entity.ChatImpl;
-import org.telegram.plugins.xuser.db.DefaultDatabaseManager;
 
 /**
  * @author Ruben Bermudez
@@ -20,9 +20,9 @@ import org.telegram.plugins.xuser.db.DefaultDatabaseManager;
  */
 public class ChatsHandler implements IChatsHandler {
     private static final String LOGTAG = "CHATSHANDLER";
-    private final DefaultDatabaseManager databaseManager;
+    private final IBotDataService databaseManager;
 
-    public ChatsHandler(DefaultDatabaseManager databaseManager) {
+    public ChatsHandler(IBotDataService databaseManager) {
         this.databaseManager = databaseManager;
     }
 
