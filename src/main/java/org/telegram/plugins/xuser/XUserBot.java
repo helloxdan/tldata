@@ -7,14 +7,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.api.channel.TLChannelParticipants;
 import org.telegram.api.channel.participants.filters.TLChannelParticipantsFilterRecent;
+import org.telegram.api.chat.TLAbsChat;
+import org.telegram.api.chat.TLChat;
+import org.telegram.api.chat.channel.TLChannel;
+import org.telegram.api.contacts.TLResolvedPeer;
 import org.telegram.api.engine.TelegramApi;
 import org.telegram.api.functions.channels.TLRequestChannelsGetParticipants;
+import org.telegram.api.functions.channels.TLRequestChannelsJoinChannel;
+import org.telegram.api.functions.contacts.TLRequestContactsResolveUsername;
+import org.telegram.api.functions.messages.TLRequestMessagesGetFullChat;
 import org.telegram.api.functions.messages.TLRequestMessagesImportChatInvite;
 import org.telegram.api.input.chat.TLInputChannel;
+import org.telegram.api.messages.TLMessagesChatFull;
 import org.telegram.api.updates.TLAbsUpdates;
 import org.telegram.api.user.TLAbsUser;
+import org.telegram.api.user.TLUser;
 import org.telegram.bot.handlers.interfaces.IChatsHandler;
 import org.telegram.bot.handlers.interfaces.IUsersHandler;
+import org.telegram.bot.kernel.IKernelComm;
 import org.telegram.bot.kernel.TelegramBot;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.LoginStatus;
@@ -129,7 +139,49 @@ public class XUserBot implements IBot {
 	 * @see org.telegram.plugins.xuser.IBot#importInvite(java.lang.String)
 	 */
 	@Override
-	public boolean importInvite(String hash) {
+	public boolean importInvite(String url) {
+		logger.info("{}，join group {}", getAccount(), url);
+		// kernel.getKernelComm().getApi().getState().isAuthenticated();
+		boolean success = true;
+
+		// TODO 加入群组
+		IKernelComm kernelComm = kernel.getKernelComm();
+		if (url.contains("telegram.me/joinchat")) {
+			String hash = url.split("/")[(url.split("/").length) - 1];
+			TLRequestMessagesImportChatInvite in = new TLRequestMessagesImportChatInvite();
+			in.setHash(hash);
+			try {
+				TLAbsUpdates bb = kernelComm.getApi().doRpcCall(in);
+
+				logger.info("入群结果：" + bb);
+			} catch (Exception e) {
+				success = false;
+				logger.error("入群失败", e);
+			}
+		} else if (url.contains("telegram.me/")) {
+			String username = url.split("/")[(url.split("/").length) - 1];
+			try {
+				TLRequestContactsResolveUsername ru = new TLRequestContactsResolveUsername();
+				ru.setUsername(username);
+				TLResolvedPeer peer = kernelComm.getApi().doRpcCall(ru);
+				TLRequestChannelsJoinChannel join = new TLRequestChannelsJoinChannel();
+				TLInputChannel ch = new TLInputChannel();
+				ch.setChannelId(peer.getChats().get(0).getId());
+				ch.setAccessHash(((TLChannel) peer.getChats().get(0))
+						.getAccessHash());
+				join.setChannel(ch);
+				TLAbsUpdates r = kernelComm.getApi().doRpcCall(join);
+				logger.info("join channel result:{}", r);
+			} catch (Exception e) {
+				success = false;
+				logger.error("入群失败", e);
+			}
+		}
+
+		return success;
+	}
+
+	public boolean importInvite2(String hash) {
 		logger.info("{}，join group {}", getAccount(), hash);
 		// kernel.getKernelComm().getApi().getState().isAuthenticated();
 		boolean success = true;
@@ -229,4 +281,35 @@ public class XUserBot implements IBot {
 		return this.status;
 	}
 
+	@Override
+	public void getGroupInfo(int chatId, long chatAccessHash) {
+		logger.info("{}，getGroupInfo ，{}", getAccount(), chatId);
+		try {
+			TelegramApi api = kernel.getKernelComm().getApi();
+			TLRequestMessagesGetFullChat req = new TLRequestMessagesGetFullChat();
+			req.setChatId(chatId);
+
+			TLMessagesChatFull result = api.doRpcCall(req);
+			TLVector<TLAbsChat> chats = result.getChats();
+			for (TLAbsChat cc : chats) {
+				TLChat ch = (TLChat) cc;
+				System.out.println(ch.getTitle());
+				System.out.println(ch.getParticipantsCount());
+				System.out.println(ch.getVersion());
+				System.out.println(ch.getClassId());
+
+			}
+			System.out.println("---");
+			System.out.println(result.getUsers().size());
+			TLVector<TLAbsUser> users = result.getUsers();
+			for (TLAbsUser uu : users) {
+				System.out.println(uu.getId());
+			}
+
+		} catch (IOException e) {
+			logger.error("取群信息失败", e);
+		} catch (TimeoutException e) {
+			logger.error("取群信息失败，超时", e);
+		}
+	}
 }

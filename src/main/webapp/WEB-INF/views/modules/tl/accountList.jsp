@@ -102,7 +102,7 @@
 		//加入群组
 		function joinGroup(account){
 			var url="${rctx}/api/tl/importInvite";
-			 var link = window.prompt('输入群组邀请链接', '');
+			 var link = window.prompt('输入群组邀请码', '');
 			 $.post(url,{phone:account,url:link},function(res){
 				 if(res.success){
 					 alert("操作完成");
@@ -116,18 +116,28 @@
 			 $.post(url,{phone:account},function(res){
 				 if(res.success){
 					 alert("操作完成");
+					 if(res.data!='ALREADYLOGGED'){
+						 var code = window.prompt('输入验证码', '');
+						 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
+							 if(res.success){
+								 alert("操作完成");
+							 }else{
+								 alert(res.msg);
+							 }
+						 })
+					 }
 				 }else{
 					 alert(res.msg);
 				 }
 			 }).done(function(){
-				 var code = window.prompt('输入验证码', '');
+				/*  var code = window.prompt('输入验证码', '');
 				 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
 					 if(res.success){
 						 alert("操作完成");
 					 }else{
 						 alert(res.msg);
 					 }
-				 })
+				 }) */
 			 }).fail(function() {
 				    alert( "error" );
 			  });
@@ -136,7 +146,7 @@
 			var url="${rctx}/api/tl/start";
 			 $.post(url,{phone:account },function(res){
 				 if(res.success){
-					 alert("操作完成11");
+					 alert("操作完成");
 					 if(res.data!='ALREADYLOGGED'){
 						 var code = window.prompt('输入验证码', '');
 						 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
@@ -239,7 +249,9 @@
 					 <c:if test="${account.status=='ready' }">
 					 <a href="javascript:signin('${account.id}')">启动</a>
 					 </c:if>
+					 <c:if test="${account.status=='run' }">
 					 <a href="javascript:joinGroup('${account.id}')">入群</a>
+					 </c:if>
 				</td>
 			</tr>
 		</c:forEach>

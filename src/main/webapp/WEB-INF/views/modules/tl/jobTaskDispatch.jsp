@@ -67,7 +67,7 @@
 		function runjob(id) {
 			confirmx("确定数据已经准备就绪，开始执行任务吗？",function(){
 				loading('系统处理中，请稍候……');
-				$.post('${ctx}/api/tl/addUsers', {
+				$.post('${rctx}/api/tl/addUsers', {
 					jobid : id
 				}, function(result) {
 					if (result.success) { 

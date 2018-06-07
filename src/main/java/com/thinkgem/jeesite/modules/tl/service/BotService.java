@@ -134,7 +134,7 @@ public class BotService {
 			bot.setBotDataService(botDataService);
 			bots.put(data.getPhone(), bot);
 		} else {
-			//已经登陆过l
+			// 已经登陆过l
 			if (XUserBot.STATUS_OK.equals(bot.getStatus())) {
 				return LoginStatus.ALREADYLOGGED;
 			}
@@ -197,9 +197,11 @@ public class BotService {
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
 
 		IBot bot = getBot(data);
-		TLVector<TLAbsUser> users = bot.collectUsers(task.getIntValue("chatid"), task.getLongValue("accesshash"),
+		TLVector<TLAbsUser> users = bot.collectUsers(
+				task.getIntValue("chatid"), task.getLongValue("accesshash"),
 				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+		logger.info("拉取群组用户结果：job={}，account={},size={}",
+				task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		// 将数据存储到数据库
@@ -246,6 +248,23 @@ public class BotService {
 			throw new RuntimeException(data.getPhone() + "账号实例不存在");
 		}
 		return bot;
+	}
+
+	/**
+	 * 查看group详细信息
+	 * 
+	 * @param data
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public boolean groupInfo(RequestData data) {
+		//通过管理员账号获取信息
+		IBot bot = bots.get(getAdminAccount());
+		if (bot == null) {
+			throw new RuntimeException(data.getPhone() + "账号实例不存在");
+		}
+		bot.getGroupInfo(data.getChatId(),data.getChatAccessHash());
+		return false;
 	}
 
 }

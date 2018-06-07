@@ -11,12 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.telegram.api.user.TLAbsUser;
+import org.telegram.api.user.TLUser;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.Chat;
 import org.telegram.bot.structure.IUser;
 import org.telegram.plugins.xuser.IBotDataService;
 import org.telegram.plugins.xuser.entity.ChatImpl;
 import org.telegram.plugins.xuser.entity.User;
+import org.telegram.tl.TLVector;
 
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.modules.tl.entity.DifferencesData;
@@ -27,6 +30,8 @@ import com.thinkgem.jeesite.modules.tl.entity.UserSession;
 public class BotDataService implements IBotDataService {
 	@Autowired
 	private ChatService chatService;
+	@Autowired
+	private GroupService groupService;
 	@Autowired
 	private UserSessionService userSessionService;
 	@Autowired
@@ -75,6 +80,15 @@ public class BotDataService implements IBotDataService {
 		chat.setIsChannel(cc.isChannel() ? 1 : 0);
 		chat.setTitle(cc.getTitle());
 		chatService.save(chat);
+
+		// 增加群组表
+		// Group group=new Group();
+		// group.setId(cc.getChatid()+"");
+		// group.setName(cc.getTitle());
+		// group.setIsChannel(cc.isChannel()?"1":"0");
+		// group.setStatus(Global.NO);
+		// groupService.insertOrUpdate(group);
+
 		return true;
 	}
 
@@ -135,7 +149,7 @@ public class BotDataService implements IBotDataService {
 	}
 
 	@Override
-	@Transactional(readOnly = false,propagation=Propagation.REQUIRES_NEW)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean updateDifferencesData(int botId, int pts, int date, int seq) {
 		// 检查是否存在记录，没有则新增，否则更新
 		try {
@@ -161,7 +175,7 @@ public class BotDataService implements IBotDataService {
 				diff.setUpdateDate(new Date());
 			}
 			differencesDataService.save(diff);
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;

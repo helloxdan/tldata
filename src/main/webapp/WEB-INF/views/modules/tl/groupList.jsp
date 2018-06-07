@@ -144,7 +144,8 @@
 				</td>
 				<td> 
 					 <a href="${ctx}/tl/job/form?groupId=${group.id}">新建任务</a>
-					  <a href="${ctx}/api/tl/collectUsers?chatId=${group.id}">拉取现有用户</a>
+					  <a href="${rctx}/api/tl/collectUsers?chatId=${group.id}">拉取现有用户</a>
+					  <a href="${rctx}/api/tl/groupInfo?chatId=${group.id}">详情</a>
 				</td>
 			</tr>
 		</c:forEach>

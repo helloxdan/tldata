@@ -97,7 +97,7 @@ public class BotApiController extends BaseController {
 			if (success) {
 				result.success("OK");
 			} else {
-				result.fail("ERROR");
+				result.fail("验证失败");
 			}
 		} catch (Exception e) {
 			result.fail("设置验证码异常，" + e.getMessage());
@@ -122,6 +122,22 @@ public class BotApiController extends BaseController {
 		return result;
 	}
 
+	@RequestMapping(value = "/groupInfo")
+	public ReturnWrap groupInfo(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			boolean success = botService.groupInfo(data);
+			if (success) {
+				result.success("OK");
+			} else {
+				result.fail("ERROR");
+			}
+		} catch (Exception e) {
+			result.fail("加群异常，" + e.getMessage());
+		}
+		return result;
+	}
 	@RequestMapping(value = "/importInvite")
 	public ReturnWrap importInvite(RequestData data,
 			HttpServletRequest request, HttpServletResponse response) {

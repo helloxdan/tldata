@@ -23,4 +23,6 @@ public interface IBot {
 
 	JSONObject getState();
 
+	void getGroupInfo(int chatId, long chatAccessHash);
+
 }
