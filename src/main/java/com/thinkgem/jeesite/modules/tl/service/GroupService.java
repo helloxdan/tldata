@@ -15,6 +15,7 @@ import com.thinkgem.jeesite.modules.tl.dao.GroupDao;
 
 /**
  * 群组Service
+ * 
  * @author admin
  * @version 2018-06-02
  */
@@ -25,25 +26,25 @@ public class GroupService extends CrudService<GroupDao, Group> {
 	public Group get(String id) {
 		return super.get(id);
 	}
-	
+
 	public List<Group> findList(Group group) {
 		return super.findList(group);
 	}
-	
+
 	public Page<Group> findPage(Page<Group> page, Group group) {
 		return super.findPage(page, group);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void save(Group group) {
 		super.save(group);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void delete(Group group) {
 		super.delete(group);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void del(String ids) {
 		if (StringUtils.isNoneBlank(ids)) {
@@ -54,6 +55,21 @@ public class GroupService extends CrudService<GroupDao, Group> {
 			}
 		}
 		// 删除缓存
-		//IcareUtils.removeCache();
+		// IcareUtils.removeCache();
+	}
+
+	@Transactional(readOnly = false)
+	public void insertOrUpdate(Group group) {
+		Group g = get(group.getId());
+		if (g == null) {
+			logger.info("新增群组，{}，{}，{}", group.getId(), group.getName(),
+					group.getIsChannel());
+			group.setIsNewRecord(true);
+		} else {
+			logger.info("更新群组，{}，{}，{}", group.getId(), group.getName(),
+					group.getIsChannel());
+			group.setIsNewRecord(false);
+		}
+		save(group);
 	}
 }

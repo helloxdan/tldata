@@ -102,7 +102,7 @@
 		//加入群组
 		function joinGroup(account){
 			var url="${rctx}/api/tl/importInvite";
-			 var link = window.prompt('输入群组邀请码', '');
+			 var link = window.prompt('输入群组邀链接', '');
 			 $.post(url,{phone:account,url:link},function(res){
 				 if(res.success){
 					 alert("操作完成");

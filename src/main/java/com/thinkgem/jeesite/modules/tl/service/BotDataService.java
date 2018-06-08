@@ -11,18 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.api.user.TLAbsUser;
-import org.telegram.api.user.TLUser;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.Chat;
 import org.telegram.bot.structure.IUser;
 import org.telegram.plugins.xuser.IBotDataService;
 import org.telegram.plugins.xuser.entity.ChatImpl;
 import org.telegram.plugins.xuser.entity.User;
-import org.telegram.tl.TLVector;
 
+import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.modules.tl.entity.DifferencesData;
+import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.entity.UserSession;
 
 @Service
@@ -82,12 +81,12 @@ public class BotDataService implements IBotDataService {
 		chatService.save(chat);
 
 		// 增加群组表
-		// Group group=new Group();
-		// group.setId(cc.getChatid()+"");
-		// group.setName(cc.getTitle());
-		// group.setIsChannel(cc.isChannel()?"1":"0");
-		// group.setStatus(Global.NO);
-		// groupService.insertOrUpdate(group);
+		 Group group=new Group();
+		 group.setId(cc.getChatid()+"");
+		 group.setName(cc.getTitle());
+		 group.setIsChannel(cc.isChannel()?"1":"0");
+		 group.setStatus(Global.NO);
+		 groupService.insertOrUpdate(group);
 
 		return true;
 	}
