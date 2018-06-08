@@ -258,10 +258,10 @@ public class BotService {
 	 */
 	@Transactional(readOnly = false)
 	public boolean groupInfo(RequestData data) {
-		//通过管理员账号获取信息
+		//通过管理员账号获取信息 
 		IBot bot = bots.get(getAdminAccount());
 		if (bot == null) {
-			throw new RuntimeException(data.getPhone() + "账号实例不存在");
+			throw new RuntimeException(data.getPhone() + "账号实例不存在1");
 		}
 		bot.getGroupInfo(data.getChatId(),data.getChatAccessHash());
 		return false;

@@ -21,7 +21,6 @@ import org.telegram.api.input.chat.TLInputChannel;
 import org.telegram.api.messages.TLMessagesChatFull;
 import org.telegram.api.updates.TLAbsUpdates;
 import org.telegram.api.user.TLAbsUser;
-import org.telegram.api.user.TLUser;
 import org.telegram.bot.handlers.interfaces.IChatsHandler;
 import org.telegram.bot.handlers.interfaces.IUsersHandler;
 import org.telegram.bot.kernel.IKernelComm;
@@ -35,6 +34,7 @@ import org.telegram.plugins.xuser.handler.UsersHandler;
 import org.telegram.plugins.xuser.support.BotConfigImpl;
 import org.telegram.plugins.xuser.support.ChatUpdatesBuilderImpl;
 import org.telegram.plugins.xuser.support.CustomUpdatesHandler;
+import org.telegram.plugins.xuser.support.DifferenceParametersService;
 import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
@@ -91,6 +91,12 @@ public class XUserBot implements IBot {
 
 			logger.info("创建实例，" + phone);
 			kernel = new TelegramBot(botConfig, builder, apikey, apihash);
+			// 覆盖默认的DifferenceParametersService
+			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
+					botDataService);
+			differenceParametersService.setAccount(getAccount());//注入实例账号
+			builder.setDifferenceParametersService(differenceParametersService);
+
 			// 初始化，如果已经有登录过，就直接登录，返回登录成功的状态
 			status = kernel.init();
 			if (status == LoginStatus.CODESENT) {
