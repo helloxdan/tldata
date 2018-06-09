@@ -15,9 +15,10 @@ public class ChatImpl implements Chat {
     private Long accessHash;
     private boolean isChannel;
     private String title;
-
+    private String username;
     public ChatImpl(int id) {
         this.id = id;
+        this.chatid=id;
     }
 
     public ChatImpl() {
@@ -25,11 +26,14 @@ public class ChatImpl implements Chat {
 
     public ChatImpl(TLChannel channel) {
 		this.id=channel.getId();
-		this.title=channel.getTitle();
+		this.chatid=channel.getId();
+		this.title= channel.getTitle();
+		this.username=channel.getUsername();
 	}
 
 	public ChatImpl(int id2, String title2) {
 		this.id=id2;
+		this.chatid=id2;
 		this.title=title2;
 	}
 
@@ -74,6 +78,14 @@ public class ChatImpl implements Chat {
 
 	public void setChatid(int chatid) {
 		this.chatid = chatid;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
     
 }

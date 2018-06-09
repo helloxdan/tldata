@@ -152,7 +152,7 @@ public class XUserBot implements IBot {
 
 		// TODO 加入群组
 		IKernelComm kernelComm = kernel.getKernelComm();
-		if (url.contains("telegram.me/joinchat")) {
+		if (url.contains("t.me/joinchat")) {
 			String hash = url.split("/")[(url.split("/").length) - 1];
 			TLRequestMessagesImportChatInvite in = new TLRequestMessagesImportChatInvite();
 			in.setHash(hash);
@@ -164,7 +164,7 @@ public class XUserBot implements IBot {
 				success = false;
 				logger.error("入群失败", e);
 			}
-		} else if (url.contains("telegram.me/")) {
+		} else if (url.contains("t.me/")) {
 			String username = url.split("/")[(url.split("/").length) - 1];
 			try {
 				TLRequestContactsResolveUsername ru = new TLRequestContactsResolveUsername();

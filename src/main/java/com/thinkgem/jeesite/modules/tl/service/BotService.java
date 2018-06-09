@@ -186,8 +186,7 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public boolean importInvite(RequestData data) {
 		IBot bot = getBot(data);
-		bot.importInvite(data.getHash());
-		return false;
+		return	bot.importInvite(data.getUrl());
 	}
 
 	@Transactional(readOnly = false)
@@ -195,6 +194,7 @@ public class BotService {
 		String taskid = data.getTaskid();
 		// 根据任务id，找到调用方法的参数
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
+		data.setPhone(task.getString("account"));
 
 		IBot bot = getBot(data);
 		TLVector<TLAbsUser> users = bot.collectUsers(

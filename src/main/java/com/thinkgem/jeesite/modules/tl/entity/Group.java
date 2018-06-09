@@ -19,7 +19,8 @@ public class Group extends DataEntity<Group> {
 
 	private static final long serialVersionUID = 1L;
 	private String name; // 群组名称
-	private String url; // 邀请码
+	private String usernmae; // 群组
+	private String url; // 邀请链接
 	private String isChannel; // 是否频道
 	private Integer usernum; // 用户数
 	private Date upcateDate; // upcate_date
@@ -32,6 +33,14 @@ public class Group extends DataEntity<Group> {
 
 	public Group(String id) {
 		super(id);
+	}
+
+	public String getUsernmae() {
+		return usernmae;
+	}
+
+	public void setUsernmae(String usernmae) {
+		this.usernmae = usernmae;
 	}
 
 	@Length(min = 0, max = 200, message = "群组名称长度必须介于 0 和 200 之间")

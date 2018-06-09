@@ -139,7 +139,7 @@
 	</update>
 	
 	<select id="getRpcCallInfo" resultType="com.alibaba.fastjson.JSONObject">
-		SELECT  a.id,a.job_id as "jobId",a.account,a.offset_ as "offsetNum",a.limit_ as "limitNum"
+		SELECT  a.id,a.job_id as "jobId",a.account,a.offset_ as "offsetNum",a.limit_ as "limitNum",
 		c.chatid ,c.accesshash,c.ischannel
 		FROM tl_task a 
 		left join tl_chat c on c.account=a.account and c.chatid=a.from_group_id

@@ -53,39 +53,51 @@ public class BotDataService implements IBotDataService {
 	}
 
 	@Override
-	@Transactional(readOnly = false)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean updateChat(ChatImpl cc) {
 		com.thinkgem.jeesite.modules.tl.entity.Chat chat = new com.thinkgem.jeesite.modules.tl.entity.Chat();
 		chat.setIsNewRecord(false);
 		chat.setId(getPhone() + cc.getId());
 		chat.setAccount(getPhone());
 		chat.setAccesshash(cc.getAccessHash());
-		chat.setChatid(cc.getChatid() + "");
+		chat.setChatid(cc.getId() + "");
 		chat.setIsChannel(cc.isChannel() ? 1 : 0);
 		chat.setTitle(cc.getTitle());
 		chatService.save(chat);
+		
+		// 增加群组表
+		 Group group=new Group();
+		 group.setId(cc.getId()+"");
+		 group.setName(cc.getTitle());
+		group.setUsernmae(cc.getUsername());
+		 group.setIsChannel(cc.isChannel()?"1":"0");
+		 group.setStatus(Global.NO);
+		 group.setUpcateDate(new Date());
+		 groupService.insertOrUpdate(group);
 		return true;
 	}
 
 	@Override
-	@Transactional(readOnly = false)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean addChat(ChatImpl cc) {
 		com.thinkgem.jeesite.modules.tl.entity.Chat chat = new com.thinkgem.jeesite.modules.tl.entity.Chat();
 		chat.setIsNewRecord(true);
 		chat.setId(getPhone() + cc.getId());
 		chat.setAccount(getPhone());
 		chat.setAccesshash(cc.getAccessHash());
-		chat.setChatid(cc.getChatid() + "");
+		chat.setChatid(cc.getId() + "");
 		chat.setIsChannel(cc.isChannel() ? 1 : 0);
 		chat.setTitle(cc.getTitle());
 		chatService.save(chat);
 
 		// 增加群组表
 		 Group group=new Group();
-		 group.setId(cc.getChatid()+"");
+		 group.setId(cc.getId()+"");
 		 group.setName(cc.getTitle());
+		 group.setUsernmae(cc.getUsername());
 		 group.setIsChannel(cc.isChannel()?"1":"0");
 		 group.setStatus(Global.NO);
+		 group.setUpcateDate(new Date());
 		 groupService.insertOrUpdate(group);
 
 		return true;
@@ -96,7 +108,7 @@ public class BotDataService implements IBotDataService {
 		return userSessionService.getUserById(getPhone(), userId);
 	}
 
-	@Transactional(readOnly = false)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean addUser(User user) {
 		UserSession us = new UserSession();
 		us.setIsNewRecord(true);
@@ -109,7 +121,7 @@ public class BotDataService implements IBotDataService {
 		return true;
 	}
 
-	@Transactional(readOnly = false)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean updateUser(User user) {
 		UserSession us = new UserSession();
 		us.setIsNewRecord(false);

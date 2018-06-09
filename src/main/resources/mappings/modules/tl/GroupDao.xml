@@ -5,6 +5,7 @@
 	<sql id="groupColumns">
 		a.id AS "id",
 		a.name AS "name",
+		a.username AS "username",
 		a.url AS "url",
 		a.is_channel AS "isChannel",
 		a.usernum AS "usernum",
@@ -78,7 +79,7 @@
 	<insert id="insert">
 		INSERT INTO tl_group(
 			id,
-			name,
+			name,username,
 			url,
 			is_channel,
 			usernum,
@@ -90,7 +91,7 @@
 			del_flag
 		) VALUES (
 			#{id},
-			#{name},
+			#{name},#{username},
 			#{url},
 			#{isChannel},
 			#{usernum},
@@ -106,6 +107,7 @@
 	<update id="update">
 		UPDATE tl_group SET 	
 			name = #{name},
+			username=#{username},
 			url = #{url},
 			is_channel = #{isChannel},
 			usernum = #{usernum},
