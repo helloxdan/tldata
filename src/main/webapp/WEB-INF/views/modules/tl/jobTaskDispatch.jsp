@@ -211,7 +211,7 @@
 				<th class="sort-column a.offset">开始位置</th>
 				<th class="sort-column a.limit">记录数</th>
 				<th class="sort-column a.usernum">有效用户数</th>
-				<th class="sort-column a.status">已经完成？</th>
+				<th class="sort-column a.status">任务状态</th>
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -246,7 +246,7 @@
 					${jobTask.usernum}
 				</td>
 				<td>
-					${fns:getDictLabel(jobTask.status, 'yes_no', '')}
+					${fns:getDictLabel(jobTask.status, 'jobtask_status', jobTask.status)}
 				</td> 
 				<td>
 					<a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">抽取用户</a>

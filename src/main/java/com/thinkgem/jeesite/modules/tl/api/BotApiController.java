@@ -127,14 +127,14 @@ public class BotApiController extends BaseController {
 			HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
-			boolean success = botService.groupInfo(data);
-			if (success) {
-				result.success("OK");
+			  JSONObject json = botService.groupInfo(data);
+			if (json.containsKey("title")) {
+				result.success(json);
 			} else {
 				result.fail("ERROR");
 			}
 		} catch (Exception e) {
-			result.fail("加群异常，" + e.getMessage());
+			result.fail("取群详情，" + e.getMessage());
 		}
 		return result;
 	}

@@ -85,11 +85,11 @@
 			</div>
 			</div>
 			<div class="form-group">
-			<label class="col-md-2 col-sm-2 col-ls-2 col-xs-2 control-label">是否已经完成：</label>
+			<label class="col-md-2 col-sm-2 col-ls-2 col-xs-2 control-label">任务状态：</label>
 			<div class="col-md-3 col-sm-3 col-ls-3 col-xs-3">
 				<form:select path="status" class="form-control ">
 					<form:option value="" label=""/>
-					<form:options items="${fns:getDictList('yes_no')}" itemLabel="label" itemValue="value" htmlEscape="false"/>
+					<form:options items="${fns:getDictList('jobtask_status')}" itemLabel="label" itemValue="value" htmlEscape="false"/>
 				</form:select>
 			</div>
 			<label class="col-md-2 col-sm-2 col-ls-2 col-xs-2 control-label">获取用户数：</label>

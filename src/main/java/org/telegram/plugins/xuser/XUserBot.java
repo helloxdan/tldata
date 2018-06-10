@@ -11,8 +11,10 @@ import org.telegram.api.channel.participants.filters.TLChannelParticipantsFilter
 import org.telegram.api.chat.TLAbsChat;
 import org.telegram.api.chat.TLChat;
 import org.telegram.api.chat.channel.TLChannel;
+import org.telegram.api.chat.channel.TLChannelFull;
 import org.telegram.api.contacts.TLResolvedPeer;
 import org.telegram.api.engine.TelegramApi;
+import org.telegram.api.functions.channels.TLRequestChannelsGetFullChannel;
 import org.telegram.api.functions.channels.TLRequestChannelsGetParticipants;
 import org.telegram.api.functions.channels.TLRequestChannelsInviteToChannel;
 import org.telegram.api.functions.channels.TLRequestChannelsJoinChannel;
@@ -307,34 +309,54 @@ public class XUserBot implements IBot {
 	}
 
 	@Override
-	public void getGroupInfo(int chatId, long chatAccessHash) {
+	public JSONObject getGroupInfo(int chatId, long chatAccessHash, boolean ischannel) {
 		logger.info("{}，getGroupInfo ，{}", getAccount(), chatId);
+		JSONObject json = new JSONObject();
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
-			TLRequestMessagesGetFullChat req = new TLRequestMessagesGetFullChat();
-			req.setChatId(chatId);
+			if (ischannel) {
+				TLRequestChannelsGetFullChannel req = new TLRequestChannelsGetFullChannel();
+				TLInputChannel channel = new TLInputChannel();
+				channel.setAccessHash(chatAccessHash);
+				channel.setChannelId(chatId);
+				req.setChannel(channel);
+				TLMessagesChatFull result = api.doRpcCall(req);
+				TLChannelFull ch = (TLChannelFull) result.getFullChat();
+				TLVector<TLAbsChat> chats = result.getChats();
+				if (chats.size() > 0) {
+					TLChannel chat = (TLChannel) chats.get(0);
+					json.put("title", chat.getTitle());
+					json.put("username", chat.getUsername());
+				}
+				json.put("usernum", ch.getParticipantsCount());
 
-			TLMessagesChatFull result = api.doRpcCall(req);
-			TLVector<TLAbsChat> chats = result.getChats();
-			for (TLAbsChat cc : chats) {
-				TLChat ch = (TLChat) cc;
-				System.out.println(ch.getTitle());
-				System.out.println(ch.getParticipantsCount());
-				System.out.println(ch.getVersion());
-				System.out.println(ch.getClassId());
+			} else {
+				TLRequestMessagesGetFullChat req = new TLRequestMessagesGetFullChat();
+				req.setChatId(chatId);
 
+				TLMessagesChatFull result = api.doRpcCall(req);
+				TLVector<TLAbsChat> chats = result.getChats();
+				for (TLAbsChat cc : chats) {
+					TLChat ch = (TLChat) cc;
+					System.out.println(ch.getTitle());
+					System.out.println(ch.getParticipantsCount());
+					System.out.println(ch.getVersion());
+					System.out.println(ch.getClassId()); 
+						json.put("title", ch.getTitle()); 
+
+				}
+//				System.out.println("---");
+//				System.out.println(result.getUsers().size());
+//				TLVector<TLAbsUser> users = result.getUsers();
+//				for (TLAbsUser uu : users) {
+//					System.out.println(uu.getId());
+//				}
 			}
-			System.out.println("---");
-			System.out.println(result.getUsers().size());
-			TLVector<TLAbsUser> users = result.getUsers();
-			for (TLAbsUser uu : users) {
-				System.out.println(uu.getId());
-			}
-
 		} catch (IOException e) {
 			logger.error("取群信息失败", e);
 		} catch (TimeoutException e) {
 			logger.error("取群信息失败，超时", e);
 		}
+		return json;
 	}
 }

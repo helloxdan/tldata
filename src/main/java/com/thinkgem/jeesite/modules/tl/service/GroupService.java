@@ -65,11 +65,11 @@ public class GroupService extends CrudService<GroupDao, Group> {
 			logger.info("新增群组，{}，{}，{}", group.getId(), group.getName(),
 					group.getIsChannel());
 			group.setIsNewRecord(true);
+			save(group);
 		} else {
-			logger.info("更新群组，{}，{}，{}", group.getId(), group.getName(),
-					group.getIsChannel());
-			group.setIsNewRecord(false);
+//			logger.info("更新群组，{}，{}，{}", group.getId(), group.getName(),
+//					group.getIsChannel());
+//			group.setIsNewRecord(false);
 		}
-		save(group);
 	}
 }
