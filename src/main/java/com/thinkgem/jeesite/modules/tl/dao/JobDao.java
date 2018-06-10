@@ -3,9 +3,11 @@
  */
 package com.thinkgem.jeesite.modules.tl.dao;
 
+import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.persistence.CrudDao;
 import com.thinkgem.jeesite.common.persistence.annotation.MyBatisDao;
 import com.thinkgem.jeesite.modules.tl.entity.Job;
+import com.thinkgem.jeesite.modules.tl.entity.JobTask;
 
 /**
  * 工作任务DAO接口
@@ -14,5 +16,7 @@ import com.thinkgem.jeesite.modules.tl.entity.Job;
  */
 @MyBatisDao
 public interface JobDao extends CrudDao<Job> {
+
+	JSONObject getRpcCallInfoByTaskid(JobTask jobTask);
 	
 }

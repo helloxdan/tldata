@@ -147,4 +147,15 @@
 		WHERE id = #{id}
 	</update>
 	
+		<select id="getRpcCallInfoByTaskid" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT  a.id,a.job_id as "jobId",a.account,a.offset_ as "offsetNum",a.limit_ as "limitNum",
+		c.chatid ,c.accesshash,c.ischannel
+		FROM tl_job j
+		left join tl_task a on j.id=a.job_id  
+		left join tl_chat c on c.account=a.account and c.chatid=j.group_id
+		<where>
+			a.id=#{id}
+		</where>
+		 
+	</select>
 </mapper>

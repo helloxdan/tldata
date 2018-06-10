@@ -4,13 +4,16 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.entity.Job;
+import com.thinkgem.jeesite.modules.tl.entity.JobTask;
 import com.thinkgem.jeesite.modules.tl.dao.JobDao;
 
 /**
@@ -55,5 +58,10 @@ public class JobService extends CrudService<JobDao, Job> {
 		}
 		// 删除缓存
 		//IcareUtils.removeCache();
+	}
+
+	public JSONObject getRpcCallInfoByTaskid(String taskid) {
+		JobTask jobTask=new JobTask(taskid);
+		return this.dao.getRpcCallInfoByTaskid(jobTask);
 	}
 }

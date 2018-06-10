@@ -199,9 +199,11 @@ public class BotService {
 		data.setPhone(task.getString("account"));
 
 		IBot bot = getBot(data);
-		TLVector<TLAbsUser> users = bot.collectUsers(task.getIntValue("chatid"), task.getLongValue("accesshash"),
+		TLVector<TLAbsUser> users = bot.collectUsers(
+				task.getIntValue("chatid"), task.getLongValue("accesshash"),
 				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+		logger.info("拉取群组用户结果：job={}，account={},size={}",
+				task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		// 将数据存储到数据库
@@ -223,7 +225,7 @@ public class BotService {
 		if (users.size() > 0) {
 			// 设置状态为已完成
 			JobTask t = jobTaskService.get(taskid);
-			t.setStatus(Global.YES);
+			t.setStatus("1");
 		}
 	}
 
@@ -239,33 +241,40 @@ public class BotService {
 
 	@Transactional(readOnly = false)
 	public void addUsers(RequestData data) {
-		List<JobUser> jobUsers =null;
+		List<JobUser> jobUsers = null;
 		String taskid = data.getTaskid();
 		if (StringUtils.isNotBlank(taskid)) {
 			// 根据任务id，找到调用方法的参数
-			JSONObject task = jobTaskService.getRpcCallInfo(taskid);
+			JSONObject task = jobService.getRpcCallInfoByTaskid(taskid);
 			data.setPhone(task.getString("account"));
-			data.setChatId(task.getIntValue("chatid"));
 			data.setJobid(task.getString("jobId"));
-			data.setChatAccessHash(task.getLongValue("accesshash"));
-			
-			
-			//取用户列表
-			JobUser jobUser=new JobUser();
+			data.setChatId(task.getIntValue("chatid"));
+			data.setChatAccessHash(task.getLongValue("accesshash"));//需要拉人的群组id和访问hash
+
+			// 取用户列表
+			JobUser jobUser = new JobUser();
 			jobUser.setAccount(data.getPhone());
 			jobUser.setJobId(task.getString("jobId"));
-	 jobUsers = jobUserService.findList(jobUser);
-		}else if (StringUtils.isNotBlank(data.getJobid())) {
-//			add user by jobid
-		}else {
+			jobUsers = jobUserService.findList(jobUser);
+		} else if (StringUtils.isNotBlank(data.getJobid())) {
+			// add user by jobid
+		} else {
 			throw new RuntimeException("参数无效，没有jobid or taskid");
 		}
 
-		if(jobUsers!=null && jobUsers.size()>0) {
-		IBot bot = getBot(data);
-		bot.addUsers(data.getChatId(),data.getChatAccessHash(),jobUsers);
-		}else {
-			throw new RuntimeException("not find jobuser by account="+data.getPhone()+" in job "+data.getJobid());
+		if (jobUsers != null && jobUsers.size() > 0) {
+			IBot bot = getBot(data);
+			bot.addUsers(data.getChatId(), data.getChatAccessHash(), jobUsers);
+			
+			//标记任务已完成
+			if (StringUtils.isNotBlank(taskid)) {
+				// 设置状态为已完成
+				JobTask t = jobTaskService.get(taskid);
+				t.setStatus("2");//已加人
+			} 
+		} else {
+			throw new RuntimeException("not find jobuser by account="
+					+ data.getPhone() + " in job " + data.getJobid());
 		}
 	}
 
