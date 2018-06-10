@@ -168,7 +168,21 @@ public class BotApiController extends BaseController {
 
 		return result;
 	}
+	
 
+	@RequestMapping(value = "/cleanJobUser")
+	public ReturnWrap cleanJobUser(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			botService.cleanJobUser(data);
+			result.success("OK");
+		} catch (Exception e) {
+			result.fail("清洗用户信息异常，" + e.getMessage());
+		}
+
+		return result;
+	}
 	@RequestMapping(value = "/addUsers")
 	public ReturnWrap addUsers(RequestData data, HttpServletRequest request,
 			HttpServletResponse response) {

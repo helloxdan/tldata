@@ -97,6 +97,7 @@
 		
 		<!-- 配置监控统计拦截的filters -->
 	    <property name="filters" value="stat" /> 
+	    <property name="connectionInitSqls" value="set names utf8mb4;"/>
 	</bean>
 	
 	<!-- 数据源配置, 使用应用服务器的数据库连接池 

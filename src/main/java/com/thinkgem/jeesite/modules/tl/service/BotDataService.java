@@ -108,7 +108,7 @@ public class BotDataService implements IBotDataService {
 			group.setUpcateDate(new Date());
 			groupService.insertOrUpdate(group);
 		} catch (Exception e) {
-			logger.error("updateChat", e);
+			logger.error("addChat", e);
 		}
 		return true;
 	}

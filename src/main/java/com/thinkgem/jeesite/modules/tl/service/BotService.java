@@ -2,6 +2,7 @@ package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
+import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.sys.entity.Log;
 import com.thinkgem.jeesite.modules.sys.utils.LogUtils;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
@@ -186,7 +188,7 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public boolean importInvite(RequestData data) {
 		IBot bot = getBot(data);
-		return	bot.importInvite(data.getUrl());
+		return bot.importInvite(data.getUrl());
 	}
 
 	@Transactional(readOnly = false)
@@ -197,20 +199,18 @@ public class BotService {
 		data.setPhone(task.getString("account"));
 
 		IBot bot = getBot(data);
-		TLVector<TLAbsUser> users = bot.collectUsers(
-				task.getIntValue("chatid"), task.getLongValue("accesshash"),
+		TLVector<TLAbsUser> users = bot.collectUsers(task.getIntValue("chatid"), task.getLongValue("accesshash"),
 				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}",
-				task.getString("jobId"), task.getString("account"),
+		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		// 将数据存储到数据库
 		for (TLAbsUser tluser : users) {
 			TLUser u = (TLUser) tluser;
 			JobUser ju = new JobUser();
-			ju.setJobId(data.getJobid());
-			ju.setAccount(data.getPhone());
-			ju.setFromGroup(data.getChatId() + "");
+			ju.setJobId(task.getString("jobId"));
+			ju.setAccount(task.getString("account"));
+			ju.setFromGroup(task.getIntValue("chatid") + "");
 			ju.setUserid(u.getId() + "");
 			ju.setUsername(u.getUserName());
 			ju.setUserHash(u.getAccessHash());
@@ -219,6 +219,12 @@ public class BotService {
 			// u.getLastName();
 			jobUserService.save(ju);
 		}
+
+		if (users.size() > 0) {
+			// 设置状态为已完成
+			JobTask t = jobTaskService.get(taskid);
+			t.setStatus(Global.YES);
+		}
 	}
 
 	/**
@@ -226,14 +232,41 @@ public class BotService {
 	 * 
 	 * @param data
 	 */
+	@Transactional(readOnly = false)
 	public void cleanJobUser(RequestData data) {
 		// TODO
 	}
 
 	@Transactional(readOnly = false)
 	public void addUsers(RequestData data) {
+		List<JobUser> jobUsers =null;
+		String taskid = data.getTaskid();
+		if (StringUtils.isNotBlank(taskid)) {
+			// 根据任务id，找到调用方法的参数
+			JSONObject task = jobTaskService.getRpcCallInfo(taskid);
+			data.setPhone(task.getString("account"));
+			data.setChatId(task.getIntValue("chatid"));
+			data.setJobid(task.getString("jobId"));
+			data.setChatAccessHash(task.getLongValue("accesshash"));
+			
+			
+			//取用户列表
+			JobUser jobUser=new JobUser();
+			jobUser.setAccount(data.getPhone());
+			jobUser.setJobId(task.getString("jobId"));
+	 jobUsers = jobUserService.findList(jobUser);
+		}else if (StringUtils.isNotBlank(data.getJobid())) {
+//			add user by jobid
+		}else {
+			throw new RuntimeException("参数无效，没有jobid or taskid");
+		}
+
+		if(jobUsers!=null && jobUsers.size()>0) {
 		IBot bot = getBot(data);
-		bot.addUsers(data.getChatId());
+		bot.addUsers(data.getChatId(),data.getChatAccessHash(),jobUsers);
+		}else {
+			throw new RuntimeException("not find jobuser by account="+data.getPhone()+" in job "+data.getJobid());
+		}
 	}
 
 	public boolean stop(RequestData data) {
@@ -258,12 +291,12 @@ public class BotService {
 	 */
 	@Transactional(readOnly = false)
 	public boolean groupInfo(RequestData data) {
-		//通过管理员账号获取信息 
+		// 通过管理员账号获取信息
 		IBot bot = bots.get(getAdminAccount());
 		if (bot == null) {
 			throw new RuntimeException(data.getPhone() + "账号实例不存在1");
 		}
-		bot.getGroupInfo(data.getChatId(),data.getChatAccessHash());
+		bot.getGroupInfo(data.getChatId(), data.getChatAccessHash());
 		return false;
 	}
 

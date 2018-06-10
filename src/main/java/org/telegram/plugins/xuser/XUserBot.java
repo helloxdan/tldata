@@ -1,6 +1,7 @@
 package org.telegram.plugins.xuser;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
@@ -13,11 +14,14 @@ import org.telegram.api.chat.channel.TLChannel;
 import org.telegram.api.contacts.TLResolvedPeer;
 import org.telegram.api.engine.TelegramApi;
 import org.telegram.api.functions.channels.TLRequestChannelsGetParticipants;
+import org.telegram.api.functions.channels.TLRequestChannelsInviteToChannel;
 import org.telegram.api.functions.channels.TLRequestChannelsJoinChannel;
 import org.telegram.api.functions.contacts.TLRequestContactsResolveUsername;
 import org.telegram.api.functions.messages.TLRequestMessagesGetFullChat;
 import org.telegram.api.functions.messages.TLRequestMessagesImportChatInvite;
 import org.telegram.api.input.chat.TLInputChannel;
+import org.telegram.api.input.user.TLAbsInputUser;
+import org.telegram.api.input.user.TLInputUser;
 import org.telegram.api.messages.TLMessagesChatFull;
 import org.telegram.api.updates.TLAbsUpdates;
 import org.telegram.api.user.TLAbsUser;
@@ -40,6 +44,7 @@ import org.telegram.tl.TLVector;
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.modules.sys.entity.Log;
 import com.thinkgem.jeesite.modules.sys.utils.LogUtils;
+import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.service.BotDataService;
 
 public class XUserBot implements IBot {
@@ -78,23 +83,18 @@ public class XUserBot implements IBot {
 			final IUsersHandler usersHandler = new UsersHandler(botDataService);
 			final IChatsHandler chatsHandler = new ChatsHandler(botDataService);
 			final MessageHandler messageHandler = new MessageHandler();
-			final TLMessageHandler tlMessageHandler = new TLMessageHandler(
-					messageHandler, botDataService);
+			final TLMessageHandler tlMessageHandler = new TLMessageHandler(messageHandler, botDataService);
 
-			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(
-					CustomUpdatesHandler.class);
-			builder.setBotConfig(botConfig).setDatabaseManager(botDataService)
-					.setUsersHandler(usersHandler)
-					.setChatsHandler(chatsHandler)
-					.setMessageHandler(messageHandler)
+			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(CustomUpdatesHandler.class);
+			builder.setBotConfig(botConfig).setDatabaseManager(botDataService).setUsersHandler(usersHandler)
+					.setChatsHandler(chatsHandler).setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
 			logger.info("创建实例，" + phone);
 			kernel = new TelegramBot(botConfig, builder, apikey, apihash);
 			// 覆盖默认的DifferenceParametersService
-			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
-					botDataService);
-			differenceParametersService.setAccount(getAccount());//注入实例账号
+			DifferenceParametersService differenceParametersService = new DifferenceParametersService(botDataService);
+			differenceParametersService.setAccount(getAccount());// 注入实例账号
 			builder.setDifferenceParametersService(differenceParametersService);
 
 			// 初始化，如果已经有登录过，就直接登录，返回登录成功的状态
@@ -121,8 +121,7 @@ public class XUserBot implements IBot {
 	@Override
 	public JSONObject getState() {
 		logger.info("getState，" + getAccount());
-		boolean isAuthenticated = kernel.getKernelComm().getApi().getState()
-				.isAuthenticated();
+		boolean isAuthenticated = kernel.getKernelComm().getApi().getState().isAuthenticated();
 		JSONObject json = new JSONObject();
 		json.put("isAuthenticated", isAuthenticated);
 		json.put("isRunning", kernel.getMainHandler().isRunning());
@@ -173,8 +172,7 @@ public class XUserBot implements IBot {
 				TLRequestChannelsJoinChannel join = new TLRequestChannelsJoinChannel();
 				TLInputChannel ch = new TLInputChannel();
 				ch.setChannelId(peer.getChats().get(0).getId());
-				ch.setAccessHash(((TLChannel) peer.getChats().get(0))
-						.getAccessHash());
+				ch.setAccessHash(((TLChannel) peer.getChats().get(0)).getAccessHash());
 				join.setChannel(ch);
 				TLAbsUpdates r = kernelComm.getApi().doRpcCall(join);
 				logger.info("join channel result:{}", r);
@@ -196,8 +194,7 @@ public class XUserBot implements IBot {
 		try {
 			TLRequestMessagesImportChatInvite req = new TLRequestMessagesImportChatInvite();
 			req.setHash(hash);
-			TLAbsUpdates result = kernel.getKernelComm().getApi()
-					.doRpcCall(req);
+			TLAbsUpdates result = kernel.getKernelComm().getApi().doRpcCall(req);
 			logger.info("入群结果：" + result);
 		} catch (IOException e) {
 			success = false;
@@ -225,8 +222,7 @@ public class XUserBot implements IBot {
 	 * @see org.telegram.plugins.xuser.IBot#collectUsers(java.lang.String)
 	 */
 	@Override
-	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash,
-			int offset, int limit) {
+	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash, int offset, int limit) {
 		TLVector<TLAbsUser> users = null;
 		logger.info("collectUsers from group ，" + chatId);
 		try {
@@ -258,9 +254,32 @@ public class XUserBot implements IBot {
 	 * @see org.telegram.plugins.xuser.IBot#addUsers(java.lang.String)
 	 */
 	@Override
-	public void addUsers(int chatId) {
+	public void addUsers(int chatId, long accessHash, List<JobUser> jobUsers) {
 		// TODO Auto-generated method stub
 		logger.info("{},addUsers to group {}", getAccount(), chatId);
+		try {
+			TelegramApi api = kernel.getKernelComm().getApi();
+			TLRequestChannelsInviteToChannel req = new TLRequestChannelsInviteToChannel();
+			TLInputChannel ch = new TLInputChannel();
+			ch.setChannelId(chatId);
+			ch.setAccessHash(accessHash);
+			req.setChannel(ch);
+
+			TLVector<TLAbsInputUser> users = new TLVector<TLAbsInputUser>();
+			for (JobUser jobUser : jobUsers) {
+				TLInputUser user = new TLInputUser();
+				user.setUserId(Integer.parseInt(jobUser.getUserid()));
+				user.setAccessHash(jobUser.getUserHash());
+				users.add(user);
+			}
+			req.setUsers(users);
+			TLAbsUpdates result = api.doRpcCall(req);
+			logger.info("拉人结果：" + result);
+		} catch (IOException e) {
+			logger.error("拉取群用户失败", e);
+		} catch (TimeoutException e) {
+			logger.error("拉取群用户失败，超时", e);
+		}
 	}
 
 	@Override

@@ -22,7 +22,7 @@
 							$("input[type='checkbox'].list_checkbox").each(function(){  
 			                    this.checked=false;  
 			                });  
-						}
+						} 
 					});
 			
 			
@@ -64,11 +64,11 @@
         	return false;
         }
 		
-		function runjob(id) {
+		function runjob(id,taskid) {
 			confirmx("确定数据已经准备就绪，开始执行任务吗？",function(){
 				loading('系统处理中，请稍候……');
 				$.post('${rctx}/api/tl/addUsers', {
-					jobid : id
+					jobid : id,taskid:taskid
 				}, function(result) {
 					if (result.success) { 
 						//刷新页面
@@ -100,7 +100,24 @@
 			});
         	return false;
         }
-		
+        function cleanJobUser(id) {
+			confirmx("确定开始执行清洗用户数据任务吗？",function(){
+				loading('系统处理中，请稍候……');
+				$.post('${rctx}/api/tl/cleanJobUser', {
+					jobid : id
+				}, function(result) {
+					if (result.success) { 
+						//刷新页面
+						document.location.reload();
+					}else{
+						top.$.jBox.tip(result.msg, 'warning');
+					}
+				});
+			},function(){
+				console.log('取消执行任务');
+			});
+        	return false;
+        }
 		
 		//添加执行计划
 		function addTasks(jobId) {
@@ -140,7 +157,7 @@
 	<div class="addData">
 	<div class="box box-solid">
 			<div class="box-header with-border">
-				<h3 class="box-title">调度任务--${jobTask.job.name }</h3>
+				<h3 class="box-title">1调度任务--${jobTask.job.name }</h3>
 			</div>
 	<form:form id="searchForm" modelAttribute="jobTask" action="${ctx}/tl/jobTask/" method="post" class="form-inline form-search">
 		<input id="jobId" name="jobId" type="hidden" value="${jobTask.jobId}"/>
@@ -177,7 +194,8 @@
 				<input id="btnAdds" class="btn btn-blue" type="button" value="批量新增" onclick="addTasks('${jobTask.jobId}')"/>
 				<input id="btnDel" class="btn btn-blue" type="button" value="删除任务" />
 			
-					|<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue"  >收集用户</a>
+					|<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue"  >批量执行抽取用户</a>
+					<a href="javascript:cleanJobUser('${jobTask.jobId}')"  class="btn btn-blue" title="删除重复数据，或者已经抽取的数据" >清洗用户数据</a>
 					<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-blue"  >开始拉人</a>
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
 			</div>	
@@ -189,7 +207,7 @@
 				<th class="sort-column j.name">任务名称</th>
 				<th class="sort-column a.account">登录账号</th>
 				<th class="sort-column a.type">任务类型</th>
-				<th class="sort-column a.from_group_link">来源群组链接</th>
+				<th class="sort-column a.from_group_link">来源群组ID</th>
 				<th class="sort-column a.offset">开始位置</th>
 				<th class="sort-column a.limit">记录数</th>
 				<th class="sort-column a.usernum">有效用户数</th>
@@ -229,9 +247,10 @@
 				</td>
 				<td>
 					${fns:getDictLabel(jobTask.status, 'yes_no', '')}
-				</td>
+				</td> 
 				<td>
-					<a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">执行拉人</a>
+					<a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">抽取用户</a>
+					<a href="javascript:runjob('','${jobTask.id}')">开始拉人</a> 
 				</td>
 			</tr>
 		</c:forEach>
