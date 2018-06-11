@@ -16,6 +16,10 @@ import com.thinkgem.jeesite.common.persistence.DataEntity;
 public class JobTask extends DataEntity<JobTask> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String STATUS_NONE="0";
+	public static final String STATUS_FETCHED="1";
+	public static final String STATUS_JOIN="2";
+	
 	private String action; // 动作标识
 	
 	

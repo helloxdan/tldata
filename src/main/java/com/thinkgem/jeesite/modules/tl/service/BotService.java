@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
@@ -66,7 +67,7 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public void startInit() {
 		System.out.println("Telegram bot 开始初始化……");
-		if (!"true".equals(Global.getConfig("autoRun"))) {
+		if ("true".equals(Global.getConfig("autoRun"))) {
 
 			accountInit(null);
 		}
@@ -96,7 +97,7 @@ public class BotService {
 			bot.setStatus(XUserBot.STATUS_OK);
 
 			// 更改帐号状态为run
-			updateAccountState(getAdminAccount(), "run");
+			updateAccountState(getAdminAccount(), Account.STATUS_RUN);
 		} else {
 			String title = getAdminAccount() + "管理员登录失败，status" + status;
 			logger.error(title);
@@ -122,9 +123,20 @@ public class BotService {
 	 * @return
 	 */
 	public String startBatch(RequestData data) {
-		// TODO Auto-generated method stub
 		// 取出指定数量的账号，并启动，如果启动成功，就修改账号状态为已启动
 		int num = data.getNum();
+		Account account = new Account();
+		account.setStatus(Account.STATUS_READY);
+		List<Account> list = accountService.findList(account);
+		logger.info("共有准备就绪账号数{},需要启动数量{}", list.size(), num);
+		if (list.size() < num)
+			num = list.size();
+		for (int i = 0; i < num; i++) {
+			Account acc = list.get(i);
+			data.setPhone(acc.getId());
+			
+			start(data);
+		}
 
 		return null;
 	}
@@ -132,7 +144,7 @@ public class BotService {
 	/**
 	 * @param data
 	 */
-	@Transactional(readOnly = false)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public LoginStatus start(RequestData data) {
 		XUserBot bot = (XUserBot) bots.get(data.getPhone());
 		if (bot == null) {
@@ -151,7 +163,7 @@ public class BotService {
 			// bots.put(getAdminAccount(), bot);
 			bot.setStatus(XUserBot.STATUS_OK);
 			// 更改帐号状态为run
-			updateAccountState(data.getPhone(), "run");
+			updateAccountState(data.getPhone(), Account.STATUS_RUN);
 		} else {
 			String title = getAdminAccount() + "管理员登录失败，status" + status;
 			logger.error(title);
@@ -190,22 +202,48 @@ public class BotService {
 	}
 
 	@Transactional(readOnly = false)
-	public boolean importInvite(RequestData data) {
+	public JSONObject importInvite(RequestData data) {
 		IBot bot = getBot(data);
 		return bot.importInvite(data.getUrl());
 	}
 
-	@Transactional(readOnly = false)
 	public void collectUsers(RequestData data) {
 		String taskid = data.getTaskid();
+		if (StringUtils.isNotBlank(taskid)) {
+			collectUsersOfTask(data, taskid);
+		} else {
+			// 将工作任务所有task，执行抽取用户任务
+			String jobid = data.getJobid();
+			JobTask jobtask = new JobTask();
+			jobtask.setJobId(jobid);
+			jobtask.setStatus(JobTask.STATUS_NONE);//
+			List<JobTask> list = jobTaskService.findList(jobtask);
+			logger.info("任务{}共有调度抽人任务数{}", jobid, list.size());
+			try {
+				// 遍历执行所有记录
+				for (JobTask jt : list) {
+					collectUsersOfTask(data, jt.getId());
+
+					Thread.sleep(1000L);// 停留1s
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+	public void collectUsersOfTask(RequestData data, String taskid) {
 		// 根据任务id，找到调用方法的参数
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
 		data.setPhone(task.getString("account"));
 
 		IBot bot = getBot(data);
-		TLVector<TLAbsUser> users = bot.collectUsers(task.getIntValue("chatid"), task.getLongValue("accesshash"),
+		TLVector<TLAbsUser> users = bot.collectUsers(
+				task.getIntValue("chatid"), task.getLongValue("accesshash"),
 				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+		logger.info("拉取群组用户结果：job={}，account={},size={}",
+				task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		// 将数据存储到数据库
@@ -227,9 +265,9 @@ public class BotService {
 		}
 
 		if (users.size() > 0) {
-			// 设置状态为已完成
+			// 设置状态为已抽取
 			JobTask t = jobTaskService.get(taskid);
-			t.setStatus("1");
+			t.setStatus(JobTask.STATUS_FETCHED);
 			jobTaskService.save(t);
 		}
 	}
@@ -241,31 +279,59 @@ public class BotService {
 	 */
 	@Transactional(readOnly = false)
 	public void cleanJobUser(RequestData data) {
-		// TODO
+		jobUserService.cleanJobUser(data.getJobid());
 	}
 
-	@Transactional(readOnly = false)
 	public void addUsers(RequestData data) {
 		List<JobUser> jobUsers = null;
 		String taskid = data.getTaskid();
 		if (StringUtils.isNotBlank(taskid)) {
-			// 根据任务id，找到调用方法的参数
-			JSONObject task = jobService.getRpcCallInfoByTaskid(taskid);
-			data.setPhone(task.getString("account"));
-			data.setJobid(task.getString("jobId"));
-			data.setChatId(task.getIntValue("chatid"));
-			data.setChatAccessHash(task.getLongValue("accesshash"));// 需要拉人的群组id和访问hash
-
-			// 取用户列表
-			JobUser jobUser = new JobUser();
-			jobUser.setAccount(data.getPhone());
-			jobUser.setJobId(task.getString("jobId"));
-			jobUsers = jobUserService.findList(jobUser);
+			//
+			addUsersOfTask(data);
 		} else if (StringUtils.isNotBlank(data.getJobid())) {
 			// add user by jobid
+			JobTask jobtask = new JobTask();
+			jobtask.setJobId(data.getJobid());
+			jobtask.setStatus(JobTask.STATUS_FETCHED);// 已抽取用户
+			List<JobTask> list = jobTaskService.findList(jobtask);
+			logger.info("任务{}共有调度拉人任务数{}", data.getJobid(), list.size());
+			try {
+				// 遍历执行所有记录
+				for (JobTask jt : list) {
+					data.setTaskid(jt.getId());
+					addUsersOfTask(data);
+
+					Thread.sleep(1000L);// 停留1s
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
 		} else {
 			throw new RuntimeException("参数无效，没有jobid or taskid");
 		}
+
+	}
+
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+	public void addUsersOfTask(RequestData data) {
+		List<JobUser> jobUsers = null;
+		String taskid = data.getTaskid();
+		if (StringUtils.isBlank(taskid)) {
+			throw new RuntimeException("参数无效，没有 taskid");
+		}
+		// 根据任务id，找到调用方法的参数
+		JSONObject task = jobService.getRpcCallInfoByTaskid(taskid);
+		data.setPhone(task.getString("account"));
+		data.setJobid(task.getString("jobId"));
+		data.setChatId(task.getIntValue("chatid"));
+		data.setChatAccessHash(task.getLongValue("accesshash"));// 需要拉人的群组id和访问hash
+
+		// 取用户列表
+		JobUser jobUser = new JobUser();
+		jobUser.setAccount(data.getPhone());
+		jobUser.setJobId(task.getString("jobId"));
+		jobUsers = jobUserService.findList(jobUser);
 
 		if (jobUsers != null && jobUsers.size() > 0) {
 			IBot bot = getBot(data);
@@ -275,11 +341,12 @@ public class BotService {
 			if (StringUtils.isNotBlank(taskid)) {
 				// 设置状态为已完成
 				JobTask t = jobTaskService.get(taskid);
-				t.setStatus("2");// 已加人
+				t.setStatus(JobTask.STATUS_JOIN);// 已加人
 				jobTaskService.save(t);
 			}
 		} else {
-			throw new RuntimeException("not find jobuser by account=" + data.getPhone() + " in job " + data.getJobid());
+			throw new RuntimeException("not find jobuser by account="
+					+ data.getPhone() + " in job " + data.getJobid());
 		}
 	}
 
@@ -297,6 +364,14 @@ public class BotService {
 		return bot;
 	}
 
+	public IBot getBotByPhone(String phone) {
+		IBot bot = bots.get(phone);
+		if (bot == null) {
+			throw new RuntimeException(phone + "账号实例不存在");
+		}
+		return bot;
+	}
+
 	/**
 	 * 查看group详细信息
 	 * 
@@ -310,16 +385,54 @@ public class BotService {
 		if (bot == null) {
 			throw new RuntimeException(data.getPhone() + "账号实例不存在1");
 		}
-		JSONObject json =new JSONObject();
+		JSONObject json = new JSONObject();
 		Chat chat = new Chat();
 		chat.setAccount(getAdminAccount());
 		chat.setChatid(data.getChatId() + "");
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			  json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
+					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
+	}
+
+	@Transactional(readOnly = false)
+	public JSONObject updateGroupInfoByLink(String groupUrl) {
+		RequestData data = new RequestData();
+		JSONObject result = new JSONObject();
+		try {
+			data.setPhone(getAdminAccount());
+			IBot bot = getBotByPhone(getAdminAccount());
+			// 通过加入群组，获取群组id
+			JSONObject json = bot.importInvite(groupUrl);
+			if (json.getBooleanValue("success")) {
+				Integer groupid = json.getInteger("chatid");
+				data.setChatId(groupid);
+				// 通过群组id获取群组详细信息
+				JSONObject ginfo = groupInfo(data);
+
+				// 保存群组信息
+				Group group = new Group();
+				group.setId(groupid + "");
+				group.setUrl(groupUrl);
+				group.setName(ginfo.getString("title"));
+				group.setUsername(ginfo.getString("username"));
+				group.setUsernum(ginfo.getInteger("usernum"));
+				groupService.insertOrUpdate(group);
+
+				result.put("groupid", groupid);
+				result.put("name", group.getName());
+			} else {
+				throw new RuntimeException("通过url  加入群组失败！");
+			}
+		} catch (Exception e) {
+			logger.error("通过url更新群组信息操作失败", e);
+			throw new RuntimeException("通过url更新群组信息操作失败", e);
+		}
+
+		return result;
 	}
 
 }

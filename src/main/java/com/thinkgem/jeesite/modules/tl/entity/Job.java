@@ -18,8 +18,8 @@ public class Job extends DataEntity<Job> {
 	private String name;		// 任务名称
 	private String groupUrl;		// 群组邀请码
 	private String groupName;		// 群组名称
-	private Long groupId;		// 群组ID
-	private Long fromGroupId;		// 来源群ID
+	private Integer groupId;		// 群组ID
+	private Integer fromGroupId;		// 来源群ID
 	private String fromGroupUrl;		// 来源群邀请码
 	private String fromGroupName;		// 来源群名称
 	private Integer usernum;		// 用户数
@@ -62,19 +62,19 @@ public class Job extends DataEntity<Job> {
 		this.groupName = groupName;
 	}
 	
-	public Long getGroupId() {
+	public Integer getGroupId() {
 		return groupId;
 	}
 
-	public void setGroupId(Long groupId) {
+	public void setGroupId(Integer groupId) {
 		this.groupId = groupId;
 	}
 	
-	public Long getFromGroupId() {
+	public Integer getFromGroupId() {
 		return fromGroupId;
 	}
 
-	public void setFromGroupId(Long fromGroupId) {
+	public void setFromGroupId(Integer fromGroupId) {
 		this.fromGroupId = fromGroupId;
 	}
 	

@@ -81,7 +81,7 @@
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
-		<div class="row">
+		<div class="row hide">
 		<div class="col-md-12">
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">群组名称：</label>
@@ -91,7 +91,7 @@
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
-		<div class="row">
+		<div class="row hide">
 		<div class="col-md-12">
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">群组ID：</label>
@@ -101,7 +101,7 @@
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
-		<div class="row">
+		<div class="row hide">
 		<div class="col-md-12">
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">来源群ID：</label>
@@ -111,7 +111,7 @@
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
-		<div class="row">
+		<div class="row hide">
 		<div class="col-md-12">
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">来源群邀请码：</label>
@@ -121,7 +121,7 @@
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
-		<div class="row">
+		<div class="row hide">
 		<div class="col-md-12">
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">来源群名称：</label>

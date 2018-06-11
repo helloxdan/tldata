@@ -18,6 +18,7 @@ import com.thinkgem.jeesite.modules.tl.dao.JobDao;
 
 /**
  * 工作任务Service
+ * 
  * @author admin
  * @version 2018-06-02
  */
@@ -28,25 +29,32 @@ public class JobService extends CrudService<JobDao, Job> {
 	public Job get(String id) {
 		return super.get(id);
 	}
-	
+
 	public List<Job> findList(Job job) {
 		return super.findList(job);
 	}
-	
+
 	public Page<Job> findPage(Page<Job> page, Job job) {
 		return super.findPage(page, job);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void save(Job job) {
-		super.save(job);
+		// super.save(job);
+		if (job.getIsNewRecord()) {
+			job.preInsert();
+			dao.insert(job);
+		} else {
+			job.preUpdate();
+			dao.update(job);
+		}
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void delete(Job job) {
 		super.delete(job);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void del(String ids) {
 		if (StringUtils.isNoneBlank(ids)) {
@@ -57,11 +65,11 @@ public class JobService extends CrudService<JobDao, Job> {
 			}
 		}
 		// 删除缓存
-		//IcareUtils.removeCache();
+		// IcareUtils.removeCache();
 	}
 
 	public JSONObject getRpcCallInfoByTaskid(String taskid) {
-		JobTask jobTask=new JobTask(taskid);
+		JobTask jobTask = new JobTask(taskid);
 		return this.dao.getRpcCallInfoByTaskid(jobTask);
 	}
 }

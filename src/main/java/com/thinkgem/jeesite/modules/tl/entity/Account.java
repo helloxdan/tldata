@@ -4,9 +4,10 @@
 package com.thinkgem.jeesite.modules.tl.entity;
 
 import org.hibernate.validator.constraints.Length;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 
 /**
@@ -17,10 +18,16 @@ import com.thinkgem.jeesite.common.persistence.DataEntity;
 public class Account extends DataEntity<Account> {
 	
 	private static final long serialVersionUID = 1L;
+	public static final String STATUS_NONE="none";
+	public static final String STATUS_READY="ready";
+	public static final String STATUS_RUN="run";
+	
 	private String name;		// 用户名
 	private Date loginDate;		// 登录时间
 	private String status;		// 用户状态
 	private String ids;  //删除记录ids
+ 
+	
 	public Account() {
 		super();
 	}

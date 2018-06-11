@@ -18,7 +18,7 @@ public interface IBot {
 
 	boolean setAdmin(int chatId, int userId, boolean isAdmin);
 
-	boolean importInvite(String url);
+	JSONObject importInvite(String url);
 
 	TLVector<TLAbsUser> collectUsers(int chatId,long accessHash,int offset,int limit);
 

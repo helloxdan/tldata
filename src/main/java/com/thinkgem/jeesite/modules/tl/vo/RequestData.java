@@ -21,7 +21,16 @@ public class RequestData implements Serializable {
 	private int num;
 	private int offset;
 	private int limit;
+	private String type;
 	private String ids;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	public String getPhone() {
 		return phone;

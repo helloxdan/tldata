@@ -110,9 +110,6 @@
 				<th class="sort-column a.id">任务ID</th>
 				<th class="sort-column a.name">任务名称</th> 
 				<th class="sort-column a.group_name">群组名称</th>
-				<th class="sort-column a.group_id">群组ID</th>
-				<th class="sort-column a.from_group_id">来源群ID</th> 
-				<th class="sort-column a.from_group_name">来源群名称</th>
 				<th class="sort-column a.usernum">用户数</th>
 				<th class="sort-column a.day">几天完成</th>
 				<th class="sort-column a.boss">老板</th>
@@ -137,16 +134,7 @@
 				<td>
 					${job.groupName}
 				</td>
-				<td>
-					${job.groupId}
-				</td>
-				<td>
-					${job.fromGroupId}
-				</td>
-				 
-				<td>
-					${job.fromGroupName}
-				</td>
+			 
 				<td>
 					${job.usernum}
 				</td>

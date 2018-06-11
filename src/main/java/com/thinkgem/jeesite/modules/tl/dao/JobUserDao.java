@@ -14,5 +14,7 @@ import com.thinkgem.jeesite.modules.tl.entity.JobUser;
  */
 @MyBatisDao
 public interface JobUserDao extends CrudDao<JobUser> {
+
+	void deleteRepeatJobUser(JobUser jobUser);
 	
 }

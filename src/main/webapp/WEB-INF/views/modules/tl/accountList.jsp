@@ -69,7 +69,8 @@
 			 var num = window.prompt('输入新增数量', '');
 			 $.post(url,{phone:account,url:link},function(res){
 				 if(res.success){
-					 alert("操作完成");
+					 showTip("操作完成");
+					 document.location.reload();
 				 }else{
 					 alert(res.msg);
 				 }
@@ -80,7 +81,8 @@
 			var url="${rctx}/api/tl/account/init"; 
 			 $.post(url,{},function(res){
 				 if(res.success){
-					 alert("操作完成");
+					 showTip("操作完成");
+					 document.location.reload();
 				 }else{
 					 alert(res.msg);
 				 }
@@ -92,7 +94,8 @@
 			 var num = window.prompt('输入启动账号数量', '');
 			 $.post(url,{num:num},function(res){
 				 if(res.success){
-					 alert("操作完成");
+					 showTip("操作完成");
+					 //document.location.reload();
 				 }else{
 					 alert(res.msg);
 				 }
@@ -106,7 +109,8 @@
 			 link=encodeURI(link);
 			 $.post(url,{phone:account,url:link},function(res){
 				 if(res.success){
-					 alert("操作完成");
+					 showTip("操作完成");
+					// document.location.reload();
 				 }else{
 					 alert(res.msg);
 				 }
@@ -116,12 +120,13 @@
 			var url="${rctx}/api/tl/start";
 			 $.post(url,{phone:account},function(res){
 				 if(res.success){
-					 alert("操作完成");
+					 showTip("提交登录操作完成");
 					 if(res.data!='ALREADYLOGGED'){
 						 var code = window.prompt('输入验证码', '');
 						 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
 							 if(res.success){
-								 alert("操作完成");
+								 showTip("提交验证码操作完成");
+								 document.location.reload();
 							 }else{
 								 alert(res.msg);
 							 }
@@ -147,12 +152,13 @@
 			var url="${rctx}/api/tl/start";
 			 $.post(url,{phone:account },function(res){
 				 if(res.success){
-					 alert("操作完成");
+					 showTip("提交登录操作完成");
 					 if(res.data!='ALREADYLOGGED'){
 						 var code = window.prompt('输入验证码', '');
 						 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
 							 if(res.success){
-								 alert("操作完成");
+								 showTip("提交验证码操作完成");
+								 document.location.reload();
 							 }else{
 								 alert(res.msg);
 							 }

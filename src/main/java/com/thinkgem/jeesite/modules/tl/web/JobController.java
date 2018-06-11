@@ -19,12 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.utils.DateUtils;
 import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.tl.entity.Job;
+import com.thinkgem.jeesite.modules.tl.service.BotService;
 import com.thinkgem.jeesite.modules.tl.service.JobService;
 
 /**
@@ -39,6 +41,8 @@ public class JobController extends BaseController {
 
 	@Autowired
 	private JobService jobService;
+	@Autowired
+	private BotService botService;
 
 	@ModelAttribute
 	public Job get(@RequestParam(required = false) String id) {
@@ -80,6 +84,15 @@ public class JobController extends BaseController {
 		if (!beanValidator(model, job)) {
 			return form(job, model);
 		}
+		// if (job.getIsNewRecord()) {
+		// 获取目标群组信息
+		if (StringUtils.isNotBlank(job.getGroupUrl())) {
+			JSONObject result = botService.updateGroupInfoByLink(job
+					.getGroupUrl());
+			job.setGroupId(result.getInteger("groupid"));
+			job.setGroupName(result.getString("name"));
+		}
+		// }
 		jobService.save(job);
 		addMessage(redirectAttributes, "保存工作任务成功");
 		return "redirect:" + Global.getAdminPath() + "/tl/job/?repage";

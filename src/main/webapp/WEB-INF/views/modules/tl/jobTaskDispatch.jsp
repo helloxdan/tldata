@@ -131,6 +131,7 @@
 			var offset = $('#offset').val();
 			var limit = $('#limit').val();
 			var params = {
+				jobId:'${jobTask.jobId}',
 				'type' : type,
 				num : num,
 				url : url,
@@ -280,34 +281,34 @@
 						 
 						<div class="form-group">
 							<label for="type">方式</label>  <select id="type"
-								name="level" class="form-control">
-								<option value="any">不限群组</option>
-								<option value="group">指定</option>
+								name="type" class="form-control">
+								<option value="group">指定群组</option>
+								<option value="any">不限群组（未实现功能）</option>
 							</select>
 						</div>
 					 
 						<div class="form-group">
 							<label for="num">新增任务数</label> <input type="text"
-								class="form-control" id="num" placeholder="任务数"
+								class="form-control" id="num" placeholder="新增任务数"
 								value="1">
 						</div>
 						 <div class="form-group">
 							<label for="url">来源群组link</label> <input type="text"
-								class="form-control" id="url" placeholder="任务数"
-								value="1">
+								class="form-control" id="url" placeholder="来源群组link"
+								 >
 						</div><div class="form-group">
 							<label for="offset">开始序号</label> <input type="text"
-								class="form-control" id="offset" placeholder="任务数"
-								value="1">
+								class="form-control" id="offset" placeholder="开始序号"
+								value="0">
 						</div><div class="form-group">
 							<label for="limit">计划用户数</label> <input type="text"
-								class="form-control" id="limit" placeholder="任务数"
-								value="1">
+								class="form-control" id="limit" placeholder="计划用户数"
+								 value="45">
 						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" onclick="saveItem()">保存</button>
+					<button type="button" class="btn btn-primary" onclick="saveTask()">保存</button>
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
 				</div>
 			</div>

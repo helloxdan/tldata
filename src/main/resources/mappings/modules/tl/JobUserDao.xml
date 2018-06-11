@@ -136,5 +136,35 @@
 			del_flag = #{DEL_FLAG_DELETE}
 		WHERE id = #{id}
 	</update>
+
+	<!-- 删除重复数据 -->
+	<update id="deleteRepeatJobUser">
+		DELETE
+		FROM
+		 tl_job_user
+		WHERE
+		 userid IN (
+		SELECT *
+		FROM (
+		SELECT
+		 userid
+		FROM
+		 tl_job_user
+		WHERE job_id=#{jobId}
+		GROUP BY
+		 userid
+		HAVING COUNT(userid) > 1
+		) b) AND userid NOT IN (
+		SELECT *
+		FROM (
+		SELECT MIN(userid)
+		FROM
+		 tl_job_user
+		WHERE job_id=#{jobId}
+		GROUP BY
+		 userid
+		HAVING COUNT(userid) > 1) c
+		) AND job_id=#{jobId}
+	</update>
 	
 </mapper>
