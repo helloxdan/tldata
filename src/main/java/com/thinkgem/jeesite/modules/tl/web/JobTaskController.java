@@ -53,7 +53,7 @@ public class JobTaskController extends BaseController {
 			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
-			if (StringUtils.isNotBlank(data.getUrl())
+			if (!StringUtils.isNotBlank(data.getUrl())
 					&& !"any".equals(data.getType())) {
 				// 根据群组链接获取群组id
 				JSONObject json = botService.updateGroupInfoByLink(data
@@ -61,13 +61,14 @@ public class JobTaskController extends BaseController {
 				if (json.getInteger("groupid") != null) {
 					data.setChatId(json.getInteger("groupid"));
 				} else {
-					throw new RuntimeException("找不到"+data.getUrl()+"对应的群组");
+					throw new RuntimeException("找不到" + data.getUrl() + "对应的群组");
 				}
 			}
 
 			String msg = jobTaskService.addTasks(data);
 			result.setData(msg);
 		} catch (Exception e) {
+			logger.error("新增任务异常，",e);
 			result.fail("新增任务异常，" + e.getMessage());
 		}
 		return result;
@@ -103,6 +104,12 @@ public class JobTaskController extends BaseController {
 
 		Page<JobTask> page = jobTaskService.findPage(new Page<JobTask>(request,
 				response), jobTask);
+
+		// 查询共任务数和有效用户数
+		JSONObject data=jobTaskService.findJobTaskStatsData(jobTask.getJobId());
+		model.addAttribute("jobTaskStats", data);
+		
+		
 		model.addAttribute("page", page);
 		return "modules/tl/jobTaskDispatch";
 	}

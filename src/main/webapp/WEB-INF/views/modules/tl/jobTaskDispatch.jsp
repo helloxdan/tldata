@@ -200,6 +200,9 @@
 					<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-blue"  >开始拉人</a>
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
 			</div>	
+			<div class="form-group cxtj_text">
+				<div>任务数：${jobTaskStats.taskNum}</div><div>有效用户数：${jobTaskStats.userNum}</div>
+			</div>
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>
 			<tr>

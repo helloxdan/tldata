@@ -74,6 +74,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	 * @param data
 	 * @return
 	 */
+	@Transactional(readOnly = false)
 	public String addTasks(RequestData data) {
 		String msg = "";
 		String type = data.getType();
@@ -133,5 +134,11 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	public JSONObject getRpcCallInfo(String taskid) {
 		JobTask jobTask = new JobTask(taskid);
 		return this.dao.getRpcCallInfo(jobTask);
+	}
+
+	public JSONObject findJobTaskStatsData(String jobId) {
+		JobTask jobTask = new JobTask();
+		jobTask.setJobId(jobId);
+		return this.dao.findJobTaskStatsData(jobTask);
 	}
 }

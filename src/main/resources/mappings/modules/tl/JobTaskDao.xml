@@ -148,4 +148,11 @@
 		</where>
 		 
 	</select>
+	
+	<!-- 统计数据，任务数和有效用户数 -->
+	<select id="findJobTaskStatsData" resultType="com.alibaba.fastjson.JSONObject">
+		 select count(*) as 'taskNum',
+		 (select sum(usernum) from tl_task where job_id=#{jobId}) as 'userNum' 
+		 from tl_task where job_id=#{jobId}
+	</select>
 </mapper>

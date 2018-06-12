@@ -17,5 +17,7 @@ import com.thinkgem.jeesite.modules.tl.entity.JobTask;
 public interface JobTaskDao extends CrudDao<JobTask> {
 
 	JSONObject getRpcCallInfo(JobTask jobTask);
+
+	JSONObject findJobTaskStatsData(JobTask jobTask);
 	
 }
