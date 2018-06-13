@@ -166,7 +166,7 @@ public class BotService {
 			// 更改帐号状态为run
 			updateAccountState(data.getPhone(), Account.STATUS_RUN);
 		} else {
-			String title = getAdminAccount() + "管理员登录失败，status" + status;
+			String title =data.getPhone() + "登录失败，status" + status;
 			logger.error(title);
 			LogUtils.saveLog(new Log("tl", title), null);
 		}
@@ -353,7 +353,10 @@ public class BotService {
 			logger.warn("taskid={}的用户{}还没加入目标群组", taskid, data.getPhone());
 			logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
 			IBot bot = getBot(data);
-			bot.importInvite(data.getUrl());
+			
+			JSONObject json = bot.importInvite(data.getUrl()); 
+			data.setChatAccessHash(json.getLong("accessHash"));
+			data.setChatId(json.getIntValue("chatid"));
 //		}
 
 		// 取用户列表
@@ -365,7 +368,7 @@ public class BotService {
 		if (jobUsers != null && jobUsers.size() > 0) {
 //			IBot bot = getBot(data);
 			// 加入目标群组
-			bot.importInvite(data.getUrl());
+//			bot.importInvite(data.getUrl());
 
 			bot.addUsers(data.getChatId(), data.getChatAccessHash(), jobUsers);
 

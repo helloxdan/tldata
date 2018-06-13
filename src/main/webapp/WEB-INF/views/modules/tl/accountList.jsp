@@ -123,6 +123,7 @@
 					 showTip("提交登录操作完成");
 					 if(res.data!='ALREADYLOGGED'){
 						 var code = window.prompt('输入验证码', '');
+						 if(code=='') return;
 						 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
 							 if(res.success){
 								 showTip("提交验证码操作完成");
@@ -157,6 +158,7 @@
 					 showTip("提交登录操作完成");
 					 if(res.data!='ALREADYLOGGED'){
 						 var code = window.prompt('输入验证码', '');
+						 if(code=='') return;
 						 $.post('${rctx}/api/tl/setAuthCode',{phone:account,code:code},function(res){
 							 if(res.success){
 								 showTip("提交验证码操作完成");
