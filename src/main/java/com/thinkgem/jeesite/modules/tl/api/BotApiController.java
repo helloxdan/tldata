@@ -39,6 +39,7 @@ public class BotApiController extends BaseController {
 			result.setData(status);
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
+			logger.error("init ",e);
 		}
 		return result;
 	}
@@ -57,6 +58,7 @@ public class BotApiController extends BaseController {
 			result.setData(status);
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
+			logger.error("startBatch",e);
 		}
 		return result;
 	}
@@ -70,6 +72,7 @@ public class BotApiController extends BaseController {
 			result.setData(status);
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
+			logger.error("start",e);
 		}
 		return result;
 	}
@@ -84,6 +87,7 @@ public class BotApiController extends BaseController {
 
 		} catch (Exception e) {
 			result.fail("取状态异常，" + e.getMessage());
+			logger.error("getState",e);
 		}
 		return result;
 	}
@@ -101,6 +105,7 @@ public class BotApiController extends BaseController {
 			}
 		} catch (Exception e) {
 			result.fail("设置验证码异常，" + e.getMessage());
+			logger.error("setAuthCode",e);
 		}
 		return result;
 	}
@@ -118,6 +123,7 @@ public class BotApiController extends BaseController {
 			}
 		} catch (Exception e) {
 			result.fail("设置管理员异常，" + e.getMessage());
+			logger.error("setAdmin",e);
 		}
 		return result;
 	}
@@ -135,6 +141,7 @@ public class BotApiController extends BaseController {
 			}
 		} catch (Exception e) {
 			result.fail("取群详情，" + e.getMessage());
+			logger.error("groupInfo",e);
 		}
 		return result;
 	}
@@ -151,6 +158,7 @@ public class BotApiController extends BaseController {
 			}
 		} catch (Exception e) {
 			result.fail("加群异常，" + e.getMessage());
+			logger.error("importInvite ",e);
 		}
 		return result;
 	}
@@ -164,6 +172,7 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("收集用户信息异常，" + e.getMessage());
+			logger.error("collectUsers",e);
 		}
 
 		return result;
@@ -179,6 +188,7 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("清洗用户信息异常，" + e.getMessage());
+			logger.error("cleanJobUser",e);
 		}
 
 		return result;
@@ -192,6 +202,7 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("收集用户信息异常，" + e.getMessage());
+			logger.error("addUsers",e);
 		}
 
 		return result;
@@ -206,6 +217,7 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("停止异常，" + e.getMessage());
+			logger.error("stop",e);
 		}
 
 		return result;

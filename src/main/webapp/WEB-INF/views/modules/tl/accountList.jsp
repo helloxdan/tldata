@@ -131,6 +131,8 @@
 								 alert(res.msg);
 							 }
 						 })
+					 }else{
+						 document.location.reload();
 					 }
 				 }else{
 					 alert(res.msg);
@@ -163,6 +165,8 @@
 								 alert(res.msg);
 							 }
 						 })
+					 }else{
+						 document.location.reload();
 					 }
 				 }else{
 					 alert(res.msg);

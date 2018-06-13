@@ -27,6 +27,7 @@ public class JobTask extends DataEntity<JobTask> {
 	private String account; // 登录账号
 	private String type; // 任务类型
 	private String groupId; // 来源群组链接
+	private String groupUrl; // 来源群组链接
 	private Integer offsetNum; // 开始位置
 	private Integer limitNum; // 记录数
 	private String status; // 是否已经完成
@@ -154,5 +155,13 @@ public class JobTask extends DataEntity<JobTask> {
 
 	public void setIds(String ids) {
 		this.ids = ids;
+	}
+
+	public String getGroupUrl() {
+		return groupUrl;
+	}
+
+	public void setGroupUrl(String groupUrl) {
+		this.groupUrl = groupUrl;
 	}
 }

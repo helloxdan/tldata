@@ -49,11 +49,12 @@ public class JobTaskController extends BaseController {
 	private BotService botService;
 
 	@RequestMapping(value = "/addTasks")
+	@ResponseBody
 	public ReturnWrap addTasks(RequestData data, HttpServletRequest request,
 			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
-			if (!StringUtils.isNotBlank(data.getUrl())
+			if (StringUtils.isNotBlank(data.getUrl())
 					&& !"any".equals(data.getType())) {
 				// 根据群组链接获取群组id
 				JSONObject json = botService.updateGroupInfoByLink(data

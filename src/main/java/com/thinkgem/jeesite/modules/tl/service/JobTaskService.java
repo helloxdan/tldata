@@ -94,7 +94,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			List<Account> alist = accountService.findList(account);
 			if (alist.size() < num) {
 				num = alist.size();
-				msg = msg + " 只有" + num + "个账号运行中,全部提交运行。需要再启动过多的账号！！";
+				msg = msg + " 只有" + num + "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
 			}
 
 			// 只去固定数量的账号
@@ -115,10 +115,14 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				}
 
 				JobTask jobTask = new JobTask();
+				jobTask.setIsNewRecord(true);
+				jobTask.preInsert();
+				
 				jobTask.setType("fetch");
 				jobTask.setJobId(data.getJobid());
 				jobTask.setAccount(ac.getId());
 				jobTask.setGroupId(data.getChatId() + "");
+				jobTask.setGroupUrl(data.getUrl());
 				jobTask.setOffsetNum(offsetNum);
 				jobTask.setLimitNum(limitNum);
 				jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
@@ -127,6 +131,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 
 				save(jobTask);// 保存记录
 			}
+			
 		}
 		return msg;
 	}

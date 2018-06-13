@@ -8,6 +8,7 @@
 		a.account AS "account",
 		a.type AS "type",
 		a.from_group_id AS "groupId",
+		a.from_group_url AS "groupUrl",
 		a.offset_ AS "offsetNum",
 		a.limit_ AS "limitNum",
 		a.status AS "status",
@@ -50,6 +51,9 @@
 			<if test="type != null and type != ''">
 				AND a.type = #{type}
 			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
 			<if test="beginOffset != null and endOffset != null and beginOffset != '' and endOffset != ''">
 				AND a.offset_ BETWEEN #{beginOffset} AND #{endOffset}
 			</if>
@@ -59,7 +63,7 @@
 				ORDER BY ${page.orderBy}
 			</when>
 			<otherwise>
-				ORDER BY a.update_date DESC
+				ORDER BY a.usernum ,a.update_date DESC
 			</otherwise>
 		</choose>
 	</select>
@@ -89,7 +93,7 @@
 			job_id,
 			account,
 			type,
-			from_group_id,
+			from_group_id,from_group_url,
 			offset_,
 			limit_,
 			status,
@@ -104,7 +108,7 @@
 			#{jobId},
 			#{account},
 			#{type},
-			#{groupId},
+			#{groupId},#{groupUrl},
 			#{offsetNum},
 			#{limitNum},
 			#{status},
@@ -123,6 +127,7 @@
 			account = #{account},
 			type = #{type},
 			from_group_id = #{groupId},
+			from_group_url = #{groupUrl},
 			offset_ = #{offsetNum},
 			limit_ = #{limitNum},
 			status = #{status},
@@ -140,7 +145,7 @@
 	
 	<select id="getRpcCallInfo" resultType="com.alibaba.fastjson.JSONObject">
 		SELECT  a.id,a.job_id as "jobId",a.account,a.offset_ as "offsetNum",a.limit_ as "limitNum",
-		c.chatid ,c.accesshash,c.ischannel
+		c.chatid ,c.accesshash as "accessHash",c.ischannel,a.from_group_url as "groupUrl"
 		FROM tl_task a 
 		left join tl_chat c on c.account=a.account and c.chatid=a.from_group_id
 		<where>
@@ -152,7 +157,7 @@
 	<!-- 统计数据，任务数和有效用户数 -->
 	<select id="findJobTaskStatsData" resultType="com.alibaba.fastjson.JSONObject">
 		 select count(*) as 'taskNum',
-		 (select sum(usernum) from tl_task where job_id=#{jobId}) as 'userNum' 
-		 from tl_task where job_id=#{jobId}
+		 (select sum(usernum) from tl_task where del_flag ='0' and job_id=#{jobId}) as 'userNum' 
+		 from tl_task where del_flag ='0' and job_id=#{jobId}
 	</select>
 </mapper>

@@ -67,7 +67,7 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public void startInit() {
 		System.out.println("Telegram bot 开始初始化……");
-		if ("true".equals(Global.getConfig("autoRun"))) {
+		if (!"true".equals(Global.getConfig("autoRun"))) {
 
 			accountInit(null);
 		}
@@ -122,6 +122,7 @@ public class BotService {
 	 * @param data
 	 * @return
 	 */
+	@Transactional(readOnly = false)
 	public String startBatch(RequestData data) {
 		// 取出指定数量的账号，并启动，如果启动成功，就修改账号状态为已启动
 		int num = data.getNum();
@@ -134,7 +135,7 @@ public class BotService {
 		for (int i = 0; i < num; i++) {
 			Account acc = list.get(i);
 			data.setPhone(acc.getId());
-			
+
 			start(data);
 		}
 
@@ -178,6 +179,7 @@ public class BotService {
 		accountService.save(acc);
 	}
 
+	@Transactional(readOnly = false)
 	public JSONObject getState(RequestData data) {
 		IBot bot = getBot(data);
 		JSONObject status = bot.getState();
@@ -195,6 +197,7 @@ public class BotService {
 		return success;
 	}
 
+	@Transactional(readOnly = false)
 	public boolean setAdmin(RequestData data) {
 		IBot bot = getBot(data);
 		bot.setAdmin(data.getChatId(), data.getUserId(), data.isAdmin());
@@ -207,6 +210,7 @@ public class BotService {
 		return bot.importInvite(data.getUrl());
 	}
 
+	@Transactional(readOnly = false)
 	public void collectUsers(RequestData data) {
 		String taskid = data.getTaskid();
 		if (StringUtils.isNotBlank(taskid)) {
@@ -237,15 +241,28 @@ public class BotService {
 		// 根据任务id，找到调用方法的参数
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
 		data.setPhone(task.getString("account"));
+		data.setUrl(task.getString("groupUrl"));
+		data.setChatAccessHash(task.getLongValue("accessHash"));
+		data.setChatId(task.getIntValue("chatid"));
 
 		IBot bot = getBot(data);
-		TLVector<TLAbsUser> users = bot.collectUsers(
-				task.getIntValue("chatid"), task.getLongValue("accesshash"),
+//		if (task.getInteger("chatid") == null) {
+			// throw new RuntimeException("taskid="+taskid+"的用户还没加入来源群组");
+//			logger.warn("taskid={}的用户{}还没加入来源群组", taskid, data.getPhone());
+			logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
+			JSONObject json = bot.importInvite(data.getUrl());
+
+			// 来源群id
+			data.setChatAccessHash(json.getLong("accessHash"));
+			data.setChatId(json.getIntValue("chatid"));
+//		}
+
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(),
 				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}",
-				task.getString("jobId"), task.getString("account"),
+		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
 				users.size());
 
+		int num = 0;
 		// 将数据存储到数据库
 		for (TLAbsUser tluser : users) {
 			TLUser u = (TLUser) tluser;
@@ -254,7 +271,7 @@ public class BotService {
 			JobUser ju = new JobUser();
 			ju.setJobId(task.getString("jobId"));
 			ju.setAccount(task.getString("account"));
-			ju.setFromGroup(task.getIntValue("chatid") + "");
+			ju.setFromGroup(data.getChatId()+ "");
 			ju.setUserid(u.getId() + "");
 			ju.setUsername(u.getUserName());
 			ju.setUserHash(u.getAccessHash());
@@ -262,11 +279,13 @@ public class BotService {
 			// u.getFirstName();
 			// u.getLastName();
 			jobUserService.save(ju);
+			num++;
 		}
 
-		if (users.size() > 0) {
+		if (users!=null && users.size() > 0) {
 			// 设置状态为已抽取
 			JobTask t = jobTaskService.get(taskid);
+			t.setUsernum(num);
 			t.setStatus(JobTask.STATUS_FETCHED);
 			jobTaskService.save(t);
 		}
@@ -282,6 +301,7 @@ public class BotService {
 		jobUserService.cleanJobUser(data.getJobid());
 	}
 
+	@Transactional(readOnly = false)
 	public void addUsers(RequestData data) {
 		List<JobUser> jobUsers = null;
 		String taskid = data.getTaskid();
@@ -324,8 +344,17 @@ public class BotService {
 		JSONObject task = jobService.getRpcCallInfoByTaskid(taskid);
 		data.setPhone(task.getString("account"));
 		data.setJobid(task.getString("jobId"));
+		data.setUrl(task.getString("groupUrl"));
 		data.setChatId(task.getIntValue("chatid"));
 		data.setChatAccessHash(task.getLongValue("accesshash"));// 需要拉人的群组id和访问hash
+
+//		if (task.getInteger("chatid") == null) {
+			// throw new RuntimeException("taskid="+taskid+"的用户还没加入目标群组");
+			logger.warn("taskid={}的用户{}还没加入目标群组", taskid, data.getPhone());
+			logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
+			IBot bot = getBot(data);
+			bot.importInvite(data.getUrl());
+//		}
 
 		// 取用户列表
 		JobUser jobUser = new JobUser();
@@ -334,7 +363,10 @@ public class BotService {
 		jobUsers = jobUserService.findList(jobUser);
 
 		if (jobUsers != null && jobUsers.size() > 0) {
-			IBot bot = getBot(data);
+//			IBot bot = getBot(data);
+			// 加入目标群组
+			bot.importInvite(data.getUrl());
+
 			bot.addUsers(data.getChatId(), data.getChatAccessHash(), jobUsers);
 
 			// 标记任务已完成
@@ -345,11 +377,11 @@ public class BotService {
 				jobTaskService.save(t);
 			}
 		} else {
-			throw new RuntimeException("not find jobuser by account="
-					+ data.getPhone() + " in job " + data.getJobid());
+			throw new RuntimeException("not find jobuser by account=" + data.getPhone() + " in job " + data.getJobid());
 		}
 	}
 
+	@Transactional(readOnly = false)
 	public boolean stop(RequestData data) {
 		IBot bot = getBot(data);
 		boolean success = bot.stop();
@@ -392,8 +424,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
-					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
+					c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}

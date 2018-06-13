@@ -125,13 +125,13 @@
 			$('#itemModal').modal("show");
 		}
 		function saveTask() {
-			var type = $('#type').val();
+			var type = $('#fetchtype').val();
 			var num = $('#num').val();
 			var url = $('#url').val();
 			var offset = $('#offset').val();
 			var limit = $('#limit').val();
 			var params = {
-				jobId:'${jobTask.jobId}',
+				jobid:'${jobTask.jobId}',
 				'type' : type,
 				num : num,
 				url : url,
@@ -211,7 +211,8 @@
 				<th class="sort-column j.name">任务名称</th>
 				<th class="sort-column a.account">登录账号</th>
 				<th class="sort-column a.type">任务类型</th>
-				<th class="sort-column a.from_group_link">来源群组ID</th>
+				<th class="sort-column a.from_group_id">来源群组ID</th>
+				<th class="sort-column a.from_group_url">来源群组URL</th>
 				<th class="sort-column a.offset">开始位置</th>
 				<th class="sort-column a.limit">记录数</th>
 				<th class="sort-column a.usernum">有效用户数</th>
@@ -239,6 +240,8 @@
 				</td>
 				<td>
 					${jobTask.groupId}
+				</td><td>
+					${jobTask.groupUrl}
 				</td>
 				<td>
 					${jobTask.offsetNum}
@@ -283,8 +286,8 @@
 					<form id="">
 						 
 						<div class="form-group">
-							<label for="type">方式</label>  <select id="type"
-								name="type" class="form-control">
+							<label for="fetchtype">方式</label>  <select id="fetchtype"
+								name="fetchtype" class="form-control">
 								<option value="group">指定群组</option>
 								<option value="any">不限群组（未实现功能）</option>
 							</select>
