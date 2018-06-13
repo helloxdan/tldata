@@ -40,6 +40,7 @@ import org.telegram.plugins.xuser.handler.UsersHandler;
 import org.telegram.plugins.xuser.support.BotConfigImpl;
 import org.telegram.plugins.xuser.support.ChatUpdatesBuilderImpl;
 import org.telegram.plugins.xuser.support.CustomUpdatesHandler;
+import org.telegram.plugins.xuser.support.DefaultBotDataService;
 import org.telegram.plugins.xuser.support.DifferenceParametersService;
 import org.telegram.tl.TLVector;
 
@@ -62,8 +63,9 @@ public class XUserBot implements IBot {
 	private BotDataService botDataService;
 	TelegramBot kernel = null;
 
-	public BotDataService getBotDataService() {
-		return botDataService;
+	public IBotDataService getBotDataService(BotDataService botDataService) {
+		// 一个封装实例，每个bot一个实例
+		return new DefaultBotDataService(botDataService);
 	}
 
 	public void setBotDataService(BotDataService botDataService) {
@@ -78,13 +80,14 @@ public class XUserBot implements IBot {
 	public LoginStatus start(String phone, int apikey, String apihash) {
 		LoginStatus status = null;
 		try {
-			final IBotDataService botDataService = getBotDataService();
 			final BotConfig botConfig = new BotConfigImpl(phone);
+			final IBotDataService botDataService = getBotDataService(this.botDataService);
 			// databaseManager.setBotConfig(botConfig);
 			botDataService.setBotConfig(botConfig);
 			final IUsersHandler usersHandler = new UsersHandler(botDataService);
 			final IChatsHandler chatsHandler = new ChatsHandler(botDataService);
 			final MessageHandler messageHandler = new MessageHandler();
+			messageHandler.setBotConfig(botConfig);
 			final TLMessageHandler tlMessageHandler = new TLMessageHandler(
 					messageHandler, botDataService);
 
@@ -158,7 +161,7 @@ public class XUserBot implements IBot {
 		boolean success = true;
 		JSONObject json = new JSONObject();
 		json.put("chatid", 0);
-		
+
 		// TODO 加入群组
 		IKernelComm kernelComm = kernel.getKernelComm();
 		if (url.contains("t.me/joinchat")) {
@@ -186,10 +189,10 @@ public class XUserBot implements IBot {
 						.getAccessHash());
 				join.setChannel(ch);
 				TLAbsUpdates r = kernelComm.getApi().doRpcCall(join);
-				
+
 				json.put("chatid", ch.getChannelId());
 				json.put("accessHash", ch.getAccessHash());
-				
+
 				logger.info("join channel result:{}", r);
 			} catch (Exception e) {
 				success = false;

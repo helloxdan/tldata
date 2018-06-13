@@ -1,5 +1,7 @@
 package org.telegram.plugins.xuser.support;
 
+import java.io.File;
+
 import org.telegram.bot.structure.BotConfig;
 
 /**
@@ -9,25 +11,30 @@ import org.telegram.bot.structure.BotConfig;
  * @date 16 of October of 2016
  */
 public class BotConfigImpl extends BotConfig {
-    private String phoneNumber;
+	private String phoneNumber;
 
-    public BotConfigImpl(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-        setAuthfile(phoneNumber + ".auth");
-    }
+	public BotConfigImpl(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+		// 按目录存放，auth/
+		File auth = new File("auth");
+		if (!auth.exists())
+			auth.mkdir();
 
-    @Override
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
+		setAuthfile("auth/"+phoneNumber + ".auth");
+	}
 
-    @Override
-    public String getBotToken() {
-        return null;
-    }
+	@Override
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
 
-    @Override
-    public boolean isBot() {
-        return false;
-    }
+	@Override
+	public String getBotToken() {
+		return null;
+	}
+
+	@Override
+	public boolean isBot() {
+		return false;
+	}
 }

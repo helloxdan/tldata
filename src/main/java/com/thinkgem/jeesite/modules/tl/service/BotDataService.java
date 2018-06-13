@@ -28,7 +28,7 @@ import com.thinkgem.jeesite.modules.tl.entity.UserSession;
 
 @Service
 @Transactional(readOnly = true)
-public class BotDataService implements IBotDataService {
+public class BotDataService   {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private ChatService chatService;
@@ -39,30 +39,19 @@ public class BotDataService implements IBotDataService {
 	@Autowired
 	private DifferencesDataService differencesDataService;
 
-	BotConfig botConfig = null;
-
-	public BotConfig getBotConfig() {
-		return botConfig;
-	}
-
-	private String getPhone() {
-		return getBotConfig().getPhoneNumber();
-	}
-
-	@Override
-	public @Nullable Chat getChatById(int chatId) {
-		return chatService.getChatById(getPhone(), chatId);
+	 
+	public Chat getChatById(String phone,int chatId) {
+		return chatService.getChatById(phone, chatId);
 
 	}
 
-	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateChat(ChatImpl cc) {
+	public boolean updateChat(String phone,ChatImpl cc) {
 		try {
 			com.thinkgem.jeesite.modules.tl.entity.Chat chat = new com.thinkgem.jeesite.modules.tl.entity.Chat();
 			chat.setIsNewRecord(false);
-			chat.setId(getPhone() + cc.getId());
-			chat.setAccount(getPhone());
+			chat.setId(phone  + cc.getId());
+			chat.setAccount(phone);
 			chat.setAccesshash(cc.getAccessHash());
 			chat.setChatid(cc.getId() + "");
 			chat.setIsChannel(cc.isChannel() ? 1 : 0);
@@ -84,14 +73,13 @@ public class BotDataService implements IBotDataService {
 		return true;
 	}
 
-	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean addChat(ChatImpl cc) {
+	public boolean addChat(String phone,ChatImpl cc) {
 		try {
 			com.thinkgem.jeesite.modules.tl.entity.Chat chat = new com.thinkgem.jeesite.modules.tl.entity.Chat();
 			chat.setIsNewRecord(true);
-			chat.setId(getPhone() + cc.getId());
-			chat.setAccount(getPhone());
+			chat.setId(phone + cc.getId());
+			chat.setAccount(phone);
 			chat.setAccesshash(cc.getAccessHash());
 			chat.setChatid(cc.getId() + "");
 			chat.setIsChannel(cc.isChannel() ? 1 : 0);
@@ -113,17 +101,16 @@ public class BotDataService implements IBotDataService {
 		return true;
 	}
 
-	@Override
-	public @Nullable IUser getUserById(int userId) {
-		return userSessionService.getUserById(getPhone(), userId);
+	public @Nullable IUser getUserById(String phone,int userId) {
+		return userSessionService.getUserById(phone, userId);
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean addUser(User user) {
+	public boolean addUser(String phone,User user) {
 		UserSession us = new UserSession();
 		us.setIsNewRecord(true);
-		us.setId(getPhone() + user.getUserId());
-		us.setAccount(getPhone());
+		us.setId(phone + user.getUserId());
+		us.setAccount(phone);
 		us.setUserid(user.getUserId());
 		us.setUserhash(user.getUserHash());
 		us.setUsername(user.getUsername());
@@ -132,11 +119,11 @@ public class BotDataService implements IBotDataService {
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateUser(User user) {
+	public boolean updateUser(String phone,User user) {
 		UserSession us = new UserSession();
 		us.setIsNewRecord(false);
-		us.setId(getPhone() + user.getUserId());
-		us.setAccount(getPhone());
+		us.setId(phone + user.getUserId());
+		us.setAccount(phone);
 		us.setUserid(user.getUserId());
 		us.setUserhash(user.getUserHash());
 		us.setUsername(user.getUsername());
@@ -144,7 +131,6 @@ public class BotDataService implements IBotDataService {
 		return true;
 	}
 
-	@Override
 	public List<User> findUsers() {
 		UserSession userSession = new UserSession();
 		Page<UserSession> page = new Page<UserSession>();
@@ -164,23 +150,21 @@ public class BotDataService implements IBotDataService {
 
 	}
 
-	@Override
-	public @NotNull Map<Integer, int[]> getDifferencesData() {
-		return differencesDataService.getDifferencesData(getPhone());
+	public @NotNull Map<Integer, int[]> getDifferencesData(String phone) {
+		return differencesDataService.getDifferencesData(phone);
 	}
 
-	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateDifferencesData(int botId, int pts, int date, int seq) {
+	public boolean updateDifferencesData(String phone,int botId, int pts, int date, int seq) {
 		// 检查是否存在记录，没有则新增，否则更新
 		try {
-			String id = getPhone() + botId;
+			String id = phone + botId;
 			DifferencesData diff = differencesDataService.get(id);
 			if (diff == null) {
 				diff = new DifferencesData();
 				diff.setIsNewRecord(true);
 				diff.setId(id);
-				diff.setAccount(getPhone());
+				diff.setAccount(phone);
 				diff.setBotid(botId);
 				diff.setPts(pts);
 				diff.setDate(date);
@@ -189,7 +173,7 @@ public class BotDataService implements IBotDataService {
 			} else {
 				diff.setIsNewRecord(false);
 				diff.setBotid(botId);
-				diff.setAccount(getPhone());
+				diff.setAccount(phone);
 				diff.setPts(pts);
 				diff.setDate(date);
 				diff.setSeq(seq);
@@ -200,11 +184,6 @@ public class BotDataService implements IBotDataService {
 			e.printStackTrace();
 		}
 		return false;
-	}
-
-	@Override
-	public void setBotConfig(BotConfig botConfig) {
-		this.botConfig = botConfig;
 	}
 
 }
