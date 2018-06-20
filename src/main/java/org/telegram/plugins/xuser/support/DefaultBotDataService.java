@@ -55,7 +55,7 @@ public class DefaultBotDataService implements IBotDataService {
 	@Override
 	public boolean updateDifferencesData(int botId, int pts, int date, int seq) {
 		return getBotDataService().updateDifferencesData(getPhone(), botId,
-				pts, date/1000, seq);
+				pts, date, seq);
 	}
 
 	@Override

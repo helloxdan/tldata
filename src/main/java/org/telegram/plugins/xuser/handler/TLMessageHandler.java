@@ -26,6 +26,7 @@ public class TLMessageHandler {
     public void onTLMessage(TLMessage message) {
         final TLAbsPeer absPeer = message.getToId();
         if (absPeer instanceof TLPeerUser) {
+        	System.out.println("-----message="+message.getMessage()+",from="+message.getFromId());
             onTLMessageForUser(message);
         } else {
             BotLogger.severe(LOGTAG, "Unsupported Peer: " + absPeer.toString());

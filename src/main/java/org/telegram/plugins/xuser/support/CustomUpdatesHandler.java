@@ -93,9 +93,12 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
      */
     private void onTLMessage(@NotNull TLMessage message) {
         if (message.hasFromId()) {
+        	  BotLogger.debug(LOGTAG, "Received TLMessage from="+message.getFromId());
             final IUser user = databaseManager.getUserById(message.getFromId());
             if (user != null) {
                 this.tlMessageHandler.onTLMessage(message);
+            }else {
+            	System.out.println("fromId user not exists "+message.getFromId());
             }
         }
     }
