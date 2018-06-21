@@ -16,5 +16,9 @@ import com.thinkgem.jeesite.modules.tl.entity.Account;
 public interface AccountDao extends CrudDao<Account> {
 
 	void resetAccountStatus();
+
+	void updateUsernum();
+
+	void updateGroupnum();
 	
 }

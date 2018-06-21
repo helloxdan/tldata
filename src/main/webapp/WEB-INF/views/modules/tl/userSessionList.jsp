@@ -110,6 +110,7 @@
 				<th class="sort-column a.userid">用户id</th>
 				<th class="sort-column a.userhash">访问码</th>
 				<th class="sort-column a.username">用户名称</th>
+				<th class="sort-column a.from_group">来源群组</th>
 				<th class="sort-column a.update_date">更新时间</th>
 			</tr>
 		</thead>
@@ -130,6 +131,9 @@
 				</td>
 				<td>
 					${userSession.username}
+				</td>
+				<td>
+					${userSession.fromGroupName}
 				</td>
 				<td>
 					<fmt:formatDate value="${userSession.updateDate}" pattern="yyyy-MM-dd HH:mm:ss"/>

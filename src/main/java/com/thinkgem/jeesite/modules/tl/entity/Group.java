@@ -25,6 +25,7 @@ public class Group extends DataEntity<Group> {
 	private Integer usernum; // 用户数
 	private Date upcateDate; // upcate_date
 	private String status;
+	private String out;// 排除在外，不做入群、采集用户等操作
 	private String ids; // 删除记录ids
 
 	public Group() {
@@ -85,6 +86,14 @@ public class Group extends DataEntity<Group> {
 
 	public void setUpcateDate(Date upcateDate) {
 		this.upcateDate = upcateDate;
+	}
+
+	public String getOut() {
+		return out;
+	}
+
+	public void setOut(String out) {
+		this.out = out;
 	}
 
 	public String getStatus() {

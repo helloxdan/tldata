@@ -10,6 +10,7 @@
 		a.is_channel AS "isChannel",
 		a.usernum AS "usernum",
 		a.status AS "status",
+		a.out_ AS "out",
 		a.create_by AS "createBy.id",
 		a.create_date AS "createDate",
 		a.update_by AS "updateBy.id",
@@ -84,6 +85,7 @@
 			is_channel,
 			usernum,
 			status,
+			out,
 			create_by,
 			create_date,
 			update_by,
@@ -96,6 +98,7 @@
 			#{isChannel},
 			#{usernum},
 			#{status},
+			#{out},
 			#{createBy.id},
 			#{createDate},
 			#{updateBy.id},
@@ -112,6 +115,7 @@
 			is_channel = #{isChannel},
 			usernum = #{usernum},
 			status = #{status},
+			out_ = #{out},
 			update_by = #{updateBy.id},
 			upcate_date = #{upcateDate}
 		WHERE id = #{id}

@@ -22,6 +22,8 @@ public class TlUser extends DataEntity<TlUser> {
 	private String firstname;		//  
 	private String lastname;		//  
 	private Date msgTime;		// 最新发言时间
+	private int star;//评级
+	
 	private Date beginMsgTime;		// 开始 最新发言时间
 	private Date endMsgTime;		// 结束 最新发言时间
 	private String ids;  //删除记录ids
@@ -92,6 +94,14 @@ public class TlUser extends DataEntity<TlUser> {
 		this.endMsgTime = endMsgTime;
 	}
 		
+
+		public int getStar() {
+		return star;
+	}
+
+	public void setStar(int star) {
+		this.star = star;
+	}
 
 		public String getIds() {
 		return ids;

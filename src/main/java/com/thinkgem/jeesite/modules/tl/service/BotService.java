@@ -67,7 +67,7 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public void startInit() {
 		System.out.println("Telegram bot 开始初始化……");
-		if (!"true".equals(Global.getConfig("autoRun"))) {
+		if ("true".equals(Global.getConfig("autoRun"))) {
 
 			accountInit(null);
 		}

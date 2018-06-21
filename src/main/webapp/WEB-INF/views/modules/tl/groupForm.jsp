@@ -105,6 +105,18 @@
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
+		<div class="row">
+		<div class="col-md-12">
+			<div class="form-group">
+			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">剔除：</label>
+			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
+				<form:select path="out" class="form-control ">
+					<form:options items="${fns:getDictList('yes_no')}" itemLabel="label" itemValue="value" htmlEscape="false"/>
+				</form:select>
+			</div>
+			</div>
+		</div>
+	 	</div><!-- /.row col -->
 		 
 		</div>
 	 	</div><!-- /.panel -->

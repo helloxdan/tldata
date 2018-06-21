@@ -17,6 +17,7 @@ import com.thinkgem.jeesite.modules.tl.dao.AccountDao;
 
 /**
  * 登录账号Service
+ * 
  * @author admin
  * @version 2018-06-02
  */
@@ -27,25 +28,25 @@ public class AccountService extends CrudService<AccountDao, Account> {
 	public Account get(String id) {
 		return super.get(id);
 	}
-	
+
 	public List<Account> findList(Account account) {
 		return super.findList(account);
 	}
-	
+
 	public Page<Account> findPage(Page<Account> page, Account account) {
 		return super.findPage(page, account);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void save(Account account) {
 		super.save(account);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void delete(Account account) {
 		super.delete(account);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void del(String ids) {
 		if (StringUtils.isNoneBlank(ids)) {
@@ -56,10 +57,12 @@ public class AccountService extends CrudService<AccountDao, Account> {
 			}
 		}
 		// 删除缓存
-		//IcareUtils.removeCache();
+		// IcareUtils.removeCache();
 	}
 
-	/**批量新增账号
+	/**
+	 * 批量新增账号
+	 * 
 	 * @param data
 	 * @return
 	 */
@@ -68,9 +71,19 @@ public class AccountService extends CrudService<AccountDao, Account> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 	@Transactional(readOnly = false)
 	public void resetAccountStatus() {
 		logger.info("恢复账号状态");
 		this.dao.resetAccountStatus();
+	}
+
+	/**
+	 * 计算账号关联的群组数和用户数数。
+	 */
+	@Transactional(readOnly = false)
+	public void updateAccountData() {
+		this.dao.updateUsernum();
+		this.dao.updateGroupnum();
 	}
 }

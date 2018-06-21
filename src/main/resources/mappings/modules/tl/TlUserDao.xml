@@ -8,7 +8,9 @@
 		a.firstname AS "firstname",
 		a.lastname AS "lastname",
 		a.langcode AS "langcode",
-		a.msg_time AS "msgTime"
+		a.msg_time AS "msgTime",
+		a.star AS "star",
+		a.update_date AS "updateDate"
 	</sql>
 	
 	<sql id="tlUserJoins">
@@ -77,14 +79,18 @@
 			firstname,
 			lastname,
 			langcode,
-			msg_time
+			msg_time,
+			star,
+			update_date
 		) VALUES (
 			#{id},
 			#{username},
 			#{firstname},
 			#{lastname},
 			#{langcode},
-			#{msgTime}
+			#{msgTime},
+			#{star},
+			#{updateDate}
 		)
 	</insert>
 	
@@ -94,7 +100,9 @@
 			firstname = #{firstname},
 			lastname = #{lastname},
 			langcode = #{langcode},
-			msg_time = #{msgTime}
+			msg_time = #{msgTime},
+			star = #{star},
+			update_date = #{updateDate}
 		WHERE id = #{id}
 	</update>
 	

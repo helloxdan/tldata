@@ -73,6 +73,17 @@
 					<div class="input-group-addon"><i class="fa fa-calendar"></i></div>
 				 </div>
 			</div>
+			
+			<label class="col-md-2 col-sm-2 col-ls-2 col-xs-2 control-label">星级：</label>
+			<div class="col-md-3 col-sm-3 col-ls-3 col-xs-3">
+				 <form:select path="star" class="form-control ">
+					<form:option value="1" label="1星"/>
+					<form:option value="2" label="2星"/>
+					<form:option value="3" label="3星"/>
+					<form:option value="4" label="4星"/>
+					<form:option value="5" label="5星"/>
+				</form:select>
+			</div>
 		</div>
 	 	</div><!-- /.row col -->
 		</div>

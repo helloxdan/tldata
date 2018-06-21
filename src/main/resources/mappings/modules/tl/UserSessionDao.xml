@@ -8,10 +8,13 @@
 		a.userid AS "userid",
 		a.userhash AS "userhash",
 		a.username AS "username",
+		a.from_group AS "fromGroup",
+		g.name as "fromGroupName",
 		a.update_date AS "updateDate"
 	</sql>
 	
 	<sql id="userSessionJoins">
+	left join tl_group g on g.id=a.from_group
 	</sql>
     
 	<select id="get" resultType="UserSession">
@@ -79,6 +82,7 @@
 			userid,
 			userhash,
 			username,
+			from_group,
 			update_date
 		) VALUES (
 			#{id},
@@ -86,6 +90,7 @@
 			#{userid},
 			#{userhash},
 			#{username},
+			#{fromGroup},
 			#{updateDate}
 		)
 	</insert>
@@ -96,6 +101,7 @@
 			userid = #{userid},
 			userhash = #{userhash},
 			username = #{username},
+			from_group = #{fromGroup},
 			update_date = #{updateDate}
 		WHERE id = #{id}
 	</update>

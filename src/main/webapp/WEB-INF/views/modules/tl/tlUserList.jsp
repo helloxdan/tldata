@@ -121,6 +121,7 @@
 				<th class="sort-column a.username">用户名</th>
 				<th class="sort-column a.language">语言区</th>
 				<th class="sort-column a.msg_time">最新发言时间</th>
+				<th class="sort-column a.star">评级</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -140,6 +141,9 @@
 				</td>
 				<td>
 					<fmt:formatDate value="${tlUser.msgTime}" pattern="yyyy-MM-dd HH:mm:ss"/>
+				</td>
+				<td>
+					${tlUser.star}
 				</td>
 			</tr>
 		</c:forEach>

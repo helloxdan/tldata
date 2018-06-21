@@ -2,6 +2,7 @@
  * Copyright &copy; 2017-2020 <a href="https://www.gzruimin.com">gzruimin</a> All rights reserved.
  */
 package com.thinkgem.jeesite.modules.tl.web;
+
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,8 +27,10 @@ import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.service.AccountService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
+
 /**
  * 登录账号Controller
+ * 
  * @author admin
  * @version 2018-06-02
  */
@@ -37,10 +40,10 @@ public class AccountController extends BaseController {
 
 	@Autowired
 	private AccountService accountService;
-	
+
 	@RequestMapping(value = "/addBatch")
-	public ReturnWrap addBatch(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap addBatch(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			String status = accountService.addBatch(data);
@@ -50,22 +53,25 @@ public class AccountController extends BaseController {
 		}
 		return result;
 	}
+
 	@ModelAttribute
-	public Account get(@RequestParam(required=false) String id) {
+	public Account get(@RequestParam(required = false) String id) {
 		Account entity = null;
-		if (StringUtils.isNotBlank(id)){
+		if (StringUtils.isNotBlank(id)) {
 			entity = accountService.get(id);
 		}
-		if (entity == null){
+		if (entity == null) {
 			entity = new Account();
 		}
 		return entity;
 	}
-	
+
 	@RequiresPermissions("tl:account:view")
-	@RequestMapping(value = {"list", ""})
-	public String list(Account account, HttpServletRequest request, HttpServletResponse response, Model model) {
-		Page<Account> page = accountService.findPage(new Page<Account>(request, response), account); 
+	@RequestMapping(value = { "list", "" })
+	public String list(Account account, HttpServletRequest request,
+			HttpServletResponse response, Model model) {
+		Page<Account> page = accountService.findPage(new Page<Account>(request,
+				response), account);
 		model.addAttribute("page", page);
 		return "modules/tl/accountList";
 	}
@@ -79,23 +85,24 @@ public class AccountController extends BaseController {
 
 	@RequiresPermissions("tl:account:edit")
 	@RequestMapping(value = "save")
-	public String save(Account account, Model model, RedirectAttributes redirectAttributes) {
-		if (!beanValidator(model, account)){
+	public String save(Account account, Model model,
+			RedirectAttributes redirectAttributes) {
+		if (!beanValidator(model, account)) {
 			return form(account, model);
 		}
 		accountService.save(account);
 		addMessage(redirectAttributes, "保存登录账号成功");
-		return "redirect:"+Global.getAdminPath()+"/tl/account/?repage";
+		return "redirect:" + Global.getAdminPath() + "/tl/account/?repage";
 	}
-	
+
 	@RequiresPermissions("tl:account:edit")
 	@RequestMapping(value = "delete")
 	public String delete(Account account, RedirectAttributes redirectAttributes) {
 		accountService.delete(account);
 		addMessage(redirectAttributes, "删除登录账号成功");
-		return "redirect:"+Global.getAdminPath()+"/tl/account/?repage";
+		return "redirect:" + Global.getAdminPath() + "/tl/account/?repage";
 	}
-	
+
 	@RequiresPermissions("tl:account:edit")
 	@RequestMapping(value = "del")
 	@ResponseBody
@@ -111,6 +118,21 @@ public class AccountController extends BaseController {
 		}
 		return modelMap;
 	}
-	
+
+	@RequiresPermissions("tl:account:edit")
+	@RequestMapping(value = "updateAccountData")
+	@ResponseBody
+	public ModelMap updateAccountData(RedirectAttributes redirectAttributes) {
+		ModelMap modelMap = new ModelMap();
+		try {
+			accountService.updateAccountData();
+			modelMap.put("success", true);
+		} catch (Exception e) {
+			logger.error("统计账号的数据失败", e);
+			modelMap.put("success", false);
+			modelMap.put("msg", "统计账号的数据失败");
+		}
+		return modelMap;
+	}
 
 }
