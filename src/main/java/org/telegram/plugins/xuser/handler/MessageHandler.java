@@ -64,6 +64,7 @@ public class MessageHandler {
 	public void handleMessage(@NotNull IUser user,
 			@NotNull TLUpdateShortMessage message) {
 		try {
+//			message.get
 			handleMessageInternal(user, message.getMessage());
 		} catch (RpcException e) {
 			BotLogger.severe(LOGTAG, e);
@@ -84,6 +85,6 @@ public class MessageHandler {
 		// kernelComm.performMarkAsRead(user, 0);
 
 		// 记录谁发送消息
-		logger.debug(getBotConfig().getPhoneNumber()+"-新消息,from={},message={}", user.getUserId(), message);
+		logger.info(getBotConfig().getPhoneNumber()+"-新消息,from={},message={}", user.getUserId(), message);
 	}
 }
