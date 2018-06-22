@@ -14,36 +14,39 @@ import org.telegram.plugins.xuser.entity.User;
 
 /**
  * @author Ruben Bermudez
- * @version 2.0
- * Handler for received users
+ * @version 2.0 Handler for received users
  */
 public class UsersHandler implements IUsersHandler {
-    private static final String LOGTAG = "USERSHANDLER";
-    private final ConcurrentHashMap<Integer, TLAbsUser> temporalUsers = new ConcurrentHashMap<>();
-    private static final int MAXTEMPORALUSERS = 4000;
-    private final IBotDataService databaseManager;
+	private static final String LOGTAG = "USERSHANDLER";
+	private final ConcurrentHashMap<Integer, TLAbsUser> temporalUsers = new ConcurrentHashMap<>();
+	private static final int MAXTEMPORALUSERS = 4000;
+	private final IBotDataService databaseManager;
 
-    public UsersHandler(IBotDataService databaseManager) {
-        this.databaseManager = databaseManager;
-    }
+	public UsersHandler(IBotDataService databaseManager) {
+		this.databaseManager = databaseManager;
+	}
 
-    /**
-     * Add a list of users to database
-     * @param users List of users to add
-     */
-    public void onUsers(@NotNull List<TLAbsUser> users) {
-        if ((this.temporalUsers.size() + users.size()) > MAXTEMPORALUSERS) {
-            this.temporalUsers.clear();
-        }
-        users.stream().forEach(x -> this.temporalUsers.put(x.getId(), x));
-        users.forEach(this::onUser);
-    }
+	/**
+	 * Add a list of users to database
+	 * 
+	 * @param users
+	 *            List of users to add
+	 */
+	public void onUsers(@NotNull List<TLAbsUser> users) {
+		if ((this.temporalUsers.size() + users.size()) > MAXTEMPORALUSERS) {
+			this.temporalUsers.clear();
+		}
+		users.stream().forEach(x -> this.temporalUsers.put(x.getId(), x));
+		users.forEach(this::onUser);
+	}
 
-    /**
-     * Add a user to database
-     * @param absUser User to add
-     */
-    private void onUser(@NotNull TLAbsUser absUser) {
+	/**
+	 * Add a user to database
+	 * 
+	 * @param absUser
+	 *            User to add
+	 */
+	private void onUser(@NotNull TLAbsUser absUser) {
         User currentUser = null;
         User user = null;
         if (absUser instanceof TLUser) {
@@ -65,6 +68,9 @@ public class UsersHandler implements IUsersHandler {
             }
             if(user!=null)
             user.setUsername(tlUser.getUserName());
+            user.setFirstName(tlUser.getFirstName());
+            user.setLastName( tlUser.getLastName());
+            user.setLangCode( tlUser.getLangCode());
         }
         if ((currentUser == null) && (user != null)) {
             databaseManager.addUser(user);
@@ -73,76 +79,92 @@ public class UsersHandler implements IUsersHandler {
         }
     }
 
-    /**
-     * Create User from a delete user
-     * @param currentUser Current use from database (null if not present)
-     * @param userDeleted Delete user from Telegram Server
-     * @return User information
-     */
-    private User onUserDelete(@Nullable User currentUser, @NotNull TLUser userDeleted) {
-        final User user;
-        if (currentUser == null) {
-            user = new User(userDeleted.getId());
-        } else {
-            user = new User(currentUser);
-        }
-        user.setUserHash(0L);
-        BotLogger.debug(LOGTAG, "userdeletedid: " + user.getUserId());
-        return user;
-    }
+	/**
+	 * Create User from a delete user
+	 * 
+	 * @param currentUser
+	 *            Current use from database (null if not present)
+	 * @param userDeleted
+	 *            Delete user from Telegram Server
+	 * @return User information
+	 */
+	private User onUserDelete(@Nullable User currentUser,
+			@NotNull TLUser userDeleted) {
+		final User user;
+		if (currentUser == null) {
+			user = new User(userDeleted.getId());
+		} else {
+			user = new User(currentUser);
+		}
+		user.setUserHash(0L);
+		BotLogger.debug(LOGTAG, "userdeletedid: " + user.getUserId());
+		return user;
+	}
 
-    /**
-     * Create User from a contact user
-     * @param currentUser Current use from database (null if not present)
-     * @param userContact Contact user from Telegram Server
-     * @return User information
-     */
-    private User onUserContact(@Nullable User currentUser, @NotNull TLUser userContact) {
-        final User user;
-        if (currentUser == null) {
-            user = new User(userContact.getId());
-        } else {
-            user = new User(currentUser);
-        }
-        user.setUserHash(userContact.getAccessHash());
-        BotLogger.debug(LOGTAG, "usercontactid: " + user.getUserId());
-        return user;
-    }
+	/**
+	 * Create User from a contact user
+	 * 
+	 * @param currentUser
+	 *            Current use from database (null if not present)
+	 * @param userContact
+	 *            Contact user from Telegram Server
+	 * @return User information
+	 */
+	private User onUserContact(@Nullable User currentUser,
+			@NotNull TLUser userContact) {
+		final User user;
+		if (currentUser == null) {
+			user = new User(userContact.getId());
+		} else {
+			user = new User(currentUser);
+		}
+		user.setUserHash(userContact.getAccessHash());
+		BotLogger.debug(LOGTAG, "usercontactid: " + user.getUserId());
+		return user;
+	}
 
-    /**
-     * Create User from a request user
-     * @param currentUser Current use from database (null if not present)
-     * @param userRequest Request user from Telegram Server
-     * @return User information
-     */
-    private User onUserRequest(@Nullable User currentUser, @NotNull TLUser userRequest) {
-        final User user;
-        if (currentUser == null) {
-            user = new User(userRequest.getId());
-        } else {
-            user = new User(currentUser);
-        }
-        user.setUserHash(userRequest.getAccessHash());
-        BotLogger.debug(LOGTAG, "userRequestId: " + user.getUserId());
-        return user;
-    }
+	/**
+	 * Create User from a request user
+	 * 
+	 * @param currentUser
+	 *            Current use from database (null if not present)
+	 * @param userRequest
+	 *            Request user from Telegram Server
+	 * @return User information
+	 */
+	private User onUserRequest(@Nullable User currentUser,
+			@NotNull TLUser userRequest) {
+		final User user;
+		if (currentUser == null) {
+			user = new User(userRequest.getId());
+		} else {
+			user = new User(currentUser);
+		}
+		user.setUserHash(userRequest.getAccessHash());
+		BotLogger.debug(LOGTAG, "userRequestId: " + user.getUserId());
+		return user;
+	}
 
-    /**
-     * Create User from a foreign user
-     * @param currentUser Current use from database (null if not present)
-     * @param userForeign Foreign user from Telegram Server
-     * @return User information
-     */
-    private User onUserForeign(@Nullable User currentUser, @NotNull TLUser userForeign) {
-        final User user;
-        if (currentUser == null) {
-            user = new User(userForeign.getId());
-        } else {
-            user = new User(currentUser);
-        }
-        user.setUserHash(userForeign.getAccessHash());
-        BotLogger.debug(LOGTAG, "userforeignid: " + user.getUserId());
-        return user;
-    }
+	/**
+	 * Create User from a foreign user
+	 * 
+	 * @param currentUser
+	 *            Current use from database (null if not present)
+	 * @param userForeign
+	 *            Foreign user from Telegram Server
+	 * @return User information
+	 */
+	private User onUserForeign(@Nullable User currentUser,
+			@NotNull TLUser userForeign) {
+		final User user;
+		if (currentUser == null) {
+			user = new User(userForeign.getId());
+		} else {
+			user = new User(currentUser);
+		}
+		user.setUserHash(userForeign.getAccessHash());
+		BotLogger.debug(LOGTAG, "userforeignid: " + user.getUserId());
+		return user;
+	}
 
 }

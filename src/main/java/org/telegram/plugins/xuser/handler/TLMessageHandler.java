@@ -38,6 +38,9 @@ public class TLMessageHandler {
             final IUser user = databaseManager.getUserById(message.getFromId());
             if (user != null) {
                 this.messageHandler.handleMessage(user, message);
+            }else{
+            	System.out.println(" messaget from="+message.getFromId()+" user not exist !");
+            	
             }
         }
     }

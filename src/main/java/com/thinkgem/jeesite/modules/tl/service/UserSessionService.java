@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.bot.structure.IUser;
@@ -16,6 +17,7 @@ import org.telegram.plugins.xuser.entity.User;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.entity.Chat;
+import com.thinkgem.jeesite.modules.tl.entity.TlUser;
 import com.thinkgem.jeesite.modules.tl.entity.UserSession;
 import com.thinkgem.jeesite.modules.tl.dao.UserSessionDao;
 

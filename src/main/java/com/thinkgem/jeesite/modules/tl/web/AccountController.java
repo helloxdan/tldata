@@ -26,6 +26,7 @@ import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.service.AccountService;
+import com.thinkgem.jeesite.modules.tl.service.BotService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
@@ -40,6 +41,8 @@ public class AccountController extends BaseController {
 
 	@Autowired
 	private AccountService accountService;
+	@Autowired
+	private BotService botService;
 
 	@RequestMapping(value = "/addBatch")
 	public ReturnWrap addBatch(RequestData data, HttpServletRequest request,
@@ -131,6 +134,22 @@ public class AccountController extends BaseController {
 			logger.error("统计账号的数据失败", e);
 			modelMap.put("success", false);
 			modelMap.put("msg", "统计账号的数据失败");
+		}
+		return modelMap;
+	}
+
+	@RequestMapping(value = "searchUsername")
+	@ResponseBody
+	public ModelMap searchUsername(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
+		ModelMap modelMap = new ModelMap();
+		try {
+			botService.searchUser(data.getPhone(), data.getUserName());
+			modelMap.put("success", true);
+		} catch (Exception e) {
+			logger.error("查找用户和群组失败", e);
+			modelMap.put("success", false);
+			modelMap.put("msg", "查找用户和群组失败");
 		}
 		return modelMap;
 	}

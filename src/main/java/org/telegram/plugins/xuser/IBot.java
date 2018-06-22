@@ -28,4 +28,6 @@ public interface IBot {
 
 	JSONObject getGroupInfo(int chatId, long chatAccessHash, boolean ischannel);
 
+	JSONObject searchUser(String username);
+
 }

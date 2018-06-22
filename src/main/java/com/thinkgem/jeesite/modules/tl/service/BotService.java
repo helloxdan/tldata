@@ -11,6 +11,8 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +61,38 @@ public class BotService {
 	private GroupService groupService;
 	@Autowired
 	private ChatService chatService;
+
+	/**
+	 * 检查账号和群组的关系。如果发现有账号没有加入某个群组，则自动加入。
+	 */
+//	@Scheduled(cron = "0 0/10 * * * ?")
+	@Transactional(readOnly = false)
+	public void scheduleUpdateGroupInfo() {
+		logger.info("定时调度，更新群组的link和用户数量……");
+		
+		
+		// TODO
+	}
+
+//	@Scheduled(cron = "0 0/5 * * * ?")
+	@Transactional(readOnly = false)
+	public void scheduleJoinGroup() {
+		logger.info("定时调度，账号自动加入有效群组……");
+		
+		
+		// TODO
+	}
+
+	/**
+	 * 定时抽取用户信息。
+	 */
+//	@Scheduled(cron = "0/5 * * * * ?")
+	@Transactional(readOnly = false)
+	public void scheduleFetchUser() {
+		logger.info("定时调度，从群组抽取用户数据……");
+
+		// TODO
+	}
 
 	/**
 	 * 程序启动初始化入口。
@@ -166,7 +200,7 @@ public class BotService {
 			// 更改帐号状态为run
 			updateAccountState(data.getPhone(), Account.STATUS_RUN);
 		} else {
-			String title =data.getPhone() + "登录失败，status" + status;
+			String title = data.getPhone() + "登录失败，status" + status;
 			logger.error(title);
 			LogUtils.saveLog(new Log("tl", title), null);
 		}
@@ -246,20 +280,22 @@ public class BotService {
 		data.setChatId(task.getIntValue("chatid"));
 
 		IBot bot = getBot(data);
-//		if (task.getInteger("chatid") == null) {
-			// throw new RuntimeException("taskid="+taskid+"的用户还没加入来源群组");
-//			logger.warn("taskid={}的用户{}还没加入来源群组", taskid, data.getPhone());
-			logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
-			JSONObject json = bot.importInvite(data.getUrl());
+		// if (task.getInteger("chatid") == null) {
+		// throw new RuntimeException("taskid="+taskid+"的用户还没加入来源群组");
+		// logger.warn("taskid={}的用户{}还没加入来源群组", taskid, data.getPhone());
+		logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
+		JSONObject json = bot.importInvite(data.getUrl());
 
-			// 来源群id
-			data.setChatAccessHash(json.getLong("accessHash"));
-			data.setChatId(json.getIntValue("chatid"));
-//		}
+		// 来源群id
+		data.setChatAccessHash(json.getLong("accessHash"));
+		data.setChatId(json.getIntValue("chatid"));
+		// }
 
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(),
-				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
+				data.getChatAccessHash(), task.getIntValue("offsetNum"),
+				task.getIntValue("limitNum"));
+		logger.info("拉取群组用户结果：job={}，account={},size={}",
+				task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		int num = 0;
@@ -271,7 +307,7 @@ public class BotService {
 			JobUser ju = new JobUser();
 			ju.setJobId(task.getString("jobId"));
 			ju.setAccount(task.getString("account"));
-			ju.setFromGroup(data.getChatId()+ "");
+			ju.setFromGroup(data.getChatId() + "");
 			ju.setUserid(u.getId() + "");
 			ju.setUsername(u.getUserName());
 			ju.setUserHash(u.getAccessHash());
@@ -282,7 +318,7 @@ public class BotService {
 			num++;
 		}
 
-		if (users!=null && users.size() > 0) {
+		if (users != null && users.size() > 0) {
 			// 设置状态为已抽取
 			JobTask t = jobTaskService.get(taskid);
 			t.setUsernum(num);
@@ -348,16 +384,16 @@ public class BotService {
 		data.setChatId(task.getIntValue("chatid"));
 		data.setChatAccessHash(task.getLongValue("accesshash"));// 需要拉人的群组id和访问hash
 
-//		if (task.getInteger("chatid") == null) {
-			// throw new RuntimeException("taskid="+taskid+"的用户还没加入目标群组");
-			logger.warn("taskid={}的用户{}还没加入目标群组", taskid, data.getPhone());
-			logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
-			IBot bot = getBot(data);
-			
-			JSONObject json = bot.importInvite(data.getUrl()); 
-			data.setChatAccessHash(json.getLong("accessHash"));
-			data.setChatId(json.getIntValue("chatid"));
-//		}
+		// if (task.getInteger("chatid") == null) {
+		// throw new RuntimeException("taskid="+taskid+"的用户还没加入目标群组");
+		logger.warn("taskid={}的用户{}还没加入目标群组", taskid, data.getPhone());
+		logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
+		IBot bot = getBot(data);
+
+		JSONObject json = bot.importInvite(data.getUrl());
+		data.setChatAccessHash(json.getLong("accessHash"));
+		data.setChatId(json.getIntValue("chatid"));
+		// }
 
 		// 取用户列表
 		JobUser jobUser = new JobUser();
@@ -366,9 +402,9 @@ public class BotService {
 		jobUsers = jobUserService.findList(jobUser);
 
 		if (jobUsers != null && jobUsers.size() > 0) {
-//			IBot bot = getBot(data);
+			// IBot bot = getBot(data);
 			// 加入目标群组
-//			bot.importInvite(data.getUrl());
+			// bot.importInvite(data.getUrl());
 
 			bot.addUsers(data.getChatId(), data.getChatAccessHash(), jobUsers);
 
@@ -380,7 +416,8 @@ public class BotService {
 				jobTaskService.save(t);
 			}
 		} else {
-			throw new RuntimeException("not find jobuser by account=" + data.getPhone() + " in job " + data.getJobid());
+			throw new RuntimeException("not find jobuser by account="
+					+ data.getPhone() + " in job " + data.getJobid());
 		}
 	}
 
@@ -427,8 +464,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
-					c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
+					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -470,4 +507,15 @@ public class BotService {
 		return result;
 	}
 
+	/**
+	 * 在某账号下查找用户名和群组。
+	 * 
+	 * @param phone
+	 * @param username
+	 * @return
+	 */
+	public JSONObject searchUser(String phone, String username) {
+		IBot bot = getBotByPhone(phone);
+		return bot.searchUser(username);
+	}
 }

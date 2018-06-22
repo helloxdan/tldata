@@ -13,10 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.Chat;
 import org.telegram.bot.structure.IUser;
-import org.telegram.plugins.xuser.IBotDataService;
 import org.telegram.plugins.xuser.entity.ChatImpl;
 import org.telegram.plugins.xuser.entity.User;
 
@@ -24,11 +22,12 @@ import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.modules.tl.entity.DifferencesData;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
+import com.thinkgem.jeesite.modules.tl.entity.TlUser;
 import com.thinkgem.jeesite.modules.tl.entity.UserSession;
 
 @Service
 @Transactional(readOnly = true)
-public class BotDataService   {
+public class BotDataService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private ChatService chatService;
@@ -38,19 +37,20 @@ public class BotDataService   {
 	private UserSessionService userSessionService;
 	@Autowired
 	private DifferencesDataService differencesDataService;
+	@Autowired
+	private TlUserService tlUserService;
 
-	 
-	public Chat getChatById(String phone,int chatId) {
+	public Chat getChatById(String phone, int chatId) {
 		return chatService.getChatById(phone, chatId);
 
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateChat(String phone,ChatImpl cc) {
+	public boolean updateChat(String phone, ChatImpl cc) {
 		try {
 			com.thinkgem.jeesite.modules.tl.entity.Chat chat = new com.thinkgem.jeesite.modules.tl.entity.Chat();
 			chat.setIsNewRecord(false);
-			chat.setId(phone  + cc.getId());
+			chat.setId(phone + cc.getId());
 			chat.setAccount(phone);
 			chat.setAccesshash(cc.getAccessHash());
 			chat.setChatid(cc.getId() + "");
@@ -74,7 +74,7 @@ public class BotDataService   {
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean addChat(String phone,ChatImpl cc) {
+	public boolean addChat(String phone, ChatImpl cc) {
 		try {
 			com.thinkgem.jeesite.modules.tl.entity.Chat chat = new com.thinkgem.jeesite.modules.tl.entity.Chat();
 			chat.setIsNewRecord(true);
@@ -101,12 +101,12 @@ public class BotDataService   {
 		return true;
 	}
 
-	public @Nullable IUser getUserById(String phone,int userId) {
+	public @Nullable IUser getUserById(String phone, int userId) {
 		return userSessionService.getUserById(phone, userId);
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean addUser(String phone,User user) {
+	public boolean addUser(String phone, User user) {
 		UserSession us = new UserSession();
 		us.setIsNewRecord(true);
 		us.setId(phone + user.getUserId());
@@ -115,11 +115,24 @@ public class BotDataService   {
 		us.setUserhash(user.getUserHash());
 		us.setUsername(user.getUsername());
 		userSessionService.save(us);
+
+		// 记录到用户表
+		TlUser tlUser = new TlUser();
+		tlUser.setIsNewRecord(true);
+		tlUser.preInsert();
+		tlUser.setId(user.getUserId() + "");
+		tlUser.setUsername(user.getUsername());
+		tlUser.setFirstname(user.getFirstName());
+		tlUser.setLastname(user.getLastName());
+		tlUser.setLangcode(user.getLangCode());
+		tlUser.setMsgTime(new Date());
+		tlUserService.save(tlUser);
+
 		return true;
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateUser(String phone,User user) {
+	public boolean updateUser(String phone, User user) {
 		UserSession us = new UserSession();
 		us.setIsNewRecord(false);
 		us.setId(phone + user.getUserId());
@@ -155,7 +168,8 @@ public class BotDataService   {
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateDifferencesData(String phone,int botId, int pts, int date, int seq) {
+	public boolean updateDifferencesData(String phone, int botId, int pts,
+			int date, int seq) {
 		// 检查是否存在记录，没有则新增，否则更新
 		try {
 			String id = phone + botId;

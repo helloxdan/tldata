@@ -12,13 +12,18 @@ import org.telegram.api.chat.TLAbsChat;
 import org.telegram.api.chat.TLChat;
 import org.telegram.api.chat.channel.TLChannel;
 import org.telegram.api.chat.channel.TLChannelFull;
+import org.telegram.api.chat.invite.TLAbsChatInvite;
+import org.telegram.api.chat.invite.TLChatInviteExported;
+import org.telegram.api.contacts.TLContactsFound;
 import org.telegram.api.contacts.TLResolvedPeer;
 import org.telegram.api.engine.TelegramApi;
+import org.telegram.api.functions.channels.TLRequestChannelsExportInvite;
 import org.telegram.api.functions.channels.TLRequestChannelsGetFullChannel;
 import org.telegram.api.functions.channels.TLRequestChannelsGetParticipants;
 import org.telegram.api.functions.channels.TLRequestChannelsInviteToChannel;
 import org.telegram.api.functions.channels.TLRequestChannelsJoinChannel;
 import org.telegram.api.functions.contacts.TLRequestContactsResolveUsername;
+import org.telegram.api.functions.contacts.TLRequestContactsSearch;
 import org.telegram.api.functions.messages.TLRequestMessagesGetFullChat;
 import org.telegram.api.functions.messages.TLRequestMessagesImportChatInvite;
 import org.telegram.api.input.chat.TLInputChannel;
@@ -27,6 +32,7 @@ import org.telegram.api.input.user.TLInputUser;
 import org.telegram.api.messages.TLMessagesChatFull;
 import org.telegram.api.updates.TLAbsUpdates;
 import org.telegram.api.user.TLAbsUser;
+import org.telegram.api.user.TLUser;
 import org.telegram.bot.handlers.interfaces.IChatsHandler;
 import org.telegram.bot.handlers.interfaces.IUsersHandler;
 import org.telegram.bot.kernel.IKernelComm;
@@ -44,6 +50,7 @@ import org.telegram.plugins.xuser.support.DefaultBotDataService;
 import org.telegram.plugins.xuser.support.DifferenceParametersService;
 import org.telegram.tl.TLVector;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.modules.sys.entity.Log;
 import com.thinkgem.jeesite.modules.sys.utils.LogUtils;
@@ -349,8 +356,18 @@ public class XUserBot implements IBot {
 					json.put("username", chat.getUsername());
 				}
 				json.put("usernum", ch.getParticipantsCount());
+				
+				TLRequestChannelsExportInvite req2=new TLRequestChannelsExportInvite();
+				req2.setChannel(channel);
+				TLAbsChatInvite r2 = api.doRpcCall(req2);
+				if(r2 instanceof TLChatInviteExported)
+				{
+					json.put("link", ((TLChatInviteExported)r2).getLink());
+				}
 
 			} else {
+				// TODO 未处理，少用到
+
 				TLRequestMessagesGetFullChat req = new TLRequestMessagesGetFullChat();
 				req.setChatId(chatId);
 
@@ -376,6 +393,52 @@ public class XUserBot implements IBot {
 			logger.error("取群信息失败", e);
 		} catch (TimeoutException e) {
 			logger.error("取群信息失败，超时", e);
+		}
+		return json;
+	}
+
+	@Override
+	public JSONObject searchUser(String username) {
+		logger.info("searchUser {} in contact", username);
+		JSONObject json = new JSONObject();
+		try {
+			TelegramApi api = kernel.getKernelComm().getApi();
+			TLRequestContactsSearch req = new TLRequestContactsSearch();
+			req.setQ(username);
+			req.setLimit(1000);
+			TLContactsFound found = api.doRpcCall(req);
+			TLVector<TLAbsUser> users = found.getUsers();
+			JSONObject ju = null;
+			JSONArray au = new JSONArray();
+			for (TLAbsUser user : users) {
+				ju = new JSONObject();
+				TLUser u = (TLUser) user;
+				ju.put("id", u.getId());
+				ju.put("username", u.getUserName());
+				ju.put("accessHash", u.getAccessHash());
+				ju.put("firstName", u.getFirstName());
+				ju.put("lastName", u.getLastName());
+				ju.put("phone", u.getPhone());
+				au.add(ju);
+			}
+			json.put("users", au);
+			JSONArray ac = new JSONArray();
+			for (TLAbsChat chat : found.getChats()) {
+				ju = new JSONObject();
+				if (chat instanceof TLChannel) {
+					TLChannel c = (TLChannel) chat;
+					ju.put("id", c.getId());
+					ju.put("username", c.getUsername());
+					ju.put("accessHash", c.getAccessHash());
+					ju.put("title", c.getTitle());
+					ju.put("ischannel", true);
+					ac.add(ju);
+				}
+			}
+			json.put("chats", ac);
+
+		} catch (Exception e) {
+			logger.error("searchUser失败", e);
 		}
 		return json;
 	}
