@@ -15,3 +15,9 @@ ALTER TABLE `tl_user`
 
 ALTER TABLE `tl_users`
 	ADD COLUMN `from_group` VARCHAR(64) NOT NULL AFTER `username`;
+ALTER TABLE `tl_group`
+	ADD COLUMN `offset_` INT(11) NULL DEFAULT NULL COMMENT '抽取数据的索引偏移数' AFTER `usernum`,
+	ADD COLUMN `update_num` INT(11) NULL DEFAULT NULL COMMENT '消息更新次数' AFTER `offset`;
+
+ALTER TABLE `tl_user`
+	ADD COLUMN `msg_num` INT(11) NULL DEFAULT NULL COMMENT '消息数量' AFTER `star`;

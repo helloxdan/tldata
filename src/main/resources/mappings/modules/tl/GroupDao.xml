@@ -9,6 +9,8 @@
 		a.url AS "url",
 		a.is_channel AS "isChannel",
 		a.usernum AS "usernum",
+		a.update_num AS "updateNum",
+		a.offset_ AS "offset",
 		a.status AS "status",
 		a.out_ AS "out",
 		a.create_by AS "createBy.id",
@@ -58,6 +60,14 @@
 			</otherwise>
 		</choose>
 	</select>
+	<select id="findListWithoutUrl" resultType="Group">
+		 select a.id,a.name,a.url ,c.accessHash from tl_group a
+		 join tl_chat c on c.chatid=a.id
+		  where    ( a.url is null  or a.url ='' )
+		  and ( a.out_=0 or a.out_ is null )
+		  and c.account='8618566104318'
+		 
+	</select>
 	
 	<select id="findAllList" resultType="Group">
 		SELECT 
@@ -84,8 +94,10 @@
 			url,
 			is_channel,
 			usernum,
+			update_num,
+			offset_,
 			status,
-			out,
+			out_,
 			create_by,
 			create_date,
 			update_by,
@@ -97,6 +109,8 @@
 			#{url},
 			#{isChannel},
 			#{usernum},
+			#{updateNum},
+			#{offset},
 			#{status},
 			#{out},
 			#{createBy.id},
@@ -116,6 +130,23 @@
 			usernum = #{usernum},
 			status = #{status},
 			out_ = #{out},
+			update_by = #{updateBy.id},
+			upcate_date = #{upcateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<update id="updateOffset">
+		UPDATE tl_group SET 	
+			offset_=#{offset},
+			update_by = #{updateBy.id},
+			upcate_date = #{upcateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateUpdateNum">
+		UPDATE tl_group SET 	
+			update_num=update_num+1,
 			update_by = #{updateBy.id},
 			upcate_date = #{upcateDate}
 		WHERE id = #{id}

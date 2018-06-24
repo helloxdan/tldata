@@ -15,6 +15,7 @@ import com.thinkgem.jeesite.modules.tl.dao.TlUserDao;
 
 /**
  * 好友用户Service
+ * 
  * @author admin
  * @version 2018-06-02
  */
@@ -25,25 +26,25 @@ public class TlUserService extends CrudService<TlUserDao, TlUser> {
 	public TlUser get(String id) {
 		return super.get(id);
 	}
-	
+
 	public List<TlUser> findList(TlUser tlUser) {
 		return super.findList(tlUser);
 	}
-	
+
 	public Page<TlUser> findPage(Page<TlUser> page, TlUser tlUser) {
 		return super.findPage(page, tlUser);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void save(TlUser tlUser) {
 		super.save(tlUser);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void delete(TlUser tlUser) {
 		super.delete(tlUser);
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void del(String ids) {
 		if (StringUtils.isNoneBlank(ids)) {
@@ -54,6 +55,12 @@ public class TlUserService extends CrudService<TlUserDao, TlUser> {
 			}
 		}
 		// 删除缓存
-		//IcareUtils.removeCache();
+		// IcareUtils.removeCache();
+	}
+
+	@Transactional(readOnly = false)
+	public void updateMsgNum(TlUser tlUser) {
+		tlUser.preUpdate();
+		this.dao.updateMsgNum(tlUser);
 	}
 }
