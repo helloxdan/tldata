@@ -141,6 +141,10 @@ public class BotDataService {
 		us.setUserhash(user.getUserHash());
 		us.setUsername(user.getUsername());
 		userSessionService.save(us);
+		
+		TlUser tlUser = new TlUser();
+		tlUser.setId(user.getUserId() + "");
+		tlUserService.updateMsgNum(tlUser);
 		return true;
 	}
 

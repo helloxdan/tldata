@@ -10,6 +10,7 @@
 		a.langcode AS "langcode",
 		a.msg_time AS "msgTime",
 		a.star AS "star",
+		a.msg_num AS "msgNum",
 		a.update_date AS "updateDate"
 	</sql>
 	
@@ -80,7 +81,7 @@
 			lastname,
 			langcode,
 			msg_time,
-			star,
+			star,msg_num,
 			update_date
 		) VALUES (
 			#{id},
@@ -90,6 +91,7 @@
 			#{langcode},
 			#{msgTime},
 			#{star},
+			#{msgNum},
 			#{updateDate}
 		)
 	</insert>
@@ -102,6 +104,13 @@
 			langcode = #{langcode},
 			msg_time = #{msgTime},
 			star = #{star},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateMsgNum">
+		UPDATE tl_user SET 	
+			msg_num = msg_num+1,
 			update_date = #{updateDate}
 		WHERE id = #{id}
 	</update>

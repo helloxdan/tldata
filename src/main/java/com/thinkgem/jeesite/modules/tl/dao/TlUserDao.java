@@ -14,5 +14,5 @@ import com.thinkgem.jeesite.modules.tl.entity.TlUser;
  */
 @MyBatisDao
 public interface TlUserDao extends CrudDao<TlUser> {
-	
+	void updateMsgNum(TlUser user);
 }

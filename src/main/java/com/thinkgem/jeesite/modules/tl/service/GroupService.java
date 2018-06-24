@@ -59,6 +59,15 @@ public class GroupService extends CrudService<GroupDao, Group> {
 	}
 
 	@Transactional(readOnly = false)
+	public void updateOffset(Group group) {
+		group.preUpdate();
+		this.dao.updateOffset(group);
+	}
+
+	/**
+	 * @param group
+	 */
+	@Transactional(readOnly = false)
 	public void insertOrUpdate(Group group) {
 		Group g = get(group.getId());
 		if (g == null) {
@@ -67,9 +76,19 @@ public class GroupService extends CrudService<GroupDao, Group> {
 			group.setIsNewRecord(true);
 			save(group);
 		} else {
-//			logger.info("更新群组，{}，{}，{}", group.getId(), group.getName(),
-//					group.getIsChannel());
-//			group.setIsNewRecord(false);
+			group.preUpdate();
+			this.dao.updateUpdateNum(group);
+			// logger.info("更新群组，{}，{}，{}", group.getId(), group.getName(),
+			// group.getIsChannel());
+			// group.setIsNewRecord(false);
 		}
+	}
+
+	/**查找没有url记录的群组，用于更新。
+	 * @param group
+	 * @return
+	 */
+	public List<Group> findListWithoutUrl(Group group) {
+		return this.dao.findListWithoutUrl(group);
 	}
 }
