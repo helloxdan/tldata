@@ -357,13 +357,15 @@ public class XUserBot implements IBot {
 				}
 				json.put("usernum", ch.getParticipantsCount());
 				
-				TLRequestChannelsExportInvite req2=new TLRequestChannelsExportInvite();
+				//需要管理员权限
+				
+			/*	TLRequestChannelsExportInvite req2=new TLRequestChannelsExportInvite();
 				req2.setChannel(channel);
 				TLAbsChatInvite r2 = api.doRpcCall(req2);
 				if(r2 instanceof TLChatInviteExported)
 				{
 					json.put("link", ((TLChatInviteExported)r2).getLink());
-				}
+				}*/
 
 			} else {
 				// TODO 未处理，少用到

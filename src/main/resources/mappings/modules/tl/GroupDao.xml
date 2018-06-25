@@ -60,10 +60,10 @@
 			</otherwise>
 		</choose>
 	</select>
-	<select id="findListWithoutUrl" resultType="Group">
+	<select id="findListWithoutUsernum" resultType="Group">
 		 select a.id,a.name,a.url ,c.accessHash from tl_group a
 		 join tl_chat c on c.chatid=a.id
-		  where    ( a.url is null  or a.url ='' )
+		  where    ( a.usernum is null )
 		  and ( a.out_=0 or a.out_ is null )
 		  and c.account='8618566104318'
 		 

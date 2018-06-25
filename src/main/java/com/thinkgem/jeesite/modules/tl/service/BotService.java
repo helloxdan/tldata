@@ -11,8 +11,6 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +38,6 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
  *
  */
 @Service
-@EnableScheduling
 @Transactional(readOnly = true)
 public class BotService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
@@ -66,54 +63,9 @@ public class BotService {
 	public BotService() {
 	}
 
-	/**
-	 * 检查账号和群组的关系。如果发现有账号没有加入某个群组，则自动加入。
-	 */
-//	@Scheduled(cron = "0/10 * * * * ?")
-	@Transactional(readOnly = false)
-	public void scheduleUpdateGroupInfo() {
-		logger.info("定时调度，更新群组的link和用户数量……");
+	 
 
-		// TODO
-		Group group = new Group();
-		List<Group> list = groupService.findListWithoutUrl(group);
-		int num = 0;
-		for (Group g : list) {
-			// 暂时只执行两次，检查api接口是否支持连续执行
-			if (num == 2)
-				break;
-			updateGroupInfo(g);
-			num++;
-		}
-	}
-
-	@Transactional(readOnly = false)
-	public void updateGroupInfo(Group g) {
-		// 通过管理员账号获取信息
-		try {
-			IBot bot = bots.get(getAdminAccount());
-			if (bot == null) {
-				throw new RuntimeException(getAdminAccount() + "账号实例不存在");
-			}
-			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()), g.getAccesshash(), true);
-			String link = json.getString("link");
-			Integer usernum = json.getInteger("usernum");
-			if (StringUtils.isNotBlank(link)) {
-				Group group = groupService.get(g.getId());
-				group.setUrl(link);
-				group.setUsernum(usernum);
-
-				groupService.save(group);
-			} else {
-				logger.warn("通过账号{}无法获取群组【{}】的link", getAdminAccount(), g.getName());
-			}
-
-		} catch (Exception e) {
-			logger.error("更新群组的link地址异常", e);
-		}
-	}
-
-	// @Scheduled(cron = "0 0/5 * * * ?")
+//	@Scheduled(cron = "0 0/5 * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleJoinGroup() {
 		logger.info("定时调度，账号自动加入有效群组……");
@@ -135,13 +87,13 @@ public class BotService {
 	/**
 	 * 程序启动初始化入口。
 	 */
-	@PostConstruct
-	@Transactional(readOnly = false)
+	 @PostConstruct
+	 @Transactional(readOnly = false)
 	public void startInit() {
 		System.out.println("Telegram bot 开始初始化……");
 		if ("true".equals(Global.getConfig("autoRun"))) {
 
-			accountInit(null);
+//			accountInit(null);
 		}
 	}
 
@@ -474,7 +426,7 @@ public class BotService {
 	public IBot getBotByPhone(String phone) {
 		IBot bot = bots.get(phone);
 		if (bot == null) {
-			throw new RuntimeException(phone + "账号实例不存在");
+//		W	throw new RuntimeException(phone + "账号实例不存在");
 		}
 		return bot;
 	}
@@ -553,4 +505,5 @@ public class BotService {
 		IBot bot = getBotByPhone(phone);
 		return bot.searchUser(username);
 	}
+
 }

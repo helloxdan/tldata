@@ -12,6 +12,7 @@ import org.telegram.plugins.xuser.IBot;
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
+import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,14 +34,16 @@ public class ScheduleService {
 	private ChatService chatService;
 	@Autowired
 	private BotService botService;
-
+	/**
+	 * 检查账号和群组的关系。如果发现有账号没有加入某个群组，则自动加入。
+	 */
 	// @Scheduled(cron = "0/10 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleUpdateGroupInfo() {
 		logger.info("定时调度，更新群组的link和用户数量……");
 		// TODO
 		Group group = new Group();
-		List<Group> list = groupService.findListWithoutUrl(group);
+		List<Group> list = groupService.findListWithoutUsernum(group);
 		int num = 0;
 		for (Group g : list) {
 			// 暂时只执行两次，检查api接口是否支持连续执行
@@ -57,23 +60,26 @@ public class ScheduleService {
 		try {
 			IBot bot = botService.getBotByPhone(botService.getAdminAccount());
 			if (bot == null) {
-				throw new RuntimeException(botService.getAdminAccount()
-						+ "账号实例不存在");
+				// throw new RuntimeException(botService.getAdminAccount()
+				// + "账号实例不存在");
+				RequestData data = new RequestData();
+				data.setPhone(botService.getAdminAccount());
+				botService.start(data);
+				return;
 			}
-			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()),
-					g.getAccesshash(), true);
-			String link = json.getString("link");
+			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()), g.getAccesshash(), true);
+//			String link = json.getString("link");
 			Integer usernum = json.getInteger("usernum");
-			if (StringUtils.isNotBlank(link)) {
-				Group group = groupService.get(g.getId());
-				group.setUrl(link);
-				group.setUsernum(usernum);
+			// if (StringUtils.isNotBlank(link)) {
+			Group group = groupService.get(g.getId());
+			// group.setUrl(link);
+			group.setUsernum(usernum);
 
-				groupService.save(group);
-			} else {
-				logger.warn("通过账号{}无法获取群组【{}】的link",
-						botService.getAdminAccount(), g.getName());
-			}
+			groupService.save(group);
+			// } else {
+			// logger.warn("通过账号{}无法获取群组【{}】的link", botService.getAdminAccount(),
+			// g.getName());
+			// }
 
 		} catch (Exception e) {
 			logger.error("更新群组的link地址异常", e);
