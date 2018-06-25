@@ -183,7 +183,7 @@ public BotService() {
 	 * 
 	 * @return
 	 */
-	private String getAdminAccount() {
+	public String getAdminAccount() {
 		// TODO Auto-generated method stub
 		return "8618566104318";
 	}
