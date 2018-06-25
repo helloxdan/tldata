@@ -10,19 +10,21 @@
 
 	<description>定时调度配置</description>
 	<!-- 调度池 -->
+	<bean id="scheduleService" class="com.thinkgem.jeesite.modules.tl.service.ScheduleService">
+	</bean>
 	<!-- <task:scheduler id="taskScheduler" pool-size="10" /> -->
-	<!-- <task:scheduled-tasks  > -->
+	<task:scheduled-tasks>
 		<!--更新群组的link和用户数量 -->
-		<!-- <task:scheduled ref="botService" method="scheduleUpdateGroupInfo"
-			cron="0/10 * * * * ?" /> -->
+		<task:scheduled ref="scheduleService" method="scheduleUpdateGroupInfo"
+			cron="0/10 * * * * ?" />
 		<!-- 账号自动加入有效群组 -->
-		<!-- <task:scheduled ref="botService" method="scheduleJoinGroup"
-			cron="0 0/5 * * * ?" /> -->
+		<task:scheduled ref="scheduleService" method="scheduleJoinGroup"
+			cron="0 0/5 * * * ?" />
 		<!-- 抽取用户 -->
-		<!-- <task:scheduled ref="botService" method="scheduleFetchUser"
-			cron="0/10 * * * * ?" /> -->
-			
-			
+		<task:scheduled ref="scheduleService" method="scheduleFetchUser"
+			cron="0/10 * * * * ?" />
+
+
 		<!-- 每半分钟触发任务 <task:scheduled ref="app" method="execute1" cron="30 * * 
 			* * ?"/> 每小时的10分30秒触发任务 <task:scheduled ref="app" method="execute2" cron="30 
 			10 * * * ?"/> 每天1点10分30秒触发任务 <task:scheduled ref="app" method="execute3" 
@@ -35,5 +37,5 @@
 			ref="app" method="execute9" cron="15-30/5 * * * * ?"/> 每小时的0分0秒开始触发，每隔3分钟触发一次 
 			<task:scheduled ref="app" method="execute10" cron="0 0/3 * * * ?"/> 星期一到星期五的10点15分0秒触发任务 
 			<task:scheduled ref="app" method="execute11" cron="0 15 10 ? * MON-FRI"/> -->
-<!-- 	</task:scheduled-tasks> -->
+	</task:scheduled-tasks>
 </beans>
