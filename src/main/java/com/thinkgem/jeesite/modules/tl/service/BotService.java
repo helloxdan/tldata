@@ -62,12 +62,14 @@ public class BotService {
 	private GroupService groupService;
 	@Autowired
 	private ChatService chatService;
-public BotService() {
-}
+
+	public BotService() {
+	}
+
 	/**
 	 * 检查账号和群组的关系。如果发现有账号没有加入某个群组，则自动加入。
 	 */
-	 @Scheduled(cron = "0/10 * * * * ?")
+//	@Scheduled(cron = "0/10 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleUpdateGroupInfo() {
 		logger.info("定时调度，更新群组的link和用户数量……");
@@ -93,8 +95,7 @@ public BotService() {
 			if (bot == null) {
 				throw new RuntimeException(getAdminAccount() + "账号实例不存在");
 			}
-			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()),
-					g.getAccesshash(), true);
+			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()), g.getAccesshash(), true);
 			String link = json.getString("link");
 			Integer usernum = json.getInteger("usernum");
 			if (StringUtils.isNotBlank(link)) {
@@ -104,8 +105,7 @@ public BotService() {
 
 				groupService.save(group);
 			} else {
-				logger.warn("通过账号{}无法获取群组【{}】的link", getAdminAccount(),
-						g.getName());
+				logger.warn("通过账号{}无法获取群组【{}】的link", getAdminAccount(), g.getName());
 			}
 
 		} catch (Exception e) {
@@ -329,11 +329,9 @@ public BotService() {
 		data.setChatId(json.getIntValue("chatid"));
 		// }
 
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
-				data.getChatAccessHash(), task.getIntValue("offsetNum"),
-				task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}",
-				task.getString("jobId"), task.getString("account"),
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(),
+				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
+		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		int num = 0;
@@ -454,8 +452,7 @@ public BotService() {
 				jobTaskService.save(t);
 			}
 		} else {
-			throw new RuntimeException("not find jobuser by account="
-					+ data.getPhone() + " in job " + data.getJobid());
+			throw new RuntimeException("not find jobuser by account=" + data.getPhone() + " in job " + data.getJobid());
 		}
 	}
 
@@ -502,8 +499,8 @@ public BotService() {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
-					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
+					c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
