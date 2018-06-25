@@ -14,9 +14,9 @@
 	</bean>
 	<!-- <task:scheduler id="taskScheduler" pool-size="10" /> -->
 	<task:scheduled-tasks>
-		<!--更新群组的link和用户数量 -->
+		<!--更新群组的用户数量 -->
 		<task:scheduled ref="scheduleService" method="scheduleUpdateGroupInfo"
-			cron="0/10 * * * * ?" />
+			cron="* 0/10 * * * ?" />
 		<!-- 账号自动加入有效群组 -->
 		<task:scheduled ref="scheduleService" method="scheduleJoinGroup"
 			cron="0 0/5 * * * ?" />

@@ -34,20 +34,21 @@ public class ScheduleService {
 	private ChatService chatService;
 	@Autowired
 	private BotService botService;
+
 	/**
 	 * 检查账号和群组的关系。如果发现有账号没有加入某个群组，则自动加入。
 	 */
 	// @Scheduled(cron = "0/10 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleUpdateGroupInfo() {
-		logger.info("定时调度，更新群组的link和用户数量……");
+		logger.info("定时调度，更新群组用户数量……");
 		// TODO
 		Group group = new Group();
 		List<Group> list = groupService.findListWithoutUsernum(group);
 		int num = 0;
 		for (Group g : list) {
 			// 暂时只执行两次，检查api接口是否支持连续执行
-			if (num == 2)
+			if (num == 20)
 				break;
 			updateGroupInfo(g);
 			num++;
@@ -68,18 +69,17 @@ public class ScheduleService {
 				return;
 			}
 			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()), g.getAccesshash(), true);
-//			String link = json.getString("link");
+			// String link = json.getString("link");
 			Integer usernum = json.getInteger("usernum");
-			// if (StringUtils.isNotBlank(link)) {
-			Group group = groupService.get(g.getId());
-			// group.setUrl(link);
-			group.setUsernum(usernum);
+			if (usernum!=null) {
+				Group group = groupService.get(g.getId());
+				// group.setUrl(link);
+				group.setUsernum(usernum);
 
-			groupService.save(group);
-			// } else {
-			// logger.warn("通过账号{}无法获取群组【{}】的link", botService.getAdminAccount(),
-			// g.getName());
-			// }
+				groupService.save(group);
+			} else {
+				logger.warn("通过账号{}无法获取群组【{}】的link", botService.getAdminAccount(), g.getName());
+			}
 
 		} catch (Exception e) {
 			logger.error("更新群组的link地址异常", e);
@@ -92,6 +92,7 @@ public class ScheduleService {
 		logger.info("定时调度，账号自动加入有效群组……");
 
 		// TODO
+//		1.找到
 	}
 
 	/**
