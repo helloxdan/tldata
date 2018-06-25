@@ -47,6 +47,7 @@ public class BotDataService {
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean updateChat(String phone, ChatImpl cc) {
+		boolean success = true;
 		try {
 			com.thinkgem.jeesite.modules.tl.entity.Chat chat = new com.thinkgem.jeesite.modules.tl.entity.Chat();
 			chat.setIsNewRecord(false);
@@ -69,12 +70,14 @@ public class BotDataService {
 			groupService.insertOrUpdate(group);
 		} catch (Exception e) {
 			logger.error("updateChat", e);
+			success = false;
 		}
-		return true;
+		return success;
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean addChat(String phone, ChatImpl cc) {
+		boolean success = true;
 		try {
 			com.thinkgem.jeesite.modules.tl.entity.Chat chat = new com.thinkgem.jeesite.modules.tl.entity.Chat();
 			chat.setIsNewRecord(true);
@@ -97,8 +100,9 @@ public class BotDataService {
 			groupService.insertOrUpdate(group);
 		} catch (Exception e) {
 			logger.error("addChat", e);
+			success = false;
 		}
-		return true;
+		return success;
 	}
 
 	public @Nullable IUser getUserById(String phone, int userId) {
@@ -107,45 +111,59 @@ public class BotDataService {
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean addUser(String phone, User user) {
-		UserSession us = new UserSession();
-		us.setIsNewRecord(true);
-		us.setId(phone + user.getUserId());
-		us.setAccount(phone);
-		us.setUserid(user.getUserId());
-		us.setUserhash(user.getUserHash());
-		us.setUsername(user.getUsername());
-		userSessionService.save(us);
+		boolean success = true;
+		try {
+			UserSession us = new UserSession();
+			us.setIsNewRecord(true);
+			us.setId(phone + user.getUserId());
+			us.setAccount(phone);
+			us.setUserid(user.getUserId());
+			us.setUserhash(user.getUserHash());
+			us.setUsername(user.getUsername());
+			userSessionService.save(us);
 
-		// 记录到用户表
-		TlUser tlUser = new TlUser();
-		tlUser.setIsNewRecord(true);
-		tlUser.preInsert();
-		tlUser.setId(user.getUserId() + "");
-		tlUser.setUsername(user.getUsername());
-		tlUser.setFirstname(user.getFirstName());
-		tlUser.setLastname(user.getLastName());
-		tlUser.setLangcode(user.getLangCode());
-		tlUser.setMsgTime(new Date());
-		tlUserService.save(tlUser);
+			// 记录到用户表
+			TlUser tlUser = new TlUser();
+			tlUser.setIsNewRecord(true);
+			tlUser.preInsert();
+			tlUser.setId(user.getUserId() + "");
+			tlUser.setUsername(user.getUsername());
+			tlUser.setFirstname(user.getFirstName());
+			tlUser.setLastname(user.getLastName());
+			tlUser.setLangcode(user.getLangCode());
+			tlUser.setMsgTime(new Date());
+			tlUserService.save(tlUser);
+		} catch (Exception e) {
+			logger.error("addUser", e);
+			success = false;
+		}
 
-		return true;
+		return success;
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public boolean updateUser(String phone, User user) {
-		UserSession us = new UserSession();
-		us.setIsNewRecord(false);
-		us.setId(phone + user.getUserId());
-		us.setAccount(phone);
-		us.setUserid(user.getUserId());
-		us.setUserhash(user.getUserHash());
-		us.setUsername(user.getUsername());
-		userSessionService.save(us);
-		
-		TlUser tlUser = new TlUser();
-		tlUser.setId(user.getUserId() + "");
-		tlUserService.updateMsgNum(tlUser);
-		return true;
+		boolean success = true;
+		try {
+			UserSession us = new UserSession();
+			us.setIsNewRecord(false);
+			us.setId(phone + user.getUserId());
+			us.setAccount(phone);
+			us.setUserid(user.getUserId());
+			us.setUserhash(user.getUserHash());
+			us.setUsername(user.getUsername());
+			userSessionService.save(us);
+
+			TlUser tlUser = new TlUser();
+			tlUser.setId(user.getUserId() + "");
+			tlUserService.updateMsgNum(tlUser);
+		} catch (Exception e) {
+			logger.error("addUser", e);
+			success = false;
+		}
+
+		return success;
+		 
 	}
 
 	public List<User> findUsers() {
@@ -172,8 +190,7 @@ public class BotDataService {
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateDifferencesData(String phone, int botId, int pts,
-			int date, int seq) {
+	public boolean updateDifferencesData(String phone, int botId, int pts, int date, int seq) {
 		// 检查是否存在记录，没有则新增，否则更新
 		try {
 			String id = phone + botId;

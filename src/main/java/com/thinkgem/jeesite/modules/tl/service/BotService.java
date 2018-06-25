@@ -40,6 +40,7 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
  *
  */
 @Service
+@EnableScheduling
 @Transactional(readOnly = true)
 public class BotService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
@@ -61,11 +62,12 @@ public class BotService {
 	private GroupService groupService;
 	@Autowired
 	private ChatService chatService;
-
+public BotService() {
+}
 	/**
 	 * 检查账号和群组的关系。如果发现有账号没有加入某个群组，则自动加入。
 	 */
-	// @Scheduled(cron = "0 0/10 * * * ?")
+	 @Scheduled(cron = "0/10 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleUpdateGroupInfo() {
 		logger.info("定时调度，更新群组的link和用户数量……");
@@ -137,7 +139,7 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public void startInit() {
 		System.out.println("Telegram bot 开始初始化……");
-		if ("true".equals(Global.getConfig("autoRun"))) {
+		if (!"true".equals(Global.getConfig("autoRun"))) {
 
 			accountInit(null);
 		}

@@ -97,7 +97,7 @@
 			update_num,
 			offset_,
 			status,
-			out,
+			out_,
 			create_by,
 			create_date,
 			update_by,
