@@ -84,11 +84,11 @@ public class GroupService extends CrudService<GroupDao, Group> {
 		}
 	}
 
-	/**查找没有url记录的群组，用于更新。
+	/**查找没有usernum 值录的群组，用于更新。
 	 * @param group
 	 * @return
 	 */
-	public List<Group> findListWithoutUrl(Group group) {
-		return this.dao.findListWithoutUrl(group);
+	public List<Group> findListWithoutUsernum(Group group) {
+		return this.dao.findListWithoutUsernum(group);
 	}
 }
