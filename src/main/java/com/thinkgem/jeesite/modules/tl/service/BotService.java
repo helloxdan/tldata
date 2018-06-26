@@ -63,9 +63,7 @@ public class BotService {
 	public BotService() {
 	}
 
-	 
-
-//	@Scheduled(cron = "0 0/5 * * * ?")
+	// @Scheduled(cron = "0 0/5 * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleJoinGroup() {
 		logger.info("定时调度，账号自动加入有效群组……");
@@ -87,13 +85,13 @@ public class BotService {
 	/**
 	 * 程序启动初始化入口。
 	 */
-	 @PostConstruct
-	 @Transactional(readOnly = false)
+	@PostConstruct
+	@Transactional(readOnly = false)
 	public void startInit() {
 		System.out.println("Telegram bot 开始初始化……");
 		if ("true".equals(Global.getConfig("autoRun"))) {
 
-//			accountInit(null);
+			// accountInit(null);
 		}
 	}
 
@@ -281,9 +279,11 @@ public class BotService {
 		data.setChatId(json.getIntValue("chatid"));
 		// }
 
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(),
-				task.getIntValue("offsetNum"), task.getIntValue("limitNum"));
-		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
+				data.getChatAccessHash(), task.getIntValue("offsetNum"),
+				task.getIntValue("limitNum"));
+		logger.info("拉取群组用户结果：job={}，account={},size={}",
+				task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		int num = 0;
@@ -404,7 +404,8 @@ public class BotService {
 				jobTaskService.save(t);
 			}
 		} else {
-			throw new RuntimeException("not find jobuser by account=" + data.getPhone() + " in job " + data.getJobid());
+			throw new RuntimeException("not find jobuser by account="
+					+ data.getPhone() + " in job " + data.getJobid());
 		}
 	}
 
@@ -424,10 +425,24 @@ public class BotService {
 	}
 
 	public IBot getBotByPhone(String phone) {
+		return getBotByPhone(phone, false);
+	}
+
+	public IBot getBotByPhone(String phone, boolean start) {
 		IBot bot = bots.get(phone);
-		if (bot == null) {
-//		W	throw new RuntimeException(phone + "账号实例不存在");
+		if (bot == null && start) {
+			// 启动账号
+			RequestData data = new RequestData();
+			data.setPhone(phone);
+			start(data);
+			bot = bots.get(phone);
+			if (bot == null) {
+				throw new RuntimeException(phone + "账号启动失败");
+			}
+		} else {
+			throw new RuntimeException(phone + "账号实例不存在");
 		}
+
 		return bot;
 	}
 
@@ -451,8 +466,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
-					c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
+					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}

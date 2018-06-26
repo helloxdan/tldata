@@ -86,4 +86,8 @@ public class AccountService extends CrudService<AccountDao, Account> {
 		this.dao.updateUsernum();
 		this.dao.updateGroupnum();
 	}
+
+	public List<Account> findUnfullUserAccount(Account account) {
+		return this.dao.findUnfullUserAccount(account) ;
+	}
 }

@@ -60,6 +60,23 @@
 			</otherwise>
 		</choose>
 	</select>
+	
+	<!-- 取一个用户数>1000,索引偏移最少offset的群组，优先从这个群组抽取用户 -->
+	<select id="getOneGroupForFetch" resultType="Group">
+		SELECT 
+			<include refid="groupColumns"/>
+		FROM tl_group a
+		<include refid="groupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.url is not null
+			and a.out_='0'	
+			and a.usernum>1000
+		</where>
+		 order by offset_  limit 1
+	</select>
+	
+	<!-- 取没有用户数的群组 -->
 	<select id="findListWithoutUsernum" resultType="Group">
 		 select a.id,a.name,a.url ,c.accessHash from tl_group a
 		 join tl_chat c on c.chatid=a.id

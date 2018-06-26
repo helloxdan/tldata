@@ -22,7 +22,7 @@
 			cron="0 0/5 * * * ?" />
 		<!-- 抽取用户 -->
 		<task:scheduled ref="scheduleService" method="scheduleFetchUser"
-			cron="0/10 * * * * ?" />
+			cron="0/30 * * * * ?" />
 
 
 		<!-- 每半分钟触发任务 <task:scheduled ref="app" method="execute1" cron="30 * * 

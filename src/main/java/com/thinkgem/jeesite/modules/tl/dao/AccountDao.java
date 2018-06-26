@@ -3,6 +3,8 @@
  */
 package com.thinkgem.jeesite.modules.tl.dao;
 
+import java.util.List;
+
 import com.thinkgem.jeesite.common.persistence.CrudDao;
 import com.thinkgem.jeesite.common.persistence.annotation.MyBatisDao;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
@@ -20,5 +22,7 @@ public interface AccountDao extends CrudDao<Account> {
 	void updateUsernum();
 
 	void updateGroupnum();
+
+	List<Account> findUnfullUserAccount(Account account);
 	
 }

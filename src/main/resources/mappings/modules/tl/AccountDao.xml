@@ -74,6 +74,18 @@
 		</choose>
 	</select>
 	
+	<select id="findUnfullUserAccount" resultType="Account">
+		SELECT 
+			<include refid="accountColumns"/>
+		FROM tl_account a
+		<include refid="accountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			a.usernum < #{minUsernum}
+		</where>		
+		order by a.usernum asc
+	</select>
+	
 	<insert id="insert">
 		INSERT INTO tl_account(
 			id,

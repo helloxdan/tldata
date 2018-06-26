@@ -29,6 +29,9 @@ public class Account extends DataEntity<Account> {
 	private String ids; // 删除记录ids
 	private int usernum;
 	private int groupnum;
+	
+	//最少用户数，默认100个
+	private int minUsernum=100;
 
 	public Account() {
 		super();
@@ -88,4 +91,13 @@ public class Account extends DataEntity<Account> {
 	public void setGroupnum(int groupnum) {
 		this.groupnum = groupnum;
 	}
+
+	public int getMinUsernum() {
+		return minUsernum;
+	}
+
+	public void setMinUsernum(int minUsernum) {
+		this.minUsernum = minUsernum;
+	}
+	
 }

@@ -22,4 +22,6 @@ public interface GroupDao extends CrudDao<Group> {
 	void updateUpdateNum(Group group);
 	void updateOffset(Group group);
 	List<Group> findListWithoutUsernum(Group group);
+
+	Group getOneGroupForFetch(Group group);
 }

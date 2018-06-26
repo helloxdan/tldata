@@ -3,6 +3,8 @@
  */
 package com.thinkgem.jeesite.modules.tl.dao;
 
+import java.util.List;
+
 import com.thinkgem.jeesite.common.persistence.CrudDao;
 import com.thinkgem.jeesite.common.persistence.annotation.MyBatisDao;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
@@ -16,5 +18,7 @@ import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 public interface JobUserDao extends CrudDao<JobUser> {
 
 	void deleteRepeatJobUser(JobUser jobUser);
+
+	List<JobUser> findUserOfJob(JobUser ju);
 	
 }

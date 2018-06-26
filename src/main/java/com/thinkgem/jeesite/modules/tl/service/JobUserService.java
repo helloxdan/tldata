@@ -72,4 +72,23 @@ public class JobUserService extends CrudService<JobUserDao, JobUser> {
 		jobUser.setJobId(jobid);
 		this.dao.deleteRepeatJobUser(jobUser);
 	}
+
+	/**
+	 * 将用户写入任务用户表中，如果用户已经在表中了，则忽略
+	 * 
+	 * @param ju
+	 * @param string
+	 */
+	@Transactional(readOnly = false)
+	public void insertUserToJob(JobUser ju, String jobId) {
+		// 先判断job=auto下是否存在此用户
+		ju.setJobId(jobId);
+		List<JobUser> list = this.dao.findUserOfJob(ju);
+		if (list.size() > 0) {
+			// 用户已经存在
+			logger.info("{}用户已存在job={}", ju.getUsername(), jobId);
+		} else {
+			save(ju);
+		}
+	}
 }

@@ -91,4 +91,9 @@ public class GroupService extends CrudService<GroupDao, Group> {
 	public List<Group> findListWithoutUsernum(Group group) {
 		return this.dao.findListWithoutUsernum(group);
 	}
+
+	public Group getOneGroupForFetch() {
+		Group group=new Group();
+		return this.dao.getOneGroupForFetch(group); 
+	}
 }
