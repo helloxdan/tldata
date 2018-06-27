@@ -32,6 +32,9 @@ public class Account extends DataEntity<Account> {
 	
 	//最少用户数，默认100个
 	private int minUsernum=100;
+	//用于查询，限定用户数量
+	private int limit=10;
+	private String jobid;
 
 	public Account() {
 		super();
@@ -98,6 +101,22 @@ public class Account extends DataEntity<Account> {
 
 	public void setMinUsernum(int minUsernum) {
 		this.minUsernum = minUsernum;
+	}
+
+	public int getLimit() {
+		return limit;
+	}
+
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
+
+	public String getJobid() {
+		return jobid;
+	}
+
+	public void setJobid(String jobid) {
+		this.jobid = jobid;
 	}
 	
 }

@@ -17,6 +17,7 @@ import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.dao.JobTaskDao;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
+import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
@@ -30,6 +31,8 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	@Autowired
 	private AccountService accountService;
+	@Autowired
+	private JobUserService jobUserService;
 
 	public JobTask get(String id) {
 		return super.get(id);
@@ -78,13 +81,18 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	public String addTasks(RequestData data) {
 		String msg = "";
 		String type = data.getType();
+		String jobid = data.getJobid();
 		int num = data.getNum();
 
 		if ("any".equals(type)) {
 			// 用户来自不同群组，任意选择
 			// TODO 优先从现有的用户中直接复制
+
+			// 分配任务到指定数量的账号上
+			dispatchUserToAccount(jobid, num, data);
+
 		} else {
-			// 需要制定群组
+			// 需要指定群组
 			if (StringUtils.isBlank(data.getUrl())) {
 				throw new RuntimeException("来源群组url不能为空");
 			}
@@ -97,7 +105,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				msg = msg + " 只有" + num + "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
 			}
 
-			// 只去固定数量的账号
+			// 只取固定数量的账号
 			List<Account> list = new ArrayList<Account>();
 			for (int i = 0; i < num; i++) {
 				list.add(alist.get(i));
@@ -117,9 +125,9 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				JobTask jobTask = new JobTask();
 				jobTask.setIsNewRecord(true);
 				jobTask.preInsert();
-				
+
 				jobTask.setType("fetch");
-				jobTask.setJobId(data.getJobid());
+				jobTask.setJobId(jobid);
 				jobTask.setAccount(ac.getId());
 				jobTask.setGroupId(data.getChatId() + "");
 				jobTask.setGroupUrl(data.getUrl());
@@ -131,9 +139,60 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 
 				save(jobTask);// 保存记录
 			}
-			
+
 		}
 		return msg;
+	}
+
+	/**
+	 * 分配任务到指定数量账号。
+	 * 
+	 * @param jobid
+	 *            任务id
+	 * @param accountNum
+	 *            账号数量
+	 * @param data
+	 */
+	public void dispatchUserToAccount(String jobid, int accountNum,
+			RequestData data) {
+		String msg = "";
+		// 从账户表中查询最多num条记录
+		Account account = new Account();
+		account.setLimit(accountNum);
+		account.setJobid(jobid);
+		List<Account> alist = accountService.findAccountForJob(account);
+		if (alist.size() < accountNum) {
+			accountNum = alist.size();
+			msg = msg + " 只有" + accountNum
+					+ "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
+		}
+ 
+		//遍历账号，从自己储备用户用获取40个账号
+		for (Account ac : alist) {
+			JobUser jobUser=new JobUser();
+			jobUser.setJobId("auto");//储备用户关联的job
+			jobUser.setAccount(ac.getId());
+			jobUser.setToJobid(jobid);//限定目标job
+			List<JobUser> users = jobUserService.findDistinctForJob(jobUser);
+			
+			//拷贝用户到jobid中
+			for (JobUser ju : users) {
+				JobUser u=new JobUser();
+				u.setIsNewRecord(true);
+				u.preInsert();
+				
+				u.setJobId(jobid);//指定jobid
+				u.setAccount(ju.getAccount());
+				u.setFromGroup(ju.getFromGroup());
+				u.setUserid(ju.getUserid());
+				u.setUsername(ju.getUsername());
+				u.setUserHash(ju.getUserHash());
+				u.setStatus("0");
+				
+				jobUserService.save(u);
+			}
+		}
+		
 	}
 
 	public JSONObject getRpcCallInfo(String taskid) {

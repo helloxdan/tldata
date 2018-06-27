@@ -91,4 +91,13 @@ public class JobUserService extends CrudService<JobUserDao, JobUser> {
 			save(ju);
 		}
 	}
+
+	public List<JobUser> findDistinctForJob(JobUser jobUser) {
+		return this.dao.findDistinctForJob(jobUser); 
+	}
+
+	public void updateStatus(JobUser jobUser) {
+		jobUser.preUpdate();
+		this.dao.updateStatus(jobUser); 
+	}
 }

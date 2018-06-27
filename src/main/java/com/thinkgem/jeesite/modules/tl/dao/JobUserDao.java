@@ -20,5 +20,9 @@ public interface JobUserDao extends CrudDao<JobUser> {
 	void deleteRepeatJobUser(JobUser jobUser);
 
 	List<JobUser> findUserOfJob(JobUser ju);
+
+	List<JobUser> findDistinctForJob(JobUser jobUser);
+
+	void updateStatus(JobUser jobUser);
 	
 }

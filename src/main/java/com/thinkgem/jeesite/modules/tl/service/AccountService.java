@@ -90,4 +90,8 @@ public class AccountService extends CrudService<AccountDao, Account> {
 	public List<Account> findUnfullUserAccount(Account account) {
 		return this.dao.findUnfullUserAccount(account) ;
 	}
+
+	public List<Account> findAccountForJob(Account account) {
+		return this.dao.findAccountForJob(account) ;
+	}
 }

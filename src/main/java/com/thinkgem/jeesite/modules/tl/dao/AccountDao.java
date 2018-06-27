@@ -24,5 +24,7 @@ public interface AccountDao extends CrudDao<Account> {
 	void updateGroupnum();
 
 	List<Account> findUnfullUserAccount(Account account);
+
+	List<Account> findAccountForJob(Account account);
 	
 }

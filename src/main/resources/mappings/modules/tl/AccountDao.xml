@@ -86,6 +86,20 @@
 		order by a.usernum asc
 	</select>
 	
+	<!-- 查询用于分配任务的账号 -->
+	<select id="findAccountForJob" resultType="Account">
+		SELECT 
+			<include refid="accountColumns"/>
+		FROM tl_account a
+		<include refid="accountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			 <!-- 账号没有被分配过 -->
+			a.id not in (select account from tl_job_user j where j.job_id=#{jobid})
+		</where>		
+		order by a.usernum asc limit ${limit}
+	</select>
+	
 	<insert id="insert">
 		INSERT INTO tl_account(
 			id,

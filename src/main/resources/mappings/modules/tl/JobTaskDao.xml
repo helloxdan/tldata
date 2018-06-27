@@ -157,7 +157,8 @@
 	<!-- 统计数据，任务数和有效用户数 -->
 	<select id="findJobTaskStatsData" resultType="com.alibaba.fastjson.JSONObject">
 		 select count(*) as 'taskNum',
-		 (select sum(usernum) from tl_task where del_flag ='0' and job_id=#{jobId}) as 'userNum' 
+		 (select sum(usernum) from tl_task where del_flag ='0' and status='0' and job_id=#{jobId}) as 'userNum' ,
+		 (select sum(usernum) from tl_task where del_flag ='0' and status='1' and job_id=#{jobId}) as 'invitedUserNum' 
 		 from tl_task where del_flag ='0' and job_id=#{jobId}
 	</select>
 </mapper>

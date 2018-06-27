@@ -374,9 +374,9 @@ public class BotService {
 
 		// if (task.getInteger("chatid") == null) {
 		// throw new RuntimeException("taskid="+taskid+"的用户还没加入目标群组");
-		logger.warn("taskid={}的用户{}还没加入目标群组", taskid, data.getPhone());
+		// logger.warn("taskid={}的用户{}还没加入目标群组", taskid, data.getPhone());
 		logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
-		IBot bot = getBot(data);
+		IBot bot = getBot(data,true);
 
 		JSONObject json = bot.importInvite(data.getUrl());
 		data.setChatAccessHash(json.getLong("accessHash"));
@@ -403,9 +403,13 @@ public class BotService {
 				t.setStatus(JobTask.STATUS_JOIN);// 已加人
 				jobTaskService.save(t);
 			}
+
+			// 将tl_job_user表中记录标记为已邀请
+			jobUser.setStatus("1");
+			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("not find jobuser by account="
-					+ data.getPhone() + " in job " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
+					+ " ，job= " + data.getJobid());
 		}
 	}
 
@@ -417,8 +421,19 @@ public class BotService {
 	}
 
 	private IBot getBot(RequestData data) {
+		return getBot(data, false);
+	}
+
+	private IBot getBot(RequestData data, boolean start) {
 		IBot bot = bots.get(data.getPhone());
-		if (bot == null) {
+		if (bot == null && start) {
+			// 启动账号
+			start(data);
+			bot = bots.get(data.getPhone());
+			if (bot == null) {
+				throw new RuntimeException(data.getPhone() + "账号启动失败");
+			}
+		} else {
 			throw new RuntimeException(data.getPhone() + "账号实例不存在");
 		}
 		return bot;

@@ -158,7 +158,7 @@
 	<div class="addData">
 	<div class="box box-solid">
 			<div class="box-header with-border">
-				<h3 class="box-title">1调度任务--${jobTask.job.name }</h3>
+				<h3 class="box-title">调度任务--${jobTask.job.name }</h3>
 			</div>
 	<form:form id="searchForm" modelAttribute="jobTask" action="${ctx}/tl/jobTask/" method="post" class="form-inline form-search">
 		<input id="jobId" name="jobId" type="hidden" value="${jobTask.jobId}"/>
@@ -201,7 +201,7 @@
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
 			</div>	
 			<div class="form-group cxtj_text">
-				<div>任务数：${jobTaskStats.taskNum}</div><div>有效用户数：${jobTaskStats.userNum}</div>
+				<div>任务数：${jobTaskStats.taskNum}</div><div>待添加用户数：${jobTaskStats.userNum}</div><div>已添加用户数：${jobTaskStats.invitedUserNum}</div>
 			</div>
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>

@@ -81,6 +81,21 @@
 			AND a.userid = #{userid}
 		</where> 
 	</select>
+	
+	<!-- 查找没有在job中未重复的用户 -->
+	<select id="findDistinctForJob" resultType="JobUser">
+		SELECT
+		<include refid="jobUserColumns" />
+		FROM tl_job_user a
+		<include refid="jobUserJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.job_id = #{jobId}
+			AND a.account = #{account}
+			and not exists (select 1 from tl_job_user j where j.job_id=#{toJobid} and j.userid=a.userid)
+		</where> 
+	 limit ${limit}
+	</select>
 
 	<select id="findAllList" resultType="JobUser">
 		SELECT
@@ -151,6 +166,15 @@
 		UPDATE tl_job_user SET
 		del_flag = #{DEL_FLAG_DELETE}
 		WHERE id = #{id}
+	</update>
+	
+	<!-- 将某账号下的所有用户都标记为 已邀请 -->
+	<update id="updateStatus">
+		UPDATE tl_job_user SET
+		status = #{status},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE job_id = #{jobId} and account=#{account}
 	</update>
 
 	<!-- 删除重复数据 -->
