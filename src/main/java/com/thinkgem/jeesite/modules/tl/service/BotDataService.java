@@ -132,7 +132,7 @@ public class BotDataService {
 			tlUser.setLastname(user.getLastName());
 			tlUser.setLangcode(user.getLangCode());
 			tlUser.setMsgTime(new Date());
-			tlUserService.save(tlUser);
+			tlUserService.insertOrUpdate(tlUser);
 		} catch (Exception e) {
 			logger.error("addUser", e);
 			success = false;

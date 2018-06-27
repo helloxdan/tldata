@@ -63,4 +63,16 @@ public class TlUserService extends CrudService<TlUserDao, TlUser> {
 		tlUser.preUpdate();
 		this.dao.updateMsgNum(tlUser);
 	}
+
+	@Transactional(readOnly = false)
+	public void insertOrUpdate(TlUser tlUser) {
+		TlUser u = get(tlUser.getId());
+		if (u == null) {
+			tlUser.setIsNewRecord(true);
+		} else {
+			tlUser.setIsNewRecord(false);
+			tlUser.preUpdate();
+		}
+		save(tlUser);
+	}
 }

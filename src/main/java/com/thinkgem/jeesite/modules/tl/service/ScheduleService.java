@@ -113,7 +113,7 @@ public class ScheduleService {
 				logger.warn("群组{}没有邀请link", g.getName());
 				continue;
 			}
-			fetchUserFromGroup(account.getId(), g);
+			fetchUserFromGroup(a.getId(), g);
 		}
 		
 		//汇总下用户有效用户数

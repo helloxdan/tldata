@@ -81,7 +81,7 @@
 		<include refid="accountJoins"/>
 		<where>
 			a.del_flag = #{DEL_FLAG_NORMAL}
-			a.usernum < #{minUsernum}
+			and a.usernum <![CDATA[ < ]]> #{minUsernum}
 		</where>		
 		order by a.usernum asc
 	</select>
