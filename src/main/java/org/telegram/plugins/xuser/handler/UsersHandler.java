@@ -47,6 +47,7 @@ public class UsersHandler implements IUsersHandler {
 	 *            User to add
 	 */
 	private void onUser(@NotNull TLAbsUser absUser) {
+		
         User currentUser = null;
         User user = null;
         if (absUser instanceof TLUser) {
@@ -66,11 +67,13 @@ public class UsersHandler implements IUsersHandler {
             } else {
                 BotLogger.info(LOGTAG, "Bot received");
             }
-            if(user!=null)
+            if(user!=null) {
             user.setUsername(tlUser.getUserName());
             user.setFirstName(tlUser.getFirstName());
             user.setLastName( tlUser.getLastName());
             user.setLangCode( tlUser.getLangCode());
+            }
+         
         }
         if ((currentUser == null) && (user != null)) {
             databaseManager.addUser(user);

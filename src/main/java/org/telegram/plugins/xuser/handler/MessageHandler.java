@@ -85,6 +85,6 @@ public class MessageHandler {
 		// kernelComm.performMarkAsRead(user, 0);
 
 		// 记录谁发送消息
-		logger.info(getBotConfig().getPhoneNumber()+"-新消息,from={},message={}", user.getUserId(), message);
+		logger.info(getBotConfig()==null ? "":getBotConfig().getPhoneNumber()+"-新消息,from={},message={}", user.getUserId(), message);
 	}
 }
