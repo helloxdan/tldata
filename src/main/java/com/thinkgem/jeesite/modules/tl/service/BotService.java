@@ -262,30 +262,47 @@ public class BotService {
 	public void collectUsersOfTask(RequestData data, String taskid) {
 		// 根据任务id，找到调用方法的参数
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
+		if (task == null) {
+			throw new RuntimeException(taskid + "任务不存在！");
+		}
 		data.setPhone(task.getString("account"));
 		data.setUrl(task.getString("groupUrl"));
 		data.setChatAccessHash(task.getLongValue("accessHash"));
 		data.setChatId(task.getIntValue("chatid"));
 
-		IBot bot = getBot(data);
+		IBot bot = getBot(data, true);
 		// if (task.getInteger("chatid") == null) {
 		// throw new RuntimeException("taskid="+taskid+"的用户还没加入来源群组");
-		// logger.warn("taskid={}的用户{}还没加入来源群组", taskid, data.getPhone());
-		logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
-		JSONObject json = bot.importInvite(data.getUrl());
+		if (data.getChatAccessHash() == 0) {
+			logger.warn("taskid={}的用户{}还没加入来源群组", taskid, data.getPhone());
+			logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
+			JSONObject json = bot.importInvite(data.getUrl());
 
-		// 来源群id
-		data.setChatAccessHash(json.getLong("accessHash"));
-		data.setChatId(json.getIntValue("chatid"));
-		// }
+			// 来源群id
+			data.setChatAccessHash(json.getLong("accessHash"));
+			data.setChatId(json.getIntValue("chatid"));
+		}
+
+		Group g = groupService.get(data.getChatId() + "");
+		if (g == null) {
+			//
+			throw new RuntimeException("群组id=" + data.getChatId()
+					+ "在表tl_group 中不存在！");
+		}
+		int offset = g.getOffset();
+		int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
 		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
-				data.getChatAccessHash(), task.getIntValue("offsetNum"),
-				task.getIntValue("limitNum"));
+				data.getChatAccessHash(), offset,
+				limitNum);
 		logger.info("拉取群组用户结果：job={}，account={},size={}",
 				task.getString("jobId"), task.getString("account"),
 				users.size());
 
+		//更新群组的offset
+		g.setOffset(offset+limitNum);
+		groupService.updateOffset(g);
+		
 		int num = 0;
 		// 将数据存储到数据库
 		for (TLAbsUser tluser : users) {
@@ -376,7 +393,7 @@ public class BotService {
 		// throw new RuntimeException("taskid="+taskid+"的用户还没加入目标群组");
 		// logger.warn("taskid={}的用户{}还没加入目标群组", taskid, data.getPhone());
 		logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
-		IBot bot = getBot(data,true);
+		IBot bot = getBot(data, true);
 
 		JSONObject json = bot.importInvite(data.getUrl());
 		data.setChatAccessHash(json.getLong("accessHash"));
@@ -522,6 +539,34 @@ public class BotService {
 		}
 
 		return result;
+	}
+
+	/**
+	 * 通过群组link获取id;
+	 * 
+	 * @param url
+	 * @return
+	 */
+	public int getGroupidByUrl(String url) {
+		int groupid = 0;
+		Group g = new Group();
+		g.setUrl(url);
+		List<Group> list = groupService.findList(g);
+		if (list.size() > 0) {
+			g = list.get(0);
+			groupid = Integer.parseInt(g.getId());
+		} else {
+			// 用管理员加入群组
+			IBot bot = getBotByPhone(getAdminAccount(), true);
+			JSONObject json = bot.importInvite(url);
+			groupid = json.getIntValue("chatid");
+
+			if (groupid == 0) {
+				throw new RuntimeException("加入群组失败，url=" + url);
+
+			}
+		}
+		return groupid;
 	}
 
 	/**

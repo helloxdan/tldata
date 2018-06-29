@@ -4,6 +4,7 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,4 +97,5 @@ public class GroupService extends CrudService<GroupDao, Group> {
 		Group group=new Group();
 		return this.dao.getOneGroupForFetch(group); 
 	}
+
 }

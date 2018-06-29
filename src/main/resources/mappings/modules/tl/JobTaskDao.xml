@@ -54,6 +54,9 @@
 			<if test="status != null and status != ''">
 				AND a.status = #{status}
 			</if>
+			<if test="usernum != null and usernum >0">
+				AND a.usernum <![CDATA[ < ]]>  #{usernum}
+			</if>
 			<if test="beginOffset != null and endOffset != null and beginOffset != '' and endOffset != ''">
 				AND a.offset_ BETWEEN #{beginOffset} AND #{endOffset}
 			</if>

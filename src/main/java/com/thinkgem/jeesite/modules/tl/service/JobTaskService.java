@@ -3,7 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +32,10 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	private AccountService accountService;
 	@Autowired
 	private JobUserService jobUserService;
+	@Autowired
+	private BotService botService;
+	@Autowired
+	private GroupService groupService;
 
 	public JobTask get(String id) {
 		return super.get(id);
@@ -96,26 +99,31 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			if (StringUtils.isBlank(data.getUrl())) {
 				throw new RuntimeException("来源群组url不能为空");
 			}
+			// 根据邀请link获取群组id
+			int chatId = botService.getGroupidByUrl(data.getUrl());
+
 			// 从账户表中查询‘运行中’状态的记录，最多num条记录
 			Account account = new Account();
-			account.setStatus(Account.STATUS_RUN);// 运行中状态
-			List<Account> alist = accountService.findList(account);
+			// account.setStatus(Account.STATUS_RUN);// 运行中状态
+			account.setLimit(num);
+			account.setJobid(jobid);
+			List<Account> alist = accountService.findAccountForJob(account);
 			if (alist.size() < num) {
 				num = alist.size();
 				msg = msg + " 只有" + num + "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
 			}
 
 			// 只取固定数量的账号
-			List<Account> list = new ArrayList<Account>();
-			for (int i = 0; i < num; i++) {
-				list.add(alist.get(i));
-			}
+			// List<Account> list = new ArrayList<Account>();
+			// for (int i = 0; i < num; i++) {
+			// list.add(alist.get(i));
+			// }
 
 			int offsetNum = data.getOffset();
 			int limitNum = data.getLimit();
 			int n = 0;
 			// 按规则批量生成任务。
-			for (Account ac : list) {
+			for (Account ac : alist) {
 				// 总数超过10000，取消。每个群组最多拉取10000人
 				if (offsetNum + limitNum > 10000) {
 					msg = msg + " 拉取人数超过10000人，退出；";
@@ -129,10 +137,11 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				jobTask.setType("fetch");
 				jobTask.setJobId(jobid);
 				jobTask.setAccount(ac.getId());
-				jobTask.setGroupId(data.getChatId() + "");
+				jobTask.setGroupId(chatId + "");
 				jobTask.setGroupUrl(data.getUrl());
-				jobTask.setOffsetNum(offsetNum);
-				jobTask.setLimitNum(limitNum);
+				// jobTask.setOffsetNum(offsetNum);
+				jobTask.setLimitNum(50);//默认每次查询50个用户，比 40多一些
+				jobTask.setUsernum(0);
 				jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
 
 				offsetNum = offsetNum + limitNum;
@@ -140,8 +149,49 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				save(jobTask);// 保存记录
 			}
 
+			// 循环拉取用户，直到满足每个账号有40个用户
+			fetchUserToAccountFromGroup(jobid);
+
 		}
 		return msg;
+	}
+
+	/**
+	 * 根据分配的账号，从知道群组中拉取用户，知道满足40个用户。
+	 * 
+	 * @param jobid
+	 */
+	@Transactional(readOnly = false)
+	public void fetchUserToAccountFromGroup(String jobid) {
+		List<JobTask> list = findUnfullJobtask(jobid);
+
+		while (list.size() > 0) {
+			for (JobTask jt : list) {
+				RequestData data = new RequestData();
+				data.setLimit(40-jt.getUsernum());
+				botService.collectUsersOfTask(data, jt.getId());
+			}
+
+			// 检查还有未满足的任务
+			list = findUnfullJobtask(jobid);
+		}
+	}
+
+	/**
+	 * 查找用户未达到40的任务。
+	 * 
+	 * @param jobid
+	 * @return
+	 */
+	private List<JobTask> findUnfullJobtask(String jobid) {
+		JobTask jobTask = new JobTask();
+		jobTask.setType("fetch");
+		jobTask.setJobId(jobid);
+		jobTask.setUsernum(40);
+		jobTask.setStatus(JobTask.STATUS_NONE);//
+		List<JobTask> list = findList(jobTask);
+		logger.info("还有{}个账号用户数未达到40", list.size());
+		return list;
 	}
 
 	/**
@@ -166,33 +216,33 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			msg = msg + " 只有" + accountNum
 					+ "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
 		}
- 
-		//遍历账号，从自己储备用户用获取40个账号
+
+		// 遍历账号，从自己储备用户用获取40个账号
 		for (Account ac : alist) {
-			JobUser jobUser=new JobUser();
-			jobUser.setJobId("auto");//储备用户关联的job
+			JobUser jobUser = new JobUser();
+			jobUser.setJobId("auto");// 储备用户关联的job
 			jobUser.setAccount(ac.getId());
-			jobUser.setToJobid(jobid);//限定目标job
+			jobUser.setToJobid(jobid);// 限定目标job
 			List<JobUser> users = jobUserService.findDistinctForJob(jobUser);
-			
-			//拷贝用户到jobid中
+
+			// 拷贝用户到jobid中
 			for (JobUser ju : users) {
-				JobUser u=new JobUser();
+				JobUser u = new JobUser();
 				u.setIsNewRecord(true);
 				u.preInsert();
-				
-				u.setJobId(jobid);//指定jobid
+
+				u.setJobId(jobid);// 指定jobid
 				u.setAccount(ju.getAccount());
 				u.setFromGroup(ju.getFromGroup());
 				u.setUserid(ju.getUserid());
 				u.setUsername(ju.getUsername());
 				u.setUserHash(ju.getUserHash());
 				u.setStatus("0");
-				
+
 				jobUserService.save(u);
 			}
 		}
-		
+
 	}
 
 	public JSONObject getRpcCallInfo(String taskid) {

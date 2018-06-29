@@ -95,7 +95,7 @@
 		<where>
 			a.del_flag = #{DEL_FLAG_NORMAL}
 			 <!-- 账号没有被分配过 -->
-			a.id not in (select account from tl_job_user j where j.job_id=#{jobid})
+			and a.id not in (select account from tl_job_user j where j.job_id=#{jobid})
 		</where>		
 		order by a.usernum asc limit ${limit}
 	</select>
