@@ -168,7 +168,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		while (list.size() > 0) {
 			for (JobTask jt : list) {
 				RequestData data = new RequestData();
-				data.setLimit(40-jt.getUsernum());
+				data.setLimit(40-jt.getUsernum()+10);
 				botService.collectUsersOfTask(data, jt.getId());
 			}
 
@@ -225,6 +225,17 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			jobUser.setToJobid(jobid);// 限定目标job
 			List<JobUser> users = jobUserService.findDistinctForJob(jobUser);
 
+			// add job task
+			JobTask jobTask=new JobTask();
+			jobTask.setIsNewRecord(true);
+			jobTask.preInsert();
+			jobTask.setType("fetch");
+			jobTask.setJobId(jobid);
+			jobTask.setAccount(ac.getId());
+			jobTask.setUsernum(users.size());
+			jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
+			save(jobTask);
+			
 			// 拷贝用户到jobid中
 			for (JobUser ju : users) {
 				JobUser u = new JobUser();

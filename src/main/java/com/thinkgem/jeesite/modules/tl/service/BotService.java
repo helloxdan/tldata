@@ -258,7 +258,8 @@ public class BotService {
 		}
 	}
 
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+	//@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+	@Transactional(readOnly = false)
 	public void collectUsersOfTask(RequestData data, String taskid) {
 		// 根据任务id，找到调用方法的参数
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
@@ -286,23 +287,19 @@ public class BotService {
 		Group g = groupService.get(data.getChatId() + "");
 		if (g == null) {
 			//
-			throw new RuntimeException("群组id=" + data.getChatId()
-					+ "在表tl_group 中不存在！");
+			throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
 		}
-		int offset = g.getOffset();
+		int offset = g.getOffset()==null ? 0:g.getOffset();
 		int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
-				data.getChatAccessHash(), offset,
-				limitNum);
-		logger.info("拉取群组用户结果：job={}，account={},size={}",
-				task.getString("jobId"), task.getString("account"),
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
+		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
 				users.size());
 
-		//更新群组的offset
-		g.setOffset(offset+limitNum);
+		// 更新群组的offset
+		g.setOffset(offset + limitNum);
 		groupService.updateOffset(g);
-		
+
 		int num = 0;
 		// 将数据存储到数据库
 		for (TLAbsUser tluser : users) {
@@ -316,6 +313,7 @@ public class BotService {
 			ju.setUserid(u.getId() + "");
 			ju.setUsername(u.getUserName());
 			ju.setUserHash(u.getAccessHash());
+			ju.setStatus("0");
 			// u.getLangCode();
 			// u.getFirstName();
 			// u.getLastName();
@@ -425,8 +423,7 @@ public class BotService {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
-					+ " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
 		}
 	}
 
@@ -443,15 +440,17 @@ public class BotService {
 
 	private IBot getBot(RequestData data, boolean start) {
 		IBot bot = bots.get(data.getPhone());
-		if (bot == null && start) {
-			// 启动账号
-			start(data);
-			bot = bots.get(data.getPhone());
-			if (bot == null) {
-				throw new RuntimeException(data.getPhone() + "账号启动失败");
+		if (bot == null) {
+			if (start) {
+				// 启动账号
+				start(data);
+				bot = bots.get(data.getPhone());
+				if (bot == null) {
+					throw new RuntimeException(data.getPhone() + "账号启动失败");
+				}
+			} else {
+				throw new RuntimeException(data.getPhone() + "账号实例不存在");
 			}
-		} else {
-			throw new RuntimeException(data.getPhone() + "账号实例不存在");
 		}
 		return bot;
 	}
@@ -462,19 +461,20 @@ public class BotService {
 
 	public IBot getBotByPhone(String phone, boolean start) {
 		IBot bot = bots.get(phone);
-		if (bot == null && start) {
-			// 启动账号
-			RequestData data = new RequestData();
-			data.setPhone(phone);
-			start(data);
-			bot = bots.get(phone);
-			if (bot == null) {
-				throw new RuntimeException(phone + "账号启动失败");
+		if (bot == null) {
+			if (start) {
+				// 启动账号
+				RequestData data = new RequestData();
+				data.setPhone(phone);
+				start(data);
+				bot = bots.get(phone);
+				if (bot == null) {
+					throw new RuntimeException(phone + "账号启动失败");
+				}
+			} else {
+				throw new RuntimeException(phone + "账号实例不存在");
 			}
-		} else {
-			throw new RuntimeException(phone + "账号实例不存在");
 		}
-
 		return bot;
 	}
 
@@ -498,8 +498,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
-					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
+					c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -510,7 +510,7 @@ public class BotService {
 		JSONObject result = new JSONObject();
 		try {
 			data.setPhone(getAdminAccount());
-			IBot bot = getBotByPhone(getAdminAccount());
+			IBot bot = getBotByPhone(getAdminAccount(), true);
 			// 通过加入群组，获取群组id
 			JSONObject json = bot.importInvite(groupUrl);
 			if (json.getBooleanValue("success")) {

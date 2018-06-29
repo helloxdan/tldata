@@ -37,7 +37,7 @@ public class JobTaskServiceTests extends BaseServiceTests {
 			RequestData data = new RequestData();
 			data.setType("task");
 			data.setJobid("20180629");
-			data.setUrl("https://t.me/ALZA_Official");
+			data.setUrl("https://t.me/silkchainchinese01");
 			data.setNum(2);
 			String msg = jobTaskService.addTasks(data);
 			System.out.println(msg);
