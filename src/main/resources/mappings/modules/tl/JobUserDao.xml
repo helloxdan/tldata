@@ -9,7 +9,8 @@
 		a.from_group AS "fromGroup",
 		a.userid AS "userid",
 		a.username AS
-		"username",
+		"username",a.firstname AS "firstname",
+		a.lastname AS "lastname",
 		a.user_hash AS "userHash",
 		a.status AS "status",
 		a.create_by
@@ -87,11 +88,11 @@
 		SELECT
 		<include refid="jobUserColumns" />
 		FROM tl_job_user a
-		<include refid="jobUserJoins" />
+		<include refid="jobUserJoins" /> 
 		<where>
 			a.del_flag = #{DEL_FLAG_NORMAL}
 			AND a.job_id = #{jobId}
-			AND a.account = #{account}
+			AND a.account = #{account} 
 			and not exists (select 1 from tl_job_user j where j.job_id=#{toJobid} and j.userid=a.userid)
 		</where> 
 	 limit ${limit}
@@ -123,7 +124,8 @@
 		account,
 		from_group,
 		userid,
-		username,
+		username,firstname,
+			lastname,
 		user_hash,
 		status,
 		create_by,
@@ -138,6 +140,8 @@
 		#{fromGroup},
 		#{userid},
 		#{username},
+		#{firstname},
+		#{lastname},
 		#{userHash},
 		#{status},
 		#{createBy.id},
@@ -155,6 +159,8 @@
 		from_group = #{fromGroup},
 		userid = #{userid},
 		username = #{username},
+		firstname = #{firstname},
+			lastname = #{lastname},
 		user_hash = #{userHash},
 		status = #{status},
 		update_by = #{updateBy.id},

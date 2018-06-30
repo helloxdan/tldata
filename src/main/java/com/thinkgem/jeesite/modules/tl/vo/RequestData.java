@@ -23,6 +23,11 @@ public class RequestData implements Serializable {
 	private int limit;
 	private String type;
 	private String ids;
+	
+	// last active days
+	private String days;
+	//group tags
+	private String tags;
 
 	public String getType() {
 		return type;
@@ -166,6 +171,22 @@ public class RequestData implements Serializable {
 
 	public void setTaskid(String taskid) {
 		this.taskid = taskid;
+	}
+
+	public String getDays() {
+		return days;
+	}
+
+	public void setDays(String days) {
+		this.days = days;
+	}
+
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 
 }

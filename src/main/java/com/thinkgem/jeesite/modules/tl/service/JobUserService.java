@@ -39,6 +39,7 @@ public class JobUserService extends CrudService<JobUserDao, JobUser> {
 	@Transactional(readOnly = false)
 	public void save(JobUser jobUser) {
 		super.save(jobUser);
+		
 	}
 
 	@Transactional(readOnly = false)

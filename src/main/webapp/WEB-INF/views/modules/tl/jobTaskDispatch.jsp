@@ -128,15 +128,15 @@
 			var type = $('#fetchtype').val();
 			var num = $('#num').val();
 			var url = $('#url').val();
-			var offset = $('#offset').val();
-			var limit = $('#limit').val();
+			var days = $('#days').val();
+			var tags = $('#tags').val();
 			var params = {
 				jobid:'${jobTask.jobId}',
 				'type' : type,
 				num : num,
 				url : url,
-				offset : offset,
-				limit : limit 
+				days : days,
+				tags : tags 
 			};
 			console.log('提交新增任务：', params);
 			$.post('${ctx}/tl/jobTask/addTasks', params,
@@ -157,8 +157,10 @@
 			 var type = $('#fetchtype').val();
 			 if(type=='any'){
 				 $('.ft-group').addClass('hide');
+				 $('.ft-any').removeClass('hide');
 			 }else{
 				 $('.ft-group').removeClass('hide');
+				 $('.ft-any').addClass('hide');
 			 }
 		}
 	</script>
@@ -222,8 +224,6 @@
 				<th class="sort-column a.type">任务类型</th>
 				<th class="sort-column a.from_group_id">来源群组ID</th>
 				<th class="sort-column a.from_group_url">来源群组URL</th>
-				<th class="sort-column a.offset">开始位置</th>
-				<th class="sort-column a.limit">记录数</th>
 				<th class="sort-column a.usernum">有效用户数</th>
 				<th class="sort-column a.status">任务状态</th>
 				<th>操作</th>
@@ -252,12 +252,7 @@
 				</td><td>
 					${jobTask.groupUrl}
 				</td>
-				<td>
-					${jobTask.offsetNum}
-				</td>
-				<td>
-					${jobTask.limitNum}
-				</td>
+				 
 				<td>
 					${jobTask.usernum}
 				</td>
@@ -265,7 +260,7 @@
 					${fns:getDictLabel(jobTask.status, 'jobtask_status', jobTask.status)}
 				</td> 
 				<td>
-					<a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">抽取用户</a>
+					<%-- <a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">抽取用户</a> --%>
 					<a href="javascript:runjob('','${jobTask.id}')">开始拉人</a> 
 				</td>
 			</tr>
@@ -309,16 +304,22 @@
 						</div>
 						 <div class="form-group ft-group hide">
 							<label for="url">来源群组link</label> <input type="text"
-								class="form-control" id="url" placeholder="来源群组link"
-								 >
-						</div><div class="form-group hide">
-							<label for="offset">开始序号</label> <input type="text"
-								class="form-control" id="offset" placeholder="开始序号"
-								value="0">
-						</div><div class="form-group hide">
-							<label for="limit">计划用户数</label> <input type="text"
-								class="form-control" id="limit" placeholder="计划用户数"
-								 value="45">
+								class="form-control" id="url" placeholder="来源群组link" >
+						    
+						</div>
+						   <div class="form-group ft-group ft-any ">
+							 <label for="url">过滤条件：</label>
+						   
+						</div><div class="form-group ft-any ">
+							<label for="offset">最近活跃天数</label> 
+							<input type="text"
+								class="form-control" id="days" placeholder="天数"
+								 value="30">
+						</div>
+						<div class="form-group  ft-any ">
+							<label for="limit">来源群组标签</label> <input type="text"
+								class="form-control" id="tags" placeholder="多个空格隔开"
+								 value="">
 						</div>
 					</form>
 				</div>

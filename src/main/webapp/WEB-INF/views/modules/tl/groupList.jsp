@@ -115,9 +115,8 @@
 				<th class="sort-column a.is_channel">是否频道</th>
 				<th class="sort-column a.usernum">用户数</th>
 				<th class="sort-column a.update_num">更新次数</th>
-				<th class="sort-column a.offset_">更新次数</th>
+				<th class="sort-column a.offset_">offset</th>
 				<th class="">是否被剔除</th>
-				<th class="sort-column a.create_by">创建人</th>
 				<th >操作</th>
 			</tr>
 		</thead>
@@ -151,9 +150,7 @@
 				<td>
 					${group.out}
 				</td>
-				<td>
-					${group.createBy.id}
-				</td>
+				 
 				<td> 
 					 <a href="${ctx}/tl/job/form?groupId=${group.id}">新建任务</a>
 					  <a href="${rctx}/api/tl/collectUsers?chatId=${group.id}">拉取现有用户</a>

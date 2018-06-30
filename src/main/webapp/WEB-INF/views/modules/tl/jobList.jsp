@@ -115,7 +115,6 @@
 				<th class="sort-column a.usernum">用户数</th>
 				<th class="sort-column a.day">几天完成</th>
 				<th class="sort-column a.boss">老板</th>
-				<th class="sort-column a.create_by">创建人</th>
 				<th class="sort-column a.status">状态</th>
 				<th >操作</th>
 			</tr>
@@ -152,9 +151,7 @@
 				<td>
 					${job.boss}
 				</td>
-				<td>
-					${job.createBy.id}
-				</td><td>
+				 <td>
 					${job.status}
 				</td>
 				<td>

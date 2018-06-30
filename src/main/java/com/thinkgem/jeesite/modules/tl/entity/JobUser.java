@@ -6,6 +6,7 @@ package com.thinkgem.jeesite.modules.tl.entity;
 import org.hibernate.validator.constraints.Length;
 
 import com.thinkgem.jeesite.common.persistence.DataEntity;
+import com.thinkgem.jeesite.modules.utils.Constants;
 
 /**
  * 邀请用户Entity
@@ -21,12 +22,14 @@ public class JobUser extends DataEntity<JobUser> {
 	private String fromGroup; // 用户来源群组
 	private String userid; // 用户ID
 	private String username; // 用户名
+	private String firstname;		//  
+	private String lastname;		//  
 	private Long userHash; // 访问码
 	private String status; // 是否已邀请
 	private String ids; // 删除记录ids
 
 	// 用于查询，限定查询结果数量
-	private int limit = 40;
+	private int limit = Constants.PER_SIZE;
 	//用户查询
 	private String toJobid;
 
@@ -120,5 +123,21 @@ public class JobUser extends DataEntity<JobUser> {
 
 	public void setToJobid(String toJobid) {
 		this.toJobid = toJobid;
+	}
+
+	public String getFirstname() {
+		return firstname;
+	}
+
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
+	}
+
+	public String getLastname() {
+		return lastname;
+	}
+
+	public void setLastname(String lastname) {
+		this.lastname = lastname;
 	}
 }

@@ -115,9 +115,11 @@ public class ScheduleService {
 			}
 			fetchUserFromGroup(a.getId(), g);
 		}
-		
+		if(alist.size()>0)
+		{
 		//汇总下用户有效用户数
 		accountService.updateAccountData();
+		}
 	}
 
 	/**

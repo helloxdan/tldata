@@ -123,6 +123,8 @@
 				<th class="sort-column a.from_group">用户来源群组</th>
 				<th class="sort-column a.userid">用户ID</th>
 				<th class="sort-column a.username">用户名</th>
+				<th class="sort-column a.firstname">firstname</th>
+				<th class="sort-column a.lastname">lastname</th>
 				<th class="sort-column a.user_hash">访问码</th>
 				<th class="sort-column a.status">是否已邀请</th>
 				<th class="sort-column a.update_date">update_date</th>
@@ -148,6 +150,12 @@
 				</td>
 				<td>
 					${jobUser.username}
+				</td>
+				<td>
+					${jobUser.firstname}
+				</td>
+				<td>
+					${jobUser.lastname}
 				</td>
 				<td>
 					${jobUser.userHash}

@@ -229,7 +229,7 @@
 				<th><input type="checkbox" id="checkAll" /></th>
 				<th class="sort-column a.id">手机号</th>
 				<th class="sort-column a.name">账号名</th>
-				<th class="sort-column a.login_date">登录时间</th>
+				<th class="sort-column a.login_date">最近登录时间</th>
 				<th class="sort-column a.status">账号状态</th>
 				<th class="sort-column a.usernum">用户数量</th>
 				<th class="sort-column a.groupnum">群组数量</th>
