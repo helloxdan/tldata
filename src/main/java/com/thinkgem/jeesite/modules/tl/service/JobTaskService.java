@@ -73,7 +73,11 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		// 删除缓存
 		// IcareUtils.removeCache();
 	}
-
+public static void main(String[] args) {
+	/*System.out.println(50/40D+"-"+Math.ceil(50/40D));*/
+	 int num=(int)Math.ceil(50/40D);
+	System.out.println(num);
+}
 	/**
 	 * 批量增加任务数。
 	 * 
@@ -85,8 +89,12 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		String msg = "";
 		String type = data.getType();
 		String jobid = data.getJobid();
-		int num = data.getNum();
+		//计划拉取总用户数
+		int toUserNum = data.getNum();
 
+		//需要账号数量，总人数/40
+		int num=(int)Math.ceil(toUserNum/40D);
+		
 		if ("any".equals(type)) {
 			// 用户来自不同群组，任意选择
 			// TODO 优先从现有的用户中直接复制
@@ -110,7 +118,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			List<Account> alist = accountService.findAccountForJob(account);
 			if (alist.size() < num) {
 				num = alist.size();
-				msg = msg + " 只有" + num + "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
+				msg = msg + " 只有" + num + "个账号可用,全部提交运行。您需要更多的账号,才能满足需求！！";
 			}
 
 			// 只取固定数量的账号

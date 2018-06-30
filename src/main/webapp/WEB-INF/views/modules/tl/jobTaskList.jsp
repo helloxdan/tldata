@@ -69,7 +69,7 @@
 	<div class="addData">
 	<div class="box box-solid">
 			<div class="box-header with-border">
-				<h3 class="box-title">调度任务列表33</h3>
+				<h3 class="box-title">调度任务列表</h3>
 			</div>
 	<form:form id="searchForm" modelAttribute="jobTask" action="${ctx}/tl/jobTask/" method="post" class="form-inline form-search">
 		<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}"/>

@@ -9,6 +9,7 @@
 		a.status AS "status",
 		a.usernum AS "usernum",
 		a.groupnum AS "groupnum",
+		a.role_ as "role",
 		a.create_by AS "createBy.id",
 		a.create_date AS "createDate",
 		a.update_by AS "updateBy.id",
@@ -81,6 +82,7 @@
 		<include refid="accountJoins"/>
 		<where>
 			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.role_='0'
 			and a.usernum <![CDATA[ < ]]> #{minUsernum}
 		</where>		
 		order by a.usernum asc
@@ -107,7 +109,7 @@
 			login_date,
 			status,
 			usernum,
-			groupnum,
+			groupnum,role_,
 			create_by,
 			create_date,
 			update_by,
@@ -119,7 +121,7 @@
 			#{loginDate},
 			#{status},
 			#{usernum},
-			#{groupnum},
+			#{groupnum},#{role},
 			#{createBy.id},
 			#{createDate},
 			#{updateBy.id},
@@ -136,6 +138,7 @@
 			status = #{status},
 			usernum = #{usernum},
 			groupnum = #{groupnum},
+			role_ = #{role},
 			update_by = #{updateBy.id},
 			update_date = #{updateDate}
 		WHERE id = #{id}

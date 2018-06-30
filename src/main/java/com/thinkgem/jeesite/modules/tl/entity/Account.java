@@ -29,6 +29,7 @@ public class Account extends DataEntity<Account> {
 	private String ids; // 删除记录ids
 	private int usernum;
 	private int groupnum;
+	private String role;
 	
 	//最少用户数，默认100个
 	private int minUsernum=100;
@@ -117,6 +118,14 @@ public class Account extends DataEntity<Account> {
 
 	public void setJobid(String jobid) {
 		this.jobid = jobid;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 	
 }

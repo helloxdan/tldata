@@ -152,6 +152,15 @@
 					});
 
 		}
+		
+		function fetchTypeChange(){
+			 var type = $('#fetchtype').val();
+			 if(type=='any'){
+				 $('.ft-group').addClass('hide');
+			 }else{
+				 $('.ft-group').removeClass('hide');
+			 }
+		}
 	</script>
 </head>
 <body>
@@ -191,11 +200,11 @@
 	<div class=" addData">
 		<div class="box box-solid minHeight">
 			<div class="form-group cxtj_text">
-				<a href="${ctx}/tl/jobTask/form?jobId=${jobTask.jobId}&type=fetch&action=dispatch" class="btn btn-blue">新增单一任务</a>
+				<a href="${ctx}/tl/jobTask/form?jobId=${jobTask.jobId}&type=fetch&action=dispatch" class="btn btn-blue hide">新增单一任务</a>
 				<input id="btnAdds" class="btn btn-blue" type="button" value="批量新增" onclick="addTasks('${jobTask.jobId}')"/>
 				<input id="btnDel" class="btn btn-blue" type="button" value="删除任务" />
 			
-					|<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue"  >批量执行抽取用户</a>
+					|<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue hide"  >批量执行抽取用户</a>
 					<a href="javascript:cleanJobUser('${jobTask.jobId}')"  class="btn btn-blue" title="删除重复数据，或者已经抽取的数据" >清洗用户数据</a>
 					<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-blue"  >开始拉人</a>
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
@@ -287,26 +296,26 @@
 						 
 						<div class="form-group">
 							<label for="fetchtype">方式</label>  <select id="fetchtype"
-								name="fetchtype" class="form-control">
+								name="fetchtype" class="form-control" onchange="fetchTypeChange()">
+								<option value="any">不限群组 </option>
 								<option value="group">指定群组</option>
-								<option value="any">不限群组（未实现功能）</option>
 							</select>
 						</div>
 					 
-						<div class="form-group">
-							<label for="num">新增任务数</label> <input type="text"
-								class="form-control" id="num" placeholder="新增任务数"
+						<div class="form-group ">
+							<label for="num">拉人总数</label> <input type="text"
+								class="form-control" id="num" placeholder="拉人总数"
 								value="1">
 						</div>
-						 <div class="form-group">
+						 <div class="form-group ft-group hide">
 							<label for="url">来源群组link</label> <input type="text"
 								class="form-control" id="url" placeholder="来源群组link"
 								 >
-						</div><div class="form-group">
+						</div><div class="form-group hide">
 							<label for="offset">开始序号</label> <input type="text"
 								class="form-control" id="offset" placeholder="开始序号"
 								value="0">
-						</div><div class="form-group">
+						</div><div class="form-group hide">
 							<label for="limit">计划用户数</label> <input type="text"
 								class="form-control" id="limit" placeholder="计划用户数"
 								 value="45">

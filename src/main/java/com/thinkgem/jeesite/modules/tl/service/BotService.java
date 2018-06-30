@@ -258,7 +258,7 @@ public class BotService {
 		}
 	}
 
-	//@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+	// @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	@Transactional(readOnly = false)
 	public void collectUsersOfTask(RequestData data, String taskid) {
 		// 根据任务id，找到调用方法的参数
@@ -287,13 +287,16 @@ public class BotService {
 		Group g = groupService.get(data.getChatId() + "");
 		if (g == null) {
 			//
-			throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
+			throw new RuntimeException("群组id=" + data.getChatId()
+					+ "在表tl_group 中不存在！");
 		}
-		int offset = g.getOffset()==null ? 0:g.getOffset();
+		int offset = g.getOffset() == null ? 0 : g.getOffset();
 		int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
-		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
+				data.getChatAccessHash(), offset, limitNum);
+		logger.info("拉取群组用户结果：job={}，account={},size={}",
+				task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		// 更新群组的offset
@@ -327,6 +330,12 @@ public class BotService {
 			t.setUsernum(num);
 			t.setStatus(JobTask.STATUS_FETCHED);
 			jobTaskService.save(t);
+		}
+
+		// 超过10000个账号限制
+		if (offset + limitNum > 10000) {
+			logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。",
+					task.getString("jobId"), data.getPhone());
 		}
 	}
 
@@ -423,7 +432,8 @@ public class BotService {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
+					+ " ，job= " + data.getJobid());
 		}
 	}
 
@@ -498,8 +508,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
-					c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
+					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
