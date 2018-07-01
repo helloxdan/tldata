@@ -2,6 +2,7 @@
  * Copyright &copy; 2017-2020 <a href="https://www.gzruimin.com">gzruimin</a> All rights reserved.
  */
 package com.thinkgem.jeesite.modules.tl.web;
+
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,14 +18,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
+import com.thinkgem.jeesite.modules.tl.service.BotService;
 import com.thinkgem.jeesite.modules.tl.service.GroupService;
+
 /**
  * 群组Controller
+ * 
  * @author admin
  * @version 2018-06-02
  */
@@ -34,23 +39,25 @@ public class GroupController extends BaseController {
 
 	@Autowired
 	private GroupService groupService;
-	
+	@Autowired
+	private BotService botService;
+
 	@ModelAttribute
-	public Group get(@RequestParam(required=false) String id) {
+	public Group get(@RequestParam(required = false) String id) {
 		Group entity = null;
-		if (StringUtils.isNotBlank(id)){
+		if (StringUtils.isNotBlank(id)) {
 			entity = groupService.get(id);
 		}
-		if (entity == null){
+		if (entity == null) {
 			entity = new Group();
 		}
 		return entity;
 	}
-	
+
 	@RequiresPermissions("tl:group:view")
-	@RequestMapping(value = {"list", ""})
+	@RequestMapping(value = { "list", "" })
 	public String list(Group group, HttpServletRequest request, HttpServletResponse response, Model model) {
-		Page<Group> page = groupService.findPage(new Page<Group>(request, response), group); 
+		Page<Group> page = groupService.findPage(new Page<Group>(request, response), group);
 		model.addAttribute("page", page);
 		return "modules/tl/groupList";
 	}
@@ -65,22 +72,35 @@ public class GroupController extends BaseController {
 	@RequiresPermissions("tl:group:edit")
 	@RequestMapping(value = "save")
 	public String save(Group group, Model model, RedirectAttributes redirectAttributes) {
-		if (!beanValidator(model, group)){
+		if (!beanValidator(model, group)) {
 			return form(group, model);
 		}
-		groupService.save(group);
-		addMessage(redirectAttributes, "保存群组成功");
-		return "redirect:"+Global.getAdminPath()+"/tl/group/?repage";
+		if (StringUtils.isNotBlank(group.getUrl())) {
+
+			// get group info by link
+			// 获取目标群组信息,
+			if (group.getIsNewRecord()) {
+				botService.getGroupidByUrl(group.getUrl());
+			} else {
+				groupService.save(group);
+			}
+			addMessage(redirectAttributes, "保存群组成功");
+
+		} else {
+			addMessage(redirectAttributes, "link url 不能为空");
+
+		}
+		return "redirect:" + Global.getAdminPath() + "/tl/group/?repage";
 	}
-	
+
 	@RequiresPermissions("tl:group:edit")
 	@RequestMapping(value = "delete")
 	public String delete(Group group, RedirectAttributes redirectAttributes) {
 		groupService.delete(group);
 		addMessage(redirectAttributes, "删除群组成功");
-		return "redirect:"+Global.getAdminPath()+"/tl/group/?repage";
+		return "redirect:" + Global.getAdminPath() + "/tl/group/?repage";
 	}
-	
+
 	@RequiresPermissions("tl:group:edit")
 	@RequestMapping(value = "del")
 	@ResponseBody
@@ -96,6 +116,5 @@ public class GroupController extends BaseController {
 		}
 		return modelMap;
 	}
-	
 
 }

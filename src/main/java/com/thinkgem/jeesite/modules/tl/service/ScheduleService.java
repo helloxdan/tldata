@@ -77,7 +77,7 @@ public class ScheduleService {
 				Group group = groupService.get(g.getId());
 				// group.setUrl(link);
 				group.setUsernum(usernum);
-
+				group.preUpdate();
 				groupService.save(group);
 			} else {
 				logger.warn("通过账号{}无法获取群组【{}】的link",

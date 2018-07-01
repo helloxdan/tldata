@@ -33,4 +33,7 @@ UPDATE tl_task a SET
 			usernum = (select count(*) from tl_job_user where job_id='20180701-01' and account=a.account)
 		WHERE job_id = '20180701-01'
 		
+
+#
+update tl_group set out_ ='0' where out_ is null;		
  

@@ -79,7 +79,7 @@
 			<div class="form-group cxtj_text"><label>群组名称：</label>
 				<form:input path="name" htmlEscape="false" maxlength="200" class="form-control"/>
 			</div>
-			<div class="form-group cxtj_text"><label>邀请码：</label>
+			<div class="form-group cxtj_text"><label>邀请link：</label>
 				<form:input path="url" htmlEscape="false" maxlength="100" class="form-control"/>
 			</div>
 			<div class="form-group cxtj_text"><label>是否频道：</label>
@@ -111,7 +111,7 @@
 				<th><input type="checkbox" id="checkAll" /></th>
 				<th class="sort-column a.id">群组ID</th>
 				<th class="sort-column a.name">群组名称</th>
-				<th class="sort-column a.url">邀请码</th>
+				<th class="sort-column a.url">邀请link</th>
 				<th class="sort-column a.is_channel">是否频道</th>
 				<th class="sort-column a.usernum">用户数</th>
 				<th class="sort-column a.update_num">更新次数</th>
@@ -152,9 +152,9 @@
 				</td>
 				 
 				<td> 
-					 <a href="${ctx}/tl/job/form?groupId=${group.id}">新建任务</a>
+					<%--  <a href="${ctx}/tl/job/form?groupId=${group.id}">新建任务</a>
 					  <a href="${rctx}/api/tl/collectUsers?chatId=${group.id}">拉取现有用户</a>
-					  <a href="${rctx}/api/tl/groupInfo?chatId=${group.id}">详情</a>
+					  <a href="${rctx}/api/tl/groupInfo?chatId=${group.id}">详情</a> --%>
 				</td>
 			</tr>
 		</c:forEach>

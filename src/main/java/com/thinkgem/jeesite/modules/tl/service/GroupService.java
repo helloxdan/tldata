@@ -38,6 +38,8 @@ public class GroupService extends CrudService<GroupDao, Group> {
 
 	@Transactional(readOnly = false)
 	public void save(Group group) {
+		if(group.getOut()==null)
+			group.setOut("0");
 		super.save(group);
 	}
 
@@ -75,6 +77,7 @@ public class GroupService extends CrudService<GroupDao, Group> {
 			logger.info("新增群组，{}，{}，{}", group.getId(), group.getName(),
 					group.getIsChannel());
 			group.setIsNewRecord(true);
+			group.preInsert();
 			save(group);
 		} else {
 			group.preUpdate();

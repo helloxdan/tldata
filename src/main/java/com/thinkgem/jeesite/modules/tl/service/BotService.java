@@ -549,7 +549,11 @@ public class BotService {
 				group.setUrl(groupUrl);
 				group.setName(ginfo.getString("title"));
 				group.setUsername(ginfo.getString("username"));
+				group.setIsChannel("1");
 				group.setUsernum(ginfo.getInteger("usernum"));
+				group.setUpdateNum(0);
+				group.setOut("0");
+				group.setStatus("0");
 				groupService.insertOrUpdate(group);
 
 				result.put("groupid", groupid);
