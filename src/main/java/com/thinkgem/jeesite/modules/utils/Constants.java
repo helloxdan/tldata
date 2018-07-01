@@ -20,4 +20,7 @@ public class Constants {
 	public static final int PER_SIZE=50;//tl 每天最多拉40人，但很多时候给的用户加不上，只能给的值比40大
 
 	public static final double PER_SIZE_DOUBLE=50D;
+	
+	public static final int MIN_CACHE_USER_NUM=100;//最低的储备用户数
+	
 }

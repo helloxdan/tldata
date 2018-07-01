@@ -53,6 +53,9 @@ public class JobService extends CrudService<JobDao, Job> {
 	@Transactional(readOnly = false)
 	public void delete(Job job) {
 		super.delete(job);
+		
+		//delete job data 
+//		TODO
 	}
 
 	@Transactional(readOnly = false)

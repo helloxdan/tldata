@@ -95,22 +95,17 @@ public class XUserBot implements IBot {
 			final IChatsHandler chatsHandler = new ChatsHandler(botDataService);
 			final MessageHandler messageHandler = new MessageHandler();
 			messageHandler.setBotConfig(botConfig);
-			final TLMessageHandler tlMessageHandler = new TLMessageHandler(
-					messageHandler, botDataService);
+			final TLMessageHandler tlMessageHandler = new TLMessageHandler(messageHandler, botDataService);
 
-			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(
-					CustomUpdatesHandler.class);
-			builder.setBotConfig(botConfig).setDatabaseManager(botDataService)
-					.setUsersHandler(usersHandler)
-					.setChatsHandler(chatsHandler)
-					.setMessageHandler(messageHandler)
+			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(CustomUpdatesHandler.class);
+			builder.setBotConfig(botConfig).setDatabaseManager(botDataService).setUsersHandler(usersHandler)
+					.setChatsHandler(chatsHandler).setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
 			logger.info("创建实例，" + phone);
 			kernel = new TelegramBot(botConfig, builder, apikey, apihash);
 			// 覆盖默认的DifferenceParametersService
-			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
-					botDataService);
+			DifferenceParametersService differenceParametersService = new DifferenceParametersService(botDataService);
 			differenceParametersService.setAccount(getAccount());// 注入实例账号
 			builder.setDifferenceParametersService(differenceParametersService);
 
@@ -138,8 +133,7 @@ public class XUserBot implements IBot {
 	@Override
 	public JSONObject getState() {
 		logger.info("getState，" + getAccount());
-		boolean isAuthenticated = kernel.getKernelComm().getApi().getState()
-				.isAuthenticated();
+		boolean isAuthenticated = kernel.getKernelComm().getApi().getState().isAuthenticated();
 		JSONObject json = new JSONObject();
 		json.put("isAuthenticated", isAuthenticated);
 		json.put("isRunning", kernel.getMainHandler().isRunning());
@@ -192,8 +186,7 @@ public class XUserBot implements IBot {
 				TLRequestChannelsJoinChannel join = new TLRequestChannelsJoinChannel();
 				TLInputChannel ch = new TLInputChannel();
 				ch.setChannelId(peer.getChats().get(0).getId());
-				ch.setAccessHash(((TLChannel) peer.getChats().get(0))
-						.getAccessHash());
+				ch.setAccessHash(((TLChannel) peer.getChats().get(0)).getAccessHash());
 				join.setChannel(ch);
 				TLAbsUpdates r = kernelComm.getApi().doRpcCall(join);
 
@@ -220,8 +213,7 @@ public class XUserBot implements IBot {
 		try {
 			TLRequestMessagesImportChatInvite req = new TLRequestMessagesImportChatInvite();
 			req.setHash(hash);
-			TLAbsUpdates result = kernel.getKernelComm().getApi()
-					.doRpcCall(req);
+			TLAbsUpdates result = kernel.getKernelComm().getApi().doRpcCall(req);
 			logger.info("入群结果：" + result);
 		} catch (IOException e) {
 			success = false;
@@ -249,8 +241,7 @@ public class XUserBot implements IBot {
 	 * @see org.telegram.plugins.xuser.IBot#collectUsers(java.lang.String)
 	 */
 	@Override
-	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash,
-			int offset, int limit) {
+	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash, int offset, int limit) {
 		TLVector<TLAbsUser> users = null;
 		logger.info("collectUsers from group ，" + chatId);
 		try {
@@ -335,8 +326,7 @@ public class XUserBot implements IBot {
 	}
 
 	@Override
-	public JSONObject getGroupInfo(int chatId, long chatAccessHash,
-			boolean ischannel) {
+	public JSONObject getGroupInfo(int chatId, long chatAccessHash, boolean ischannel) {
 		logger.info("{}，getGroupInfo ，{}", getAccount(), chatId);
 		JSONObject json = new JSONObject();
 		try {
@@ -356,16 +346,15 @@ public class XUserBot implements IBot {
 					json.put("username", chat.getUsername());
 				}
 				json.put("usernum", ch.getParticipantsCount());
-				
-				//需要管理员权限
-				
-			/*	TLRequestChannelsExportInvite req2=new TLRequestChannelsExportInvite();
-				req2.setChannel(channel);
-				TLAbsChatInvite r2 = api.doRpcCall(req2);
-				if(r2 instanceof TLChatInviteExported)
-				{
-					json.put("link", ((TLChatInviteExported)r2).getLink());
-				}*/
+
+				// 需要管理员权限
+
+				/*
+				 * TLRequestChannelsExportInvite req2=new TLRequestChannelsExportInvite();
+				 * req2.setChannel(channel); TLAbsChatInvite r2 = api.doRpcCall(req2); if(r2
+				 * instanceof TLChatInviteExported) { json.put("link",
+				 * ((TLChatInviteExported)r2).getLink()); }
+				 */
 
 			} else {
 				// TODO 未处理，少用到
@@ -393,6 +382,8 @@ public class XUserBot implements IBot {
 			}
 		} catch (IOException e) {
 			logger.error("取群信息失败", e);
+			// if private
+			// FIXME
 		} catch (TimeoutException e) {
 			logger.error("取群信息失败，超时", e);
 		}

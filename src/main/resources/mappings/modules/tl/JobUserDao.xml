@@ -87,12 +87,18 @@
 	<select id="findDistinctForJob" resultType="JobUser">
 		SELECT
 		<include refid="jobUserColumns" />
+		,u.star
 		FROM tl_job_user a
 		<include refid="jobUserJoins" /> 
+		LEFT JOIN tl_user u ON u.id=a.userid
 		<where>
 			a.del_flag = #{DEL_FLAG_NORMAL}
 			AND a.job_id = #{jobId}
 			AND a.account = #{account} 
+			<if test="star>-1">
+				AND u.star <![CDATA[ >= ]]> #{star}
+			</if>
+			
 			and not exists (select 1 from tl_job_user j where j.job_id=#{toJobid} and j.userid=a.userid)
 		</where> 
 	 limit ${limit}

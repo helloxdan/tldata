@@ -28,6 +28,8 @@ public class JobUser extends DataEntity<JobUser> {
 	private String status; // 是否已邀请
 	private String ids; // 删除记录ids
 
+	private int star=0;//用于查询用户
+	
 	// 用于查询，限定查询结果数量
 	private int limit = Constants.PER_SIZE;
 	//用户查询
@@ -140,4 +142,13 @@ public class JobUser extends DataEntity<JobUser> {
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
 	}
+
+	public int getStar() {
+		return star;
+	}
+
+	public void setStar(int star) {
+		this.star = star;
+	}
+	
 }

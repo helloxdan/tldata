@@ -166,7 +166,15 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			fetchUserToAccountFromGroup(jobid);
 
 		}
+		
+
 		return msg;
+	}
+
+	private void updateJobTaskUsernum(String jobid) {
+		JobTask task=new JobTask();
+		task.setJobId(jobid);
+		this.dao.updateJobTaskUsernum(task);
 	}
 
 	/**

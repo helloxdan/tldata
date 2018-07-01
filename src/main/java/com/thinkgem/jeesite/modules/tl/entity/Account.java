@@ -9,6 +9,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.thinkgem.jeesite.common.persistence.DataEntity;
+import com.thinkgem.jeesite.modules.utils.Constants;
 
 /**
  * 登录账号Entity
@@ -32,7 +33,7 @@ public class Account extends DataEntity<Account> {
 	private String role;
 	
 	//最少用户数，默认100个
-	private int minUsernum=100;
+	private int minUsernum= Constants.MIN_CACHE_USER_NUM;
 	//用于查询，限定用户数量
 	private int limit=10;
 	private String jobid;

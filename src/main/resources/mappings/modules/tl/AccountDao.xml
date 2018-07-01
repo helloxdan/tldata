@@ -96,6 +96,7 @@
 		<include refid="accountJoins"/>
 		<where>
 			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.role_='0'
 			 <!-- 账号没有被分配过 -->
 			and a.id not in (select account from tl_job_user j where j.job_id=#{jobid})
 		</where>		
@@ -158,7 +159,7 @@
 		WHERE status = 'run'
 	</update>
 	<update id="updateUsernum">
-		update tl_account t set usernum=(select count(distinct userid) from tl_job_user c where c.account=t.id)
+		update tl_account t set usernum=(select count(distinct userid) from tl_job_user c where c.account=t.id  and job_id='auto')
 	</update>
 	<update id="updateGroupnum">
 		update tl_account t set groupnum=(select count(distinct chatid) from tl_chat c where c.account=t.id)

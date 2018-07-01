@@ -220,8 +220,8 @@
 					<a onclick="addBatch()"class="btn btn-blue">批量新增</a>
 				<input id="btnDel" class="btn btn-blue" type="button" value="删除" />
 				
-					<a onclick="initAccount()"class="btn btn-blue">初始化账号</a>
-						<a onclick="startBatch()" class="btn btn-blue">批量启动</a>
+					<a onclick="initAccount()"class="btn btn-blue">账号下线</a>
+						<a onclick="startBatch()" class="btn btn-blue hide">批量启动</a>
 			</div>	
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>
@@ -231,7 +231,7 @@
 				<th class="sort-column a.name">账号名</th>
 				<th class="sort-column a.login_date">最近登录时间</th>
 				<th class="sort-column a.status">账号状态</th>
-				<th class="sort-column a.usernum">用户数量</th>
+				<th class="sort-column a.usernum">储备用户数量</th>
 				<th class="sort-column a.groupnum">群组数量</th>
 				<th class="sort-column a.update_date">更新时间</th>
 				<th >操作</th>
