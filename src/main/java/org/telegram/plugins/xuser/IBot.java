@@ -20,9 +20,10 @@ public interface IBot {
 
 	JSONObject importInvite(String url);
 
-	TLVector<TLAbsUser> collectUsers(int chatId,long accessHash,int offset,int limit);
+	TLVector<TLAbsUser> collectUsers(int chatId, long accessHash, int offset,
+			int limit);
 
-	void addUsers(int chatId,long accessHash,List<JobUser> users);
+	void addUsers(int chatId, long accessHash, List<JobUser> users);
 
 	JSONObject getState();
 
@@ -30,4 +31,5 @@ public interface IBot {
 
 	JSONObject searchUser(String username);
 
+	JSONObject registe(String phone);
 }

@@ -18,7 +18,6 @@ import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
-import com.thinkgem.jeesite.modules.utils.Constants;
 
 /**
  * 调度任务Service
@@ -76,8 +75,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	}
 
 	public static void main(String[] args) {
-		/* System.out.println(50/ Constants.PER_SIZE_DOUBLE+"-"+Math.ceil(50/ Constants.PER_SIZE_DOUBLE)); */
-		int num = (int) Math.ceil(50 / Constants.PER_SIZE_DOUBLE);
+		/* System.out.println(50/40D+"-"+Math.ceil(50/40D)); */
+		int num = (int) Math.ceil(50 / 40D);
 		System.out.println(num);
 	}
 
@@ -96,7 +95,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		int toUserNum = data.getNum();
 
 		// 需要账号数量，总人数/40
-		int num = (int) Math.ceil(toUserNum /  Constants.PER_SIZE_DOUBLE);
+		int num = (int) Math.ceil(toUserNum / 40D);
 
 		if ("any".equals(type)) {
 			// 用户来自不同群组，任意选择
@@ -124,24 +123,22 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				msg = msg + " 只有" + num + "个账号可用,全部提交运行。您需要更多的账号,才能满足需求！！";
 			}
 
-			if (num == 0)
-				return msg;
 			// 只取固定数量的账号
 			// List<Account> list = new ArrayList<Account>();
 			// for (int i = 0; i < num; i++) {
 			// list.add(alist.get(i));
 			// }
 
-			int offsetNum = data.getOffset();
-			int limitNum = data.getLimit();
-			int n = 0;
+			// int offsetNum = data.getOffset();
+			// int limitNum = data.getLimit();
+
 			// 按规则批量生成任务。
 			for (Account ac : alist) {
 				// 总数超过10000，取消。每个群组最多拉取10000人
-				if (offsetNum + limitNum > 10000) {
-					msg = msg + " 拉取人数超过10000人，退出；";
-					break;
-				}
+				// if (offsetNum + limitNum > 10000) {
+				// msg = msg + " 拉取人数超过10000人，退出；";
+				// break;
+				// }
 
 				JobTask jobTask = new JobTask();
 				jobTask.setIsNewRecord(true);
@@ -157,7 +154,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				jobTask.setUsernum(0);
 				jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
 
-				offsetNum = offsetNum + limitNum;
+				// offsetNum = offsetNum + limitNum;
 
 				save(jobTask);// 保存记录
 			}
@@ -166,15 +163,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			fetchUserToAccountFromGroup(jobid);
 
 		}
-		
-
 		return msg;
-	}
-
-	private void updateJobTaskUsernum(String jobid) {
-		JobTask task=new JobTask();
-		task.setJobId(jobid);
-		this.dao.updateJobTaskUsernum(task);
 	}
 
 	/**
@@ -189,7 +178,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		while (list.size() > 0) {
 			for (JobTask jt : list) {
 				RequestData data = new RequestData();
-				data.setLimit(Constants.PER_SIZE - jt.getUsernum() + 10);
+				data.setLimit(40 - jt.getUsernum() + 10);
 				botService.collectUsersOfTask(data, jt.getId());
 			}
 
@@ -208,10 +197,10 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		JobTask jobTask = new JobTask();
 		jobTask.setType("fetch");
 		jobTask.setJobId(jobid);
-		jobTask.setUsernum(Constants.PER_SIZE);
+		jobTask.setUsernum(40);
 		jobTask.setStatus(JobTask.STATUS_NONE);//
 		List<JobTask> list = findList(jobTask);
-		logger.info("还有{}个账号用户数未达到"+Constants.PER_SIZE, list.size());
+		logger.info("还有{}个账号用户数未达到40", list.size());
 		return list;
 	}
 
@@ -224,7 +213,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	 *            账号数量
 	 * @param data
 	 */
-	public void dispatchUserToAccount(String jobid, int accountNum, RequestData data) {
+	public void dispatchUserToAccount(String jobid, int accountNum,
+			RequestData data) {
 		String msg = "";
 		// 从账户表中查询最多num条记录
 		Account account = new Account();
@@ -233,7 +223,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		List<Account> alist = accountService.findAccountForJob(account);
 		if (alist.size() < accountNum) {
 			accountNum = alist.size();
-			msg = msg + " 只有" + accountNum + "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
+			msg = msg + " 只有" + accountNum
+					+ "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
 		}
 
 		// 遍历账号，从自己储备用户用获取40个账号
@@ -244,19 +235,17 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			jobUser.setToJobid(jobid);// 限定目标job
 			List<JobUser> users = jobUserService.findDistinctForJob(jobUser);
 
-			if (users.size() > 0) {
-				// add job task
-				JobTask jobTask = new JobTask();
-				jobTask.setIsNewRecord(true);
-				jobTask.preInsert();
-				jobTask.setType("fetch");
-				jobTask.setJobId(jobid);
-				jobTask.setAccount(ac.getId());
-				jobTask.setUsernum(users.size());
-				jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
-				save(jobTask);
+			// add job task
+			JobTask jobTask = new JobTask();
+			jobTask.setIsNewRecord(true);
+			jobTask.preInsert();
+			jobTask.setType("fetch");
+			jobTask.setJobId(jobid);
+			jobTask.setAccount(ac.getId());
+			jobTask.setUsernum(users.size());
+			jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
+			save(jobTask);
 
-			}
 			// 拷贝用户到jobid中
 			for (JobUser ju : users) {
 				JobUser u = new JobUser();

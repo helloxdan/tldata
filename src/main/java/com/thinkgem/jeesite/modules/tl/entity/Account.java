@@ -37,6 +37,8 @@ public class Account extends DataEntity<Account> {
 	//用于查询，限定用户数量
 	private int limit=10;
 	private String jobid;
+	
+	private int trynum=1;
 
 	public Account() {
 		super();
@@ -127,6 +129,14 @@ public class Account extends DataEntity<Account> {
 
 	public void setRole(String role) {
 		this.role = role;
+	}
+
+	public int getTrynum() {
+		return trynum;
+	}
+
+	public void setTrynum(int trynum) {
+		this.trynum = trynum;
 	}
 	
 }

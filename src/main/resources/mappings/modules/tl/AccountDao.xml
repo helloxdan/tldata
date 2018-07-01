@@ -103,6 +103,7 @@
 		order by a.usernum asc limit ${limit}
 	</select>
 	
+	
 	<insert id="insert">
 		INSERT INTO tl_account(
 			id,
@@ -163,5 +164,37 @@
 	</update>
 	<update id="updateGroupnum">
 		update tl_account t set groupnum=(select count(distinct chatid) from tl_chat c where c.account=t.id)
+	</update>
+	
+	
+	<select id="findAccountInHis" resultType="Account">
+		SELECT id,trynum,status,update_date
+		FROM tl_account_his a 
+		<where>  
+			and a.id=#{id}
+		</where>		
+		 limit 1
+	</select>
+	<insert id="insertAccountHis">
+		INSERT INTO tl_account_his(
+			id,
+			trynum, 
+			status, 
+			update_date 
+		) VALUES (
+			#{id},
+			#{trynum},
+			#{status}, 
+			#{updateDate} 
+		)
+	</insert>
+	
+		<update id="updateAccountHis">
+		UPDATE tl_account_his SET 	
+			id = #{id},
+			trynum = #{trynum},
+			status = #{status}, 
+			update_date = #{updateDate}
+		WHERE id = #{id}
 	</update>
 </mapper>

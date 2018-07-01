@@ -88,10 +88,26 @@ public class AccountService extends CrudService<AccountDao, Account> {
 	}
 
 	public List<Account> findUnfullUserAccount(Account account) {
-		return this.dao.findUnfullUserAccount(account) ;
+		return this.dao.findUnfullUserAccount(account);
 	}
 
 	public List<Account> findAccountForJob(Account account) {
-		return this.dao.findAccountForJob(account) ;
+		return this.dao.findAccountForJob(account);
+	}
+
+	public Account findAccountInHis(String phone) {
+		Account account = new Account();
+		account.setId(phone);
+		return this.dao.findAccountInHis(account);
+	}
+
+	@Transactional(readOnly = false)
+	public void insertAccountHis(Account account) {
+		this.dao.insertAccountHis(account);
+	}
+
+	@Transactional(readOnly = false)
+	public void updateAccountHis(Account account) {
+		this.dao.updateAccountHis(account);
 	}
 }

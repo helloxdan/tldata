@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
+import com.thinkgem.jeesite.modules.tl.service.RegisteService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
@@ -29,40 +30,67 @@ public class BotApiController extends BaseController {
 
 	@Autowired
 	private BotService botService;
-	
+	@Autowired
+	private RegisteService registeService;
+
+	/**
+	 * 启动账号注册。
+	 * 
+	 * @param data
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/account/reg/start")
+	public ReturnWrap registe(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			registeService.autoRegiste();
+			result.setData("start……");
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+			logger.error("init ", e);
+		}
+		return result;
+	}
+
 	@RequestMapping(value = "/account/init")
-	public ReturnWrap accountInit(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap accountInit(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			String status = botService.accountInit(data);
 			result.setData(status);
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
-			logger.error("init ",e);
+			logger.error("init ", e);
 		}
 		return result;
 	}
-	/**批量启动
+
+	/**
+	 * 批量启动
+	 * 
 	 * @param data
 	 * @param request
 	 * @param response
 	 * @return
 	 */
 	@RequestMapping(value = "/startBatch")
-	public ReturnWrap startBatch(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap startBatch(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			String status = botService.startBatch(data);
 			result.setData(status);
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
-			logger.error("startBatch",e);
+			logger.error("startBatch", e);
 		}
 		return result;
 	}
-	
+
 	@RequestMapping(value = "/start")
 	public ReturnWrap sendImMessage(RequestData data,
 			HttpServletRequest request, HttpServletResponse response) {
@@ -72,7 +100,7 @@ public class BotApiController extends BaseController {
 			result.setData(status);
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
-			logger.error("start",e);
+			logger.error("start", e);
 		}
 		return result;
 	}
@@ -87,7 +115,7 @@ public class BotApiController extends BaseController {
 
 		} catch (Exception e) {
 			result.fail("取状态异常，" + e.getMessage());
-			logger.error("getState",e);
+			logger.error("getState", e);
 		}
 		return result;
 	}
@@ -105,7 +133,7 @@ public class BotApiController extends BaseController {
 			}
 		} catch (Exception e) {
 			result.fail("设置验证码异常，" + e.getMessage());
-			logger.error("setAuthCode",e);
+			logger.error("setAuthCode", e);
 		}
 		return result;
 	}
@@ -123,17 +151,17 @@ public class BotApiController extends BaseController {
 			}
 		} catch (Exception e) {
 			result.fail("设置管理员异常，" + e.getMessage());
-			logger.error("setAdmin",e);
+			logger.error("setAdmin", e);
 		}
 		return result;
 	}
 
 	@RequestMapping(value = "/groupInfo")
-	public ReturnWrap groupInfo(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap groupInfo(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
-			  JSONObject json = botService.groupInfo(data);
+			JSONObject json = botService.groupInfo(data);
 			if (json.containsKey("title")) {
 				result.success(json);
 			} else {
@@ -141,10 +169,11 @@ public class BotApiController extends BaseController {
 			}
 		} catch (Exception e) {
 			result.fail("取群详情，" + e.getMessage());
-			logger.error("groupInfo",e);
+			logger.error("groupInfo", e);
 		}
 		return result;
 	}
+
 	@RequestMapping(value = "/importInvite")
 	public ReturnWrap importInvite(RequestData data,
 			HttpServletRequest request, HttpServletResponse response) {
@@ -158,7 +187,7 @@ public class BotApiController extends BaseController {
 			}
 		} catch (Exception e) {
 			result.fail("加群异常，" + e.getMessage());
-			logger.error("importInvite ",e);
+			logger.error("importInvite ", e);
 		}
 		return result;
 	}
@@ -172,12 +201,11 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("收集用户信息异常，" + e.getMessage());
-			logger.error("collectUsers",e);
+			logger.error("collectUsers", e);
 		}
 
 		return result;
 	}
-	
 
 	@RequestMapping(value = "/cleanJobUser")
 	public ReturnWrap cleanJobUser(RequestData data,
@@ -188,11 +216,12 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("清洗用户信息异常，" + e.getMessage());
-			logger.error("cleanJobUser",e);
+			logger.error("cleanJobUser", e);
 		}
 
 		return result;
 	}
+
 	@RequestMapping(value = "/addUsers")
 	public ReturnWrap addUsers(RequestData data, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -202,7 +231,7 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("收集用户信息异常，" + e.getMessage());
-			logger.error("addUsers",e);
+			logger.error("addUsers", e);
 		}
 
 		return result;
@@ -217,7 +246,7 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("停止异常，" + e.getMessage());
-			logger.error("stop",e);
+			logger.error("stop", e);
 		}
 
 		return result;

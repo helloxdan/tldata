@@ -6,18 +6,18 @@ import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.telegram.api.auth.TLSentCode;
 import org.telegram.api.channel.TLChannelParticipants;
 import org.telegram.api.channel.participants.filters.TLChannelParticipantsFilterRecent;
 import org.telegram.api.chat.TLAbsChat;
 import org.telegram.api.chat.TLChat;
 import org.telegram.api.chat.channel.TLChannel;
 import org.telegram.api.chat.channel.TLChannelFull;
-import org.telegram.api.chat.invite.TLAbsChatInvite;
-import org.telegram.api.chat.invite.TLChatInviteExported;
 import org.telegram.api.contacts.TLContactsFound;
 import org.telegram.api.contacts.TLResolvedPeer;
+import org.telegram.api.engine.RpcException;
 import org.telegram.api.engine.TelegramApi;
-import org.telegram.api.functions.channels.TLRequestChannelsExportInvite;
+import org.telegram.api.functions.auth.TLRequestAuthSendCode;
 import org.telegram.api.functions.channels.TLRequestChannelsGetFullChannel;
 import org.telegram.api.functions.channels.TLRequestChannelsGetParticipants;
 import org.telegram.api.functions.channels.TLRequestChannelsInviteToChannel;
@@ -56,6 +56,7 @@ import com.thinkgem.jeesite.modules.sys.entity.Log;
 import com.thinkgem.jeesite.modules.sys.utils.LogUtils;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.service.BotDataService;
+import com.thinkgem.jeesite.modules.utils.Constants;
 
 public class XUserBot implements IBot {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
@@ -95,17 +96,22 @@ public class XUserBot implements IBot {
 			final IChatsHandler chatsHandler = new ChatsHandler(botDataService);
 			final MessageHandler messageHandler = new MessageHandler();
 			messageHandler.setBotConfig(botConfig);
-			final TLMessageHandler tlMessageHandler = new TLMessageHandler(messageHandler, botDataService);
+			final TLMessageHandler tlMessageHandler = new TLMessageHandler(
+					messageHandler, botDataService);
 
-			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(CustomUpdatesHandler.class);
-			builder.setBotConfig(botConfig).setDatabaseManager(botDataService).setUsersHandler(usersHandler)
-					.setChatsHandler(chatsHandler).setMessageHandler(messageHandler)
+			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(
+					CustomUpdatesHandler.class);
+			builder.setBotConfig(botConfig).setDatabaseManager(botDataService)
+					.setUsersHandler(usersHandler)
+					.setChatsHandler(chatsHandler)
+					.setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
 			logger.info("创建实例，" + phone);
 			kernel = new TelegramBot(botConfig, builder, apikey, apihash);
 			// 覆盖默认的DifferenceParametersService
-			DifferenceParametersService differenceParametersService = new DifferenceParametersService(botDataService);
+			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
+					botDataService);
 			differenceParametersService.setAccount(getAccount());// 注入实例账号
 			builder.setDifferenceParametersService(differenceParametersService);
 
@@ -133,7 +139,8 @@ public class XUserBot implements IBot {
 	@Override
 	public JSONObject getState() {
 		logger.info("getState，" + getAccount());
-		boolean isAuthenticated = kernel.getKernelComm().getApi().getState().isAuthenticated();
+		boolean isAuthenticated = kernel.getKernelComm().getApi().getState()
+				.isAuthenticated();
 		JSONObject json = new JSONObject();
 		json.put("isAuthenticated", isAuthenticated);
 		json.put("isRunning", kernel.getMainHandler().isRunning());
@@ -186,7 +193,8 @@ public class XUserBot implements IBot {
 				TLRequestChannelsJoinChannel join = new TLRequestChannelsJoinChannel();
 				TLInputChannel ch = new TLInputChannel();
 				ch.setChannelId(peer.getChats().get(0).getId());
-				ch.setAccessHash(((TLChannel) peer.getChats().get(0)).getAccessHash());
+				ch.setAccessHash(((TLChannel) peer.getChats().get(0))
+						.getAccessHash());
 				join.setChannel(ch);
 				TLAbsUpdates r = kernelComm.getApi().doRpcCall(join);
 
@@ -213,7 +221,8 @@ public class XUserBot implements IBot {
 		try {
 			TLRequestMessagesImportChatInvite req = new TLRequestMessagesImportChatInvite();
 			req.setHash(hash);
-			TLAbsUpdates result = kernel.getKernelComm().getApi().doRpcCall(req);
+			TLAbsUpdates result = kernel.getKernelComm().getApi()
+					.doRpcCall(req);
 			logger.info("入群结果：" + result);
 		} catch (IOException e) {
 			success = false;
@@ -241,7 +250,8 @@ public class XUserBot implements IBot {
 	 * @see org.telegram.plugins.xuser.IBot#collectUsers(java.lang.String)
 	 */
 	@Override
-	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash, int offset, int limit) {
+	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash,
+			int offset, int limit) {
 		TLVector<TLAbsUser> users = null;
 		logger.info("collectUsers from group ，" + chatId);
 		try {
@@ -326,7 +336,8 @@ public class XUserBot implements IBot {
 	}
 
 	@Override
-	public JSONObject getGroupInfo(int chatId, long chatAccessHash, boolean ischannel) {
+	public JSONObject getGroupInfo(int chatId, long chatAccessHash,
+			boolean ischannel) {
 		logger.info("{}，getGroupInfo ，{}", getAccount(), chatId);
 		JSONObject json = new JSONObject();
 		try {
@@ -350,9 +361,10 @@ public class XUserBot implements IBot {
 				// 需要管理员权限
 
 				/*
-				 * TLRequestChannelsExportInvite req2=new TLRequestChannelsExportInvite();
-				 * req2.setChannel(channel); TLAbsChatInvite r2 = api.doRpcCall(req2); if(r2
-				 * instanceof TLChatInviteExported) { json.put("link",
+				 * TLRequestChannelsExportInvite req2=new
+				 * TLRequestChannelsExportInvite(); req2.setChannel(channel);
+				 * TLAbsChatInvite r2 = api.doRpcCall(req2); if(r2 instanceof
+				 * TLChatInviteExported) { json.put("link",
 				 * ((TLChatInviteExported)r2).getLink()); }
 				 */
 
@@ -434,5 +446,81 @@ public class XUserBot implements IBot {
 			logger.error("searchUser失败", e);
 		}
 		return json;
+	}
+
+	/**
+	 * 账号注册。
+	 * 
+	 * @param phone
+	 * @return
+	 */
+	@Override
+	public JSONObject registe(String phone) {
+		JSONObject data = new JSONObject();
+		boolean result = false;
+		String status = null;
+		final BotConfig config = kernel.getConfig();
+		logger.info("Sending code to phone " + phone + "...");
+		TLSentCode sentCode = null;
+		try {
+			try {
+				final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
+				sentCode = kernel.getKernelComm().getApi()
+						.doRpcCallNonAuth(tlRequestAuthSendCode);
+				// createNextCodeTimer(sentCode.getTimeout());
+				logger.info(
+						"sentCode,isPhoneRegistered={},type={},nextType={},timeout={}",
+						sentCode.isPhoneRegistered(), sentCode.getType(),
+						sentCode.getNextType(), sentCode.getTimeout());
+				// 判断是否为新手机号，没注册过的
+				if (!sentCode.isPhoneRegistered()) {
+					// 未注册过
+					status = "未注册";
+					config.setRegistered(true);
+					result = true;
+					// 进入等待状态，待输入验证码
+				} else {
+					// 已注册，写入黑名单
+					result = false;
+					status = "黑名单";
+				}
+			} catch (RpcException e) {
+				logger.error("注册接口调用失败", e);
+				result = false;
+			} catch (TimeoutException e) {
+				logger.error("注册发送信息接口调用超时", e);
+				sentCode = null;
+				result = false;
+			}
+			if (sentCode != null) {
+				config.setHashCode(sentCode.getPhoneCodeHash());
+				config.setRegistered(sentCode.isPhoneRegistered());
+				logger.info("sent Code to {}", phone);
+				// data.put("status", LoginStatus.CODESENT);
+				status = LoginStatus.CODESENT.name();
+			} else {
+				// data.put("status", LoginStatus.ERRORSENDINGCODE);
+				status = LoginStatus.ERRORSENDINGCODE.name();
+				result = false;
+			}
+		} catch (Exception e) {
+			logger.error("registe Account failure", phone);
+			// result = LoginStatus.UNEXPECTEDERROR;
+			result = false;
+		}
+		// 记录结果
+		data.put("result", result);
+		data.put("status", status);
+		return data;
+	}
+
+	private TLRequestAuthSendCode getSendCodeRequest() {
+		BotConfig config = kernel.getConfig();
+		final TLRequestAuthSendCode tlRequestAuthSendCode = new TLRequestAuthSendCode();
+		tlRequestAuthSendCode.setPhoneNumber(config.getPhoneNumber());
+		tlRequestAuthSendCode.setApiId(Constants.APIKEY);
+		tlRequestAuthSendCode.setApiHash(Constants.APIHASH);
+		// tlRequestAuthSendCode.set
+		return tlRequestAuthSendCode;
 	}
 }

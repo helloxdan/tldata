@@ -11,6 +11,7 @@ import com.thinkgem.jeesite.modules.tl.entity.Account;
 
 /**
  * 登录账号DAO接口
+ * 
  * @author admin
  * @version 2018-06-02
  */
@@ -26,5 +27,10 @@ public interface AccountDao extends CrudDao<Account> {
 	List<Account> findUnfullUserAccount(Account account);
 
 	List<Account> findAccountForJob(Account account);
-	
+
+	Account findAccountInHis(Account account);
+
+	void insertAccountHis(Account account);
+
+	void updateAccountHis(Account account);
 }
