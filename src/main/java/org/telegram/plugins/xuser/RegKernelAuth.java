@@ -24,6 +24,7 @@ import org.telegram.bot.kernel.engine.MemoryApiState;
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.LoginStatus;
+import org.telegram.plugins.xuser.support.CreateRandomField;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -46,7 +47,8 @@ public class RegKernelAuth extends KernelAuth {
 	private final String apiHash;
 	private Timer loginTimer = new Timer();
 
-	public RegKernelAuth(AbsApiState apiState, BotConfig config, IKernelComm kernelComm, int apiKey, String apiHash) {
+	public RegKernelAuth(AbsApiState apiState, BotConfig config,
+			IKernelComm kernelComm, int apiKey, String apiHash) {
 		super(apiState, config, kernelComm, apiKey, apiHash);
 		this.kernelComm = kernelComm;
 		this.apiState = apiState;
@@ -70,7 +72,8 @@ public class RegKernelAuth extends KernelAuth {
 		boolean result;
 		try {
 			if (getApiState().isAuthenticated()) {
-				kernelComm.doRpcCallSync(new TLRequestAuthLogOut()); // Logout previous
+				kernelComm.doRpcCallSync(new TLRequestAuthLogOut()); // Logout
+																		// previous
 				getApiState().resetAuth(); // Reset previous stored credentials
 				config.setRegistered(false);
 			} else {
@@ -102,16 +105,20 @@ public class RegKernelAuth extends KernelAuth {
 				final TLAuthorization authorization;
 				if (config.isRegistered()) {
 					final TLRequestAuthSignIn tlRequestAuthSignIn = getSignInRequest(code);
-					authorization = kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSignIn);
+					authorization = kernelComm.getApi().doRpcCallNonAuth(
+							tlRequestAuthSignIn);
 				} else {
 					final TLRequestAuthSignUp tlRequestAuthSignUp = getSignUpRequest(code);
-					authorization = kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSignUp);
+					authorization = kernelComm.getApi().doRpcCallNonAuth(
+							tlRequestAuthSignUp);
 				}
 				if (authorization != null) {
 					config.setRegistered(true);
 					getApiState().doAuth(authorization);
-					BotLogger.info(LOGTAG, "Activation complete as #" + getApiState().getObj().getUid());
-					kernelComm.getApi().doRpcCall(new TLRequestUpdatesGetState());
+					BotLogger.info(LOGTAG, "Activation complete as #"
+							+ getApiState().getObj().getUid());
+					kernelComm.getApi().doRpcCall(
+							new TLRequestUpdatesGetState());
 					BotLogger.info(LOGTAG, "Loaded initial state");
 					resetTimer();
 					result = true;
@@ -136,17 +143,21 @@ public class RegKernelAuth extends KernelAuth {
 				result = LoginStatus.ALREADYLOGGED;
 			} else {
 				try {
-					final TLConfig config = kernelComm.getApi().doRpcCallNonAuth(new TLRequestHelpGetConfig());
+					final TLConfig config = kernelComm.getApi()
+							.doRpcCallNonAuth(new TLRequestHelpGetConfig());
 					BotLogger.info(LOGTAG, "Loaded DC list");
 					getApiState().updateSettings(config);
 				} catch (IOException | TimeoutException e) {
 					BotLogger.error(LOGTAG, e);
 				}
-				BotLogger.info(LOGTAG, "Sending code to phone " + config.getPhoneNumber() + "...");
+				BotLogger.info(LOGTAG,
+						"Sending code to phone " + config.getPhoneNumber()
+								+ "...");
 				TLSentCode sentCode = null;
 				try {
 					final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
-					sentCode = kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSendCode);
+					sentCode = kernelComm.getApi().doRpcCallNonAuth(
+							tlRequestAuthSendCode);
 					createNextCodeTimer(sentCode.getTimeout());
 				} catch (RpcException e) {
 					if (e.getErrorCode() == ERROR303) {
@@ -171,12 +182,15 @@ public class RegKernelAuth extends KernelAuth {
 					result = LoginStatus.ERRORSENDINGCODE;
 				}
 				/*
-				 * if (sentCode != null) { config.hashCode = sentCode.getPhoneCodeHash();
-				 * config.isRegistered = sentCode.isPhoneRegistered();
-				 * BotLogger.info(LOGTAG,"sent Code via " + sentCode.getType().toString()); do {
-				 * final String code = readCode(); if (!code.isEmpty() && setAuthCode(code)) {
-				 * result = 0; } if (result != 0) { System.out.println("Incorrect code!"); } }
-				 * while (result != 0); } else { result = -2; }
+				 * if (sentCode != null) { config.hashCode =
+				 * sentCode.getPhoneCodeHash(); config.isRegistered =
+				 * sentCode.isPhoneRegistered();
+				 * BotLogger.info(LOGTAG,"sent Code via " +
+				 * sentCode.getType().toString()); do { final String code =
+				 * readCode(); if (!code.isEmpty() && setAuthCode(code)) {
+				 * result = 0; } if (result != 0) {
+				 * System.out.println("Incorrect code!"); } } while (result !=
+				 * 0); } else { result = -2; }
 				 */
 			}
 		} catch (IOException | TimeoutException ex) {
@@ -196,25 +210,31 @@ public class RegKernelAuth extends KernelAuth {
 				result = LoginStatus.ALREADYLOGGED;
 			} else {
 				try {
-					final TLConfig config = kernelComm.getApi().doRpcCallNonAuth(new TLRequestHelpGetConfig());
+					final TLConfig config = kernelComm.getApi()
+							.doRpcCallNonAuth(new TLRequestHelpGetConfig());
 					BotLogger.info(LOGTAG, "Loaded DC list");
 					getApiState().updateSettings(config);
 				} catch (IOException | TimeoutException e) {
 					BotLogger.error(LOGTAG, e);
 				}
-				BotLogger.info(LOGTAG, "Sending code to phone " + config.getPhoneNumber() + "...");
+				BotLogger.info(LOGTAG,
+						"Sending code to phone " + config.getPhoneNumber()
+								+ "...");
 				try {
 					final TLRequestAuthImportBotAuthorization botAuthorization = new TLRequestAuthImportBotAuthorization();
 					botAuthorization.setApiId(this.apiKey);
 					botAuthorization.setApiHash(this.apiHash);
 					botAuthorization.setBotAuthToken(config.getBotToken());
-					TLAuthorization authorization = kernelComm.getApi().doRpcCallNonAuth(botAuthorization);
+					TLAuthorization authorization = kernelComm.getApi()
+							.doRpcCallNonAuth(botAuthorization);
 
 					if (authorization != null) {
 						config.setRegistered(true);
 						getApiState().doAuth(authorization);
-						BotLogger.info(LOGTAG, "Activation complete as #" + getApiState().getObj().getUid());
-						kernelComm.getApi().doRpcCall(new TLRequestUpdatesGetState());
+						BotLogger.info(LOGTAG, "Activation complete as #"
+								+ getApiState().getObj().getUid());
+						kernelComm.getApi().doRpcCall(
+								new TLRequestUpdatesGetState());
 						BotLogger.info(LOGTAG, "Loaded initial state");
 						result = LoginStatus.BOTLOGIN;
 					}
@@ -242,7 +262,8 @@ public class RegKernelAuth extends KernelAuth {
 			public void run() {
 				try {
 					final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
-					TLSentCode sentCode = kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSendCode);
+					TLSentCode sentCode = kernelComm.getApi().doRpcCallNonAuth(
+							tlRequestAuthSendCode);
 					this.cancel();
 					createNextCodeTimer(sentCode.getTimeout());
 				} catch (Exception e) {
@@ -263,11 +284,14 @@ public class RegKernelAuth extends KernelAuth {
 	public int updateDCWhenLogin(RpcException e) {
 		final int destDC;
 		if (e.getErrorTag().startsWith("NETWORK_MIGRATE_")) {
-			destDC = Integer.parseInt(e.getErrorTag().substring("NETWORK_MIGRATE_".length()));
+			destDC = Integer.parseInt(e.getErrorTag().substring(
+					"NETWORK_MIGRATE_".length()));
 		} else if (e.getErrorTag().startsWith("PHONE_MIGRATE_")) {
-			destDC = Integer.parseInt(e.getErrorTag().substring("PHONE_MIGRATE_".length()));
+			destDC = Integer.parseInt(e.getErrorTag().substring(
+					"PHONE_MIGRATE_".length()));
 		} else if (e.getErrorTag().startsWith("USER_MIGRATE_")) {
-			destDC = Integer.parseInt(e.getErrorTag().substring("USER_MIGRATE_".length()));
+			destDC = Integer.parseInt(e.getErrorTag().substring(
+					"USER_MIGRATE_".length()));
 		} else {
 			BotLogger.error(LOGTAG, e);
 			destDC = -1;
@@ -275,7 +299,8 @@ public class RegKernelAuth extends KernelAuth {
 		return destDC;
 	}
 
-	private TLSentCode retryLogin(int destDC) throws IOException, TimeoutException {
+	private TLSentCode retryLogin(int destDC) throws IOException,
+			TimeoutException {
 		final TLSentCode sentCode;
 		kernelComm.getApi().switchToDc(destDC);
 		final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
@@ -295,8 +320,23 @@ public class RegKernelAuth extends KernelAuth {
 		tlRequestAuthSignUp.setPhoneNumber(config.getPhoneNumber());
 		tlRequestAuthSignUp.setPhoneCodeHash(config.getHashCode());
 		tlRequestAuthSignUp.setPhoneCode(code);
-		tlRequestAuthSignUp.setFirstName("Rubenlagus");
-		tlRequestAuthSignUp.setLastName("Bot");
+		// FIXME 注册用户名
+		tlRequestAuthSignUp.setFirstName(CreateRandomField
+				.getRandomEnglishFirstName());
+		tlRequestAuthSignUp.setLastName(CreateRandomField
+				.getRandomEnglishLastName());
+		return tlRequestAuthSignUp;
+	}
+
+	private TLRequestAuthSignUp getSignUpRequest(String code, String firstName,
+			String lastName) {
+		final TLRequestAuthSignUp tlRequestAuthSignUp = new TLRequestAuthSignUp();
+		tlRequestAuthSignUp.setPhoneNumber(config.getPhoneNumber());
+		tlRequestAuthSignUp.setPhoneCodeHash(config.getHashCode());
+		tlRequestAuthSignUp.setPhoneCode(code);
+		// FIXME 注册用户名
+		tlRequestAuthSignUp.setFirstName(firstName);
+		tlRequestAuthSignUp.setLastName(lastName);
 		return tlRequestAuthSignUp;
 	}
 
@@ -317,17 +357,21 @@ public class RegKernelAuth extends KernelAuth {
 				result = LoginStatus.ALREADYLOGGED;
 			} else {
 				try {
-					final TLConfig config = kernelComm.getApi().doRpcCallNonAuth(new TLRequestHelpGetConfig());
+					final TLConfig config = kernelComm.getApi()
+							.doRpcCallNonAuth(new TLRequestHelpGetConfig());
 					BotLogger.info(LOGTAG, "Loaded DC list");
 					getApiState().updateSettings(config);
 				} catch (IOException | TimeoutException e) {
 					BotLogger.error(LOGTAG, e);
 				}
-				BotLogger.info(LOGTAG, "Sending code to phone " + config.getPhoneNumber() + "...");
+				BotLogger.info(LOGTAG,
+						"Sending code to phone " + config.getPhoneNumber()
+								+ "...");
 				TLSentCode sentCode = null;
 				try {
 					final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
-					sentCode = kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSendCode);
+					sentCode = kernelComm.getApi().doRpcCallNonAuth(
+							tlRequestAuthSendCode);
 					createNextCodeTimer(sentCode.getTimeout());
 				} catch (RpcException e) {
 					if (e.getErrorCode() == ERROR303) {
@@ -361,7 +405,8 @@ public class RegKernelAuth extends KernelAuth {
 		return result;
 	}
 
-	private TLSentCode retryRegiste(int destDC) throws IOException, TimeoutException {
+	private TLSentCode retryRegiste(int destDC) throws IOException,
+			TimeoutException {
 		final TLSentCode sentCode;
 		kernelComm.getApi().switchToDc(destDC);
 		final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
@@ -383,24 +428,35 @@ public class RegKernelAuth extends KernelAuth {
 			} else {
 				final TLAuthorization authorization;
 				/*
-				 * if (config.isRegistered()) { final TLRequestAuthSignIn tlRequestAuthSignIn =
-				 * getSignInRequest(code); authorization =
-				 * kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSignIn); } else { final
-				 * TLRequestAuthSignUp tlRequestAuthSignUp = getSignUpRequest(code);
-				 * authorization = kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSignUp); }
+				 * if (config.isRegistered()) { final TLRequestAuthSignIn
+				 * tlRequestAuthSignIn = getSignInRequest(code); authorization =
+				 * kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSignIn); }
+				 * else { final TLRequestAuthSignUp tlRequestAuthSignUp =
+				 * getSignUpRequest(code); authorization =
+				 * kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSignUp); }
 				 */
 				// 都执行 注册操作,依据检查结果判断是否注册成功
-				final TLRequestAuthSignUp tlRequestAuthSignUp = getSignUpRequest(code);
-				authorization = kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSignUp);
+				String firstName = CreateRandomField
+						.getRandomEnglishFirstName();
+				String lastName = CreateRandomField
+						.getRandomEnglishLastName();
+				final TLRequestAuthSignUp tlRequestAuthSignUp = getSignUpRequest(code,firstName,lastName);
+				authorization = kernelComm.getApi().doRpcCallNonAuth(
+						tlRequestAuthSignUp);
 				if (authorization != null) {
-
+					
 					config.setRegistered(true);
 					getApiState().doAuth(authorization);
-					BotLogger.info(LOGTAG, "Activation complete as #" + getApiState().getObj().getUid());
-					kernelComm.getApi().doRpcCall(new TLRequestUpdatesGetState());
+					BotLogger.info(LOGTAG, "Activation complete as #"
+							+ getApiState().getObj().getUid());
+					kernelComm.getApi().doRpcCall(
+							new TLRequestUpdatesGetState());
 					BotLogger.info(LOGTAG, "Loaded initial state");
 					resetTimer();
 					result = true;
+					
+					json.put("firstName", firstName);
+					json.put("lastName", lastName);
 				} else {
 					BotLogger.info(LOGTAG, "authorization is null");
 					type = "authorization is null";

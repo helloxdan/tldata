@@ -12,17 +12,33 @@
 	<!-- 调度池 -->
 	<bean id="scheduleService" class="com.thinkgem.jeesite.modules.tl.service.ScheduleService">
 	</bean>
+	<bean id="registeService" class="com.thinkgem.jeesite.modules.tl.service.RegisteService">
+	</bean>
 	<!-- <task:scheduler id="taskScheduler" pool-size="10" /> -->
 	<task:scheduled-tasks>
 		<!--更新群组的用户数量 -->
 		<task:scheduled ref="scheduleService" method="scheduleUpdateGroupInfo"
 			cron="0 0/10 * * * ?" />
-		<!-- 账号自动加入有效群组
-		<task:scheduled ref="scheduleService" method="scheduleJoinGroup"
+		<!-- 账号自动加入有效群组 <task:scheduled ref="scheduleService" method="scheduleJoinGroup" 
 			cron="0 0/5 * * * ?" /> -->
 		<!-- 抽取用户 -->
 		<task:scheduled ref="scheduleService" method="scheduleFetchUser"
 			cron="0/30 * * * * ?" />
+
+		<!-- 定时从卡商获取手机列表，3分钟一次 -->
+		<task:scheduled ref="registeService" method="getPhoneList"
+			cron="0 0/3 * * * ?" />
+		<!-- 定时从卡商获取手机验证码列表，10秒一次 -->
+		<task:scheduled ref="registeService" method="getPhoneCodeList"
+			cron="0/10 * * * * ?" />
+			
+		<!-- 定时向手机发送验证码 -->
+		<task:scheduled ref="registeService" method="autoRegiste"
+			cron="0/10 * * * * ?" />
+			
+		<!-- 定时检查验证码，并验证 -->
+		<task:scheduled ref="registeService" method="autoSentCode"
+			cron="0/5 * * * * ?" />
 
 
 		<!-- 每半分钟触发任务 <task:scheduled ref="app" method="execute1" cron="30 * * 

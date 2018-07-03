@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
+import com.thinkgem.jeesite.modules.tl.service.RegisteService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
@@ -30,6 +31,37 @@ public class BotApiController extends BaseController {
 	@Autowired
 	private BotService botService;
 
+	@Autowired
+	private RegisteService registeService;
+
+	@RequestMapping(value = "/reg/addPhone")
+	public ReturnWrap addRegPhone(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			registeService.addPhone(data.getPhone());
+			result.setData("add phone ok");
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+			logger.error("init ", e);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/reg/addPhoneCode")
+	public ReturnWrap addRegPhoneCode(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			registeService.addPhoneCode(data.getPhone(), data.getCode());
+			result.setData("add phone code ok");
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+			logger.error("init ", e);
+		}
+		return result;
+	}
+
 	/**
 	 * 启动账号注册。
 	 * 
@@ -38,8 +70,9 @@ public class BotApiController extends BaseController {
 	 * @param response
 	 * @return
 	 */
-	@RequestMapping(value = "/account/reg/start")
-	public ReturnWrap autoregiste(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	@RequestMapping(value = "/reg/auto/start")
+	public ReturnWrap autoregiste(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			// registeService.autoRegiste();
@@ -52,7 +85,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/account/reg")
-	public ReturnWrap registe(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap registe(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.registe(data.getPhone());
@@ -65,10 +99,12 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/account/reg/setAuthCode")
-	public ReturnWrap setRegCode(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap setRegCode(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
-			JSONObject json = botService.setRegAuthCode(data.getPhone(), data.getCode());
+			JSONObject json = botService.setRegAuthCode(data.getPhone(),
+					data.getCode());
 			if (json.getBooleanValue("result")) {
 				result.success(json);
 			} else {
@@ -83,7 +119,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/account/init")
-	public ReturnWrap accountInit(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap accountInit(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			String status = botService.accountInit(data);
@@ -104,7 +141,8 @@ public class BotApiController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "/startBatch")
-	public ReturnWrap startBatch(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap startBatch(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			String status = botService.startBatch(data);
@@ -117,7 +155,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/start")
-	public ReturnWrap sendImMessage(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap sendImMessage(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			LoginStatus status = botService.start(data);
@@ -130,7 +169,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/getState")
-	public ReturnWrap getState(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap getState(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			JSONObject state = botService.getState(data);
@@ -144,7 +184,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/setAuthCode")
-	public ReturnWrap setCode(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap setCode(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			boolean success = botService.setAuthCode(data);
@@ -161,7 +202,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/setAdmin")
-	public ReturnWrap setAdmin(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap setAdmin(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			boolean success = botService.setAdmin(data);
@@ -178,7 +220,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/groupInfo")
-	public ReturnWrap groupInfo(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap groupInfo(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			JSONObject json = botService.groupInfo(data);
@@ -195,7 +238,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/importInvite")
-	public ReturnWrap importInvite(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap importInvite(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			JSONObject json = botService.importInvite(data);
@@ -212,7 +256,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/collectUsers")
-	public ReturnWrap collectUsers(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap collectUsers(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.collectUsers(data);
@@ -226,7 +271,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/cleanJobUser")
-	public ReturnWrap cleanJobUser(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap cleanJobUser(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.cleanJobUser(data);
@@ -240,7 +286,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/addUsers")
-	public ReturnWrap addUsers(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap addUsers(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.addUsers(data);
@@ -254,7 +301,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/stop")
-	public ReturnWrap stop(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap stop(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.stop(data);

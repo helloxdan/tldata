@@ -112,6 +112,7 @@
 		<property name="password" value="${jdbc.password}"/>
 	</bean>-->
 	
-	
-	 
+	<!-- 卡商服务接口实现，默认空实现 -->
+	 <bean id="smsCardService" class="com.thinkgem.jeesite.modules.tl.service.EmptySmsCardService">
+	</bean>
 </beans>

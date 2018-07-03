@@ -291,13 +291,16 @@ public class BotService {
 		Group g = groupService.get(data.getChatId() + "");
 		if (g == null) {
 			//
-			throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
+			throw new RuntimeException("群组id=" + data.getChatId()
+					+ "在表tl_group 中不存在！");
 		}
 		int offset = g.getOffset() == null ? 0 : g.getOffset();
 		int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
-		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
+				data.getChatAccessHash(), offset, limitNum);
+		logger.info("拉取群组用户结果：job={}，account={},size={}",
+				task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		// 更新群组的offset
@@ -349,7 +352,8 @@ public class BotService {
 
 		// 超过10000个账号限制
 		if (offset + limitNum > 10000) {
-			logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。", task.getString("jobId"), data.getPhone());
+			logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。",
+					task.getString("jobId"), data.getPhone());
 		}
 	}
 
@@ -446,7 +450,8 @@ public class BotService {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
+					+ " ，job= " + data.getJobid());
 		}
 	}
 
@@ -521,8 +526,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
-					c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
+					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -615,6 +620,7 @@ public class BotService {
 	 */
 	@Transactional(readOnly = false)
 	public void registe(String phone) {
+		logger.info("注册，发送验证码，{}", phone);
 		String status = "FAILUE";
 		// 1.先检查账号是否已经注册过了
 		Account ac = accountService.findAccountInHis(phone);
@@ -707,6 +713,7 @@ public class BotService {
 		if (json.getBooleanValue("result")) {
 			logger.info("{}，注册成功", phone, code);
 			status = "SUCCESS";
+
 		} else {
 			if ("timeout".equals(json.getString("type"))) {
 				// try again
@@ -719,16 +726,19 @@ public class BotService {
 						status = "TIMEOUT";
 					} else {
 						status = "FAILURE";
+						// 清除
+						bots.put(phone, null);
 					}
 				}
 			} else {
 				// 失败,列入黑名单
 				status = "FAILURE";
+				// 清除
+				bots.put(phone, null);
 			}
 		}
-		
+
 		// 更新数据库
-		// 1.先检查账号是否已经注册过了
 		Account ac = accountService.findAccountInHis(phone);
 		if (ac != null) {
 			ac.setStatus(status);
@@ -737,6 +747,18 @@ public class BotService {
 			accountService.updateAccountHis(ac);
 		} else {
 			logger.error("{},不在数据库中,!!??");
+		}
+		// 成功，则写入账号表
+		if ("SUCCESS".equals(status)) {
+			ac = new Account();
+			ac.preInsert();
+			ac.setId(phone);
+			ac.setName(json.getString("firstName") + " "
+					+ json.getString("lastName"));
+			ac.setStatus("ready");
+			ac.setUsernum(0);
+			ac.setGroupnum(0);
+			accountService.save(ac);
 		}
 		return json;
 	}
