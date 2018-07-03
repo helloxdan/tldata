@@ -95,7 +95,7 @@ public class BotService {
 		System.out.println("Telegram bot 开始初始化……");
 		if ("true".equals(Global.getConfig("autoRun"))) {
 
-			accountInit(null);
+			// accountInit(null);
 		}
 	}
 
@@ -291,16 +291,13 @@ public class BotService {
 		Group g = groupService.get(data.getChatId() + "");
 		if (g == null) {
 			//
-			throw new RuntimeException("群组id=" + data.getChatId()
-					+ "在表tl_group 中不存在！");
+			throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
 		}
 		int offset = g.getOffset() == null ? 0 : g.getOffset();
 		int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
-				data.getChatAccessHash(), offset, limitNum);
-		logger.info("拉取群组用户结果：job={}，account={},size={}",
-				task.getString("jobId"), task.getString("account"),
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
+		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		// 更新群组的offset
@@ -352,8 +349,7 @@ public class BotService {
 
 		// 超过10000个账号限制
 		if (offset + limitNum > 10000) {
-			logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。",
-					task.getString("jobId"), data.getPhone());
+			logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。", task.getString("jobId"), data.getPhone());
 		}
 	}
 
@@ -450,8 +446,7 @@ public class BotService {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
-					+ " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
 		}
 	}
 
@@ -526,8 +521,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
-					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
+					c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -618,6 +613,7 @@ public class BotService {
 	 * 
 	 * @param phone
 	 */
+	@Transactional(readOnly = false)
 	public void registe(String phone) {
 		String status = "FAILUE";
 		// 1.先检查账号是否已经注册过了
@@ -625,17 +621,24 @@ public class BotService {
 		if (ac != null) {
 			if ("SUCCESS".equals(ac.getStatus())) {
 				logger.warn("账号{}已经在数据库中，不用注册了", phone);
-			} else {
+				return;
+			}
+			if ("FAILURE".equals(ac.getStatus())) {
 				// 2.检查账号是否已经处理过。有可能账号已经试过不成功，黑名单
 				logger.warn("账号{}注册失败，已列入黑名单", phone);
+				return;
+			} else {
+				// 记录尝试次数+1
+				ac.setTrynum(ac.getTrynum() + 1);
+				ac.setUpdateDate(new Date());
+				accountService.updateAccountHis(ac);
+				logger.warn("账号{}注册失败，try again", phone);
 			}
-			// 记录尝试次数+1
-			ac.setTrynum(ac.getTrynum() + 1);
-			ac.setUpdateDate(new Date());
-			accountService.updateAccountHis(ac);
+
 		}
 
 		XUserBot bot = (XUserBot) bots.get(phone);
+		bot = null;
 		if (bot == null) {
 			bot = new XUserBot();
 			bot.setBotDataService(botDataService);
@@ -644,24 +647,97 @@ public class BotService {
 			// 已经登陆过
 			throw new RuntimeException("账号{}实例已经创建，说明已经操作过了");
 		}
+		boolean save = true;
 		// 注册
-		JSONObject json = bot.registe(phone);
-		if (json.getBooleanValue("result")) {
+		JSONObject json = bot.registe(phone, APIKEY, APIHASH);
+		if ("success".equals(json.getString("result"))) {
 			// 成功
 			status = "SUCCESS";
-			//等待输入验证码
+
+			bot.setStatus(XUserBot.STATUS_WAIT);
+			// 等待输入验证码
+		} else if ("timeout".equals(json.getString("result"))) {
+			// timeout
+			status = "TIMEOUT";
+			save = false;// dont save
+			// TRY AGAIN
+			logger.info("超时，重新发送验证码……");
+			json = bot.registe(phone, -1, APIHASH);
+			if ("success".equals(json.getString("result"))) {
+				// 成功
+				status = "SUCCESS";
+				bot.setStatus(XUserBot.STATUS_WAIT);
+				save = true;
+				// 等待输入验证码
+			} else if ("timeout".equals(json.getString("result"))) {
+				// timeout
+				status = "TIMEOUT";
+				save = false;// dont save
+			} else {
+				bots.put(phone, null);
+			}
 		} else {
 			// 失败,移除map
 			bots.put(phone, null);
 			// FIXME 删除认证文件
 			status = "FAILURE";
+			logger.error("其他异常，注册失败," + json.getString("status"));
 		}
-		// 保存try记录
-		ac.setIsNewRecord(true);
-		ac.setId(phone);
-		ac.setTrynum(1);
-		ac.setStatus(status);
-		ac.setUpdateDate(new Date());
-		accountService.insertAccountHis(ac);
+		if (save) {
+			// 保存try记录
+			ac = new Account();
+			ac.setIsNewRecord(true);
+			ac.setId(phone);
+			ac.setTrynum(1);
+			ac.setStatus(status);
+			ac.setUpdateDate(new Date());
+			accountService.insertAccountHis(ac);
+		}
+	}
+
+	@Transactional(readOnly = false)
+	public JSONObject setRegAuthCode(String phone, String code) {
+		IBot bot = getBotByPhone(phone);
+		XUserBot b = (XUserBot) bot;
+		if (!XUserBot.STATUS_WAIT.equals(b.getStatus())) {
+			throw new RuntimeException(phone + "账号实例不是在等待输入验证码状态");
+		}
+		String status = null;
+		JSONObject json = bot.setRegAuthCode(phone, code);
+		if (json.getBooleanValue("result")) {
+			logger.info("{}，注册成功", phone, code);
+			status = "SUCCESS";
+		} else {
+			if ("timeout".equals(json.getString("type"))) {
+				// try again
+				json = bot.setRegAuthCode(phone, code);
+				if (json.getBooleanValue("result")) {
+					logger.info("{}，注册成功", phone, code);
+					status = "SUCCESS";
+				} else {
+					if ("timeout".equals(json.getString("type"))) {
+						status = "TIMEOUT";
+					} else {
+						status = "FAILURE";
+					}
+				}
+			} else {
+				// 失败,列入黑名单
+				status = "FAILURE";
+			}
+		}
+		
+		// 更新数据库
+		// 1.先检查账号是否已经注册过了
+		Account ac = accountService.findAccountInHis(phone);
+		if (ac != null) {
+			ac.setStatus(status);
+			ac.setRemarks(json.getString("msg"));
+			ac.setUpdateDate(new Date());
+			accountService.updateAccountHis(ac);
+		} else {
+			logger.error("{},不在数据库中,!!??");
+		}
+		return json;
 	}
 }

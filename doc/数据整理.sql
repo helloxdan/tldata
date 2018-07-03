@@ -14,6 +14,7 @@ select u.id,'auto',u.account,u.from_group,u.userId,u.username,u.userHash,tu.firs
 left join tl_user tu on tu.id=u.userId
 where u.username is not null and u.username!='';
 
+#
 
 #delete repeat user
 delete from tl_job_user  where id in (select * from (
@@ -27,6 +28,11 @@ select * from tl_user
 #copy to tl_user
 insert into tl_user
 select userid,username,firstname,lastname,null,CURRENT_TIMESTAMP,0,0,CURRENT_TIMESTAMP from  tl_job_user where userid not in (select id from tl_user);
+
+#
+select * from tl_user where firstname like '%电报群%';
+update tl_user set star=-1 where firstname like '%电报群%';
+
 
 ##
 UPDATE tl_task a SET 

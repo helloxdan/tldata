@@ -15,7 +15,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
-import com.thinkgem.jeesite.modules.tl.service.RegisteService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
@@ -30,8 +29,6 @@ public class BotApiController extends BaseController {
 
 	@Autowired
 	private BotService botService;
-	@Autowired
-	private RegisteService registeService;
 
 	/**
 	 * 启动账号注册。
@@ -42,11 +39,10 @@ public class BotApiController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "/account/reg/start")
-	public ReturnWrap registe(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap autoregiste(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
-			registeService.autoRegiste();
+			// registeService.autoRegiste();
 			result.setData("start……");
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
@@ -55,9 +51,39 @@ public class BotApiController extends BaseController {
 		return result;
 	}
 
+	@RequestMapping(value = "/account/reg")
+	public ReturnWrap registe(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			botService.registe(data.getPhone());
+			result.setData("registe……");
+		} catch (Exception e) {
+			result.fail("异常，" + e.getMessage());
+			logger.error("init ", e);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/account/reg/setAuthCode")
+	public ReturnWrap setRegCode(RequestData data, HttpServletRequest request, HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			JSONObject json = botService.setRegAuthCode(data.getPhone(), data.getCode());
+			if (json.getBooleanValue("result")) {
+				result.success(json);
+			} else {
+				result.fail(json.getString("msg"));
+				result.setData(json);
+			}
+		} catch (Exception e) {
+			result.fail("设置注册验证码异常，" + e.getMessage());
+			logger.error("setAuthCode", e);
+		}
+		return result;
+	}
+
 	@RequestMapping(value = "/account/init")
-	public ReturnWrap accountInit(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap accountInit(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			String status = botService.accountInit(data);
@@ -78,8 +104,7 @@ public class BotApiController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "/startBatch")
-	public ReturnWrap startBatch(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap startBatch(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			String status = botService.startBatch(data);
@@ -92,8 +117,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/start")
-	public ReturnWrap sendImMessage(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap sendImMessage(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			LoginStatus status = botService.start(data);
@@ -106,8 +130,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/getState")
-	public ReturnWrap getState(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap getState(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			JSONObject state = botService.getState(data);
@@ -121,8 +144,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/setAuthCode")
-	public ReturnWrap setCode(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap setCode(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			boolean success = botService.setAuthCode(data);
@@ -139,8 +161,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/setAdmin")
-	public ReturnWrap setAdmin(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap setAdmin(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			boolean success = botService.setAdmin(data);
@@ -157,8 +178,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/groupInfo")
-	public ReturnWrap groupInfo(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap groupInfo(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			JSONObject json = botService.groupInfo(data);
@@ -175,8 +195,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/importInvite")
-	public ReturnWrap importInvite(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap importInvite(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			JSONObject json = botService.importInvite(data);
@@ -193,8 +212,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/collectUsers")
-	public ReturnWrap collectUsers(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap collectUsers(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.collectUsers(data);
@@ -208,8 +226,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/cleanJobUser")
-	public ReturnWrap cleanJobUser(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap cleanJobUser(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.cleanJobUser(data);
@@ -223,8 +240,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/addUsers")
-	public ReturnWrap addUsers(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap addUsers(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.addUsers(data);
@@ -238,8 +254,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/stop")
-	public ReturnWrap stop(RequestData data, HttpServletRequest request,
-			HttpServletResponse response) {
+	public ReturnWrap stop(RequestData data, HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			botService.stop(data);

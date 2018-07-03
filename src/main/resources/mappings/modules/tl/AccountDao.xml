@@ -180,12 +180,12 @@
 			id,
 			trynum, 
 			status, 
-			update_date 
+			update_date ,remarks
 		) VALUES (
 			#{id},
 			#{trynum},
 			#{status}, 
-			#{updateDate} 
+			#{updateDate} ,#{remarks}
 		)
 	</insert>
 	
@@ -194,7 +194,8 @@
 			id = #{id},
 			trynum = #{trynum},
 			status = #{status}, 
-			update_date = #{updateDate}
+			update_date = #{updateDate},
+			remarks = #{remarks}
 		WHERE id = #{id}
 	</update>
 </mapper>

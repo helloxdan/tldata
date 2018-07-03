@@ -31,5 +31,7 @@ public interface IBot {
 
 	JSONObject searchUser(String username);
 
-	JSONObject registe(String phone);
+	JSONObject registe(String phone, int apikey, String apihash);
+
+	JSONObject setRegAuthCode(String phone, String code);
 }
