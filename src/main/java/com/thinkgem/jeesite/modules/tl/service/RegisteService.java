@@ -30,6 +30,7 @@ public class RegisteService {
 	private SmsCardService smsCardService;
 
 	private Map<String, String> phoneMaps = new HashMap<String, String>();
+	private Map<String, String> codeMaps = new HashMap<String, String>();
 	// 手机队列
 	private Queue<String> phoneQueue = new LinkedList<String>();
 	private Queue<String[]> codeQueue = new LinkedList<String[]>();
@@ -52,7 +53,7 @@ public class RegisteService {
 	}
 
 	public SmsCardService getSmsCardService() {
-		 
+
 		return smsCardService;
 	}
 
@@ -134,6 +135,12 @@ public class RegisteService {
 				logger.warn("{}账号没有发送短信验证码的记录", kv[0]);
 				return;
 			}
+			if (codeMaps.containsKey(kv[0])) {
+				logger.warn("{}账号已经发送短信验证码，不能重复发送", kv[0]);
+				return;
+			}
+			codeMaps.put(kv[0], kv[0]);
+
 			// JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
 			JSONObject json = new JSONObject();
 			// 检查返回结果，如果成功，则清除记录；
@@ -144,6 +151,7 @@ public class RegisteService {
 			} else {
 				// 失败，计入黑名单，调用卡商接口，标记黑名单，避免下次再获取
 				logger.info("调用卡商接口，标记黑名单，{}", kv[0]);
+				smsCardService.setForbidden(kv[0]);
 			}
 		}
 	}
