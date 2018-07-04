@@ -11,7 +11,7 @@ import java.util.List;
 public interface SmsCardService {
 	List<String> getPhoneList();
 
-	List<String[]> getPhoneCodeList();
+	List<String[]> getPhoneCode (String phone);
 
 	void setForbidden(String phone);
 }

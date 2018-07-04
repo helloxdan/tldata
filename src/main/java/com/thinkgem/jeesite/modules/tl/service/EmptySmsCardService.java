@@ -18,7 +18,7 @@ public class EmptySmsCardService implements SmsCardService {
 	}
 
 	@Override
-	public List<String[]> getPhoneCodeList() {
+	public List<String[]> getPhoneCode(String phone) {
 		// TODO Auto-generated method stub
 		return new ArrayList<String[]>();
 	}

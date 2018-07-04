@@ -111,8 +111,22 @@
 		<property name="username" value="${jdbc.username}"/>
 		<property name="password" value="${jdbc.password}"/>
 	</bean>-->
-	
+	<!-- 配置RestTemplate -->
+	<!--Http client Factory -->
+	<bean id="httpClientFactory"
+		class="org.springframework.http.client.SimpleClientHttpRequestFactory">
+		<property name="connectTimeout" value="60000" />
+		<property name="readTimeout" value="60000" />
+	</bean>
+
+	<!--RestTemplate -->
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+		<constructor-arg ref="httpClientFactory" />
+	</bean>
 	<!-- 卡商服务接口实现，默认空实现 -->
-	 <bean id="smsCardService" class="com.thinkgem.jeesite.modules.tl.service.EmptySmsCardService">
+	<!--  <bean id="smsCardService" class="com.thinkgem.jeesite.modules.tl.service.EmptySmsCardService">
+	</bean> -->
+	 <bean id="smsCardService" class="com.thinkgem.jeesite.modules.tl.service.JsSmsCardService">
+	 <property name="restTemplate" ref="restTemplate" />
 	</bean>
 </beans>

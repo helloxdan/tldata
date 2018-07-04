@@ -1,10 +1,12 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +32,8 @@ public class RegisteService {
 	private SmsCardService smsCardService;
 
 	private Map<String, String> phoneMaps = new HashMap<String, String>();
-	private Map<String, String> codeMaps = new HashMap<String, String>();
+	// 记录待取验证码的手机号
+	private Map<String, Long> codeMaps = new HashMap<String, Long>();
 	// 手机队列
 	private Queue<String> phoneQueue = new LinkedList<String>();
 	private Queue<String[]> codeQueue = new LinkedList<String[]>();
@@ -78,6 +81,13 @@ public class RegisteService {
 		if (!phoneQueue.isEmpty())
 			return;
 
+		// FIXME 获取指定数量的账号即停止
+		if (phoneMaps.keySet().size() > 15) {
+			logger.info("获取手机号达到15个，停止运行。待观察效果后，再行定夺");
+			stop();
+			return;
+		}
+
 		List<String> list = getSmsCardService().getPhoneList();
 		if (list != null) {
 			logger.info("从卡商获取手机号记录数={}", list.size());
@@ -94,12 +104,30 @@ public class RegisteService {
 		if (!start)
 			return;
 
-		List<String[]> list = getSmsCardService().getPhoneCodeList();
-		if (list != null) {
-			logger.info("从卡商获取手机验证码记录数={}", list.size());
-		}
-		for (String[] pc : list) {
-			codeQueue.add(pc);
+		Set<String> sets = codeMaps.keySet();
+		for (Iterator iterator = sets.iterator(); iterator.hasNext();) {
+			String phone = (String) iterator.next();
+
+			Long cacheTime = codeMaps.get(phone);
+			long len = System.currentTimeMillis() - cacheTime;
+			if (len > 1000 * 60 * 3) {
+				// 超过3分钟，就不再查询了
+				// codeMaps.remove(phone);
+				iterator.remove();
+				logger.warn("取验证码时间超过3分钟，超时，取消操作");
+				continue;
+			}
+
+			List<String[]> list = getSmsCardService().getPhoneCode(phone);
+			if (list != null) {
+				logger.info("从卡商获取手机验证码记录数={}", list.size());
+			}
+			for (String[] pc : list) {
+				codeQueue.add(pc);
+				// 已经获取到验证码，移除记录
+				// codeMaps.remove(pc[0]);
+				iterator.remove();
+			}
 		}
 	}
 
@@ -114,9 +142,10 @@ public class RegisteService {
 			if (phoneMaps.containsKey(phone)) {
 				logger.info("{}账号已经发送过验证码", phone);
 			} else {
-				// botService.registe(phone);
+				 botService.registe(phone);
 				// 存入缓存。
 				phoneMaps.put(phone, phone);
+				codeMaps.put(phone, System.currentTimeMillis());
 			}
 		}
 	}
@@ -135,19 +164,17 @@ public class RegisteService {
 				logger.warn("{}账号没有发送短信验证码的记录", kv[0]);
 				return;
 			}
-			if (codeMaps.containsKey(kv[0])) {
-				logger.warn("{}账号已经发送短信验证码，不能重复发送", kv[0]);
-				return;
-			}
-			codeMaps.put(kv[0], kv[0]);
 
-			// JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
-			JSONObject json = new JSONObject();
+			 JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
+//			JSONObject json = new JSONObject();
 			// 检查返回结果，如果成功，则清除记录；
 			if (json.getBooleanValue("result")) {
 				// 完成账号注册
 				logger.info("账号{}注册成功，{} {}", kv[0],
 						json.getString("firstName"), json.getString("lastName"));
+
+				// 成功之后，移除记录，不再重复发送验证码
+				codeMaps.remove(kv[0]);
 			} else {
 				// 失败，计入黑名单，调用卡商接口，标记黑名单，避免下次再获取
 				logger.info("调用卡商接口，标记黑名单，{}", kv[0]);
