@@ -678,8 +678,10 @@ public class BotService {
 				// timeout
 				status = "TIMEOUT";
 				save = false;// dont save
+				deleteAuthFile(phone);
 			} else {
 				bots.put(phone, null);
+				deleteAuthFile(phone);
 			}
 		} else {
 			// 失败,移除map
@@ -688,12 +690,7 @@ public class BotService {
 			status = "FAILURE";
 			logger.error("{}其他异常，注册失败,{}", phone, json.getString("status"));
 
-			try {
-				File auth = new File("auth/" + phone + ".auth");
-				auth.deleteOnExit();
-			} catch (Exception e) { 
-				logger.warn("delete auth file error {}",e.getMessage());
-			}
+			deleteAuthFile(phone);
 
 		}
 		if (save) {
@@ -711,6 +708,15 @@ public class BotService {
 		}
 
 		return success;
+	}
+
+	private void deleteAuthFile(String phone) {
+		try {
+			File auth = new File("auth/" + phone + ".auth");
+			auth.deleteOnExit();
+		} catch (Exception e) { 
+			logger.warn("delete auth file error {}",e.getMessage());
+		}
 	}
 
 	@Transactional(readOnly = false)

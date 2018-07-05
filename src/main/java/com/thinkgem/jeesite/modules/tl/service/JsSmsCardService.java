@@ -25,6 +25,8 @@ public class JsSmsCardService implements SmsCardService {
 	private RestTemplate restTemplate;
 	String token = null;
 	boolean run = true;
+	// 每次获取手机号 数量
+	int maxPhoneNum = 1;
 
 	void stop() {
 		this.run = false;
@@ -66,8 +68,8 @@ public class JsSmsCardService implements SmsCardService {
 			return list;
 		String result = null;
 		try {
-			String url = "http://www.js-yzm.com:9180/service.asmx/GetHM2Str?token=" + getToken()
-					+ "&xmid=2596&sl=1&lx=0&a1=&a2=&pk=&ks=0&rj=woshishui";
+			String url = "http://www.js-yzm.com:9180/service.asmx/GetHM2Str?token=" + getToken() + "&xmid=2596&sl="
+					+ maxPhoneNum + "&lx=0&a1=&a2=&pk=&ks=0&rj=woshishui";
 			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("取号码结果：" + result);
@@ -104,7 +106,7 @@ public class JsSmsCardService implements SmsCardService {
 		Pattern p = Pattern.compile(regEx);
 
 		String result = "2018-07-05 16:15:21æ¶å° [mt]Your verification code is 58292";
-		result=result.substring(20);
+		result = result.substring(20);
 		// 一个Matcher对象是一个状态机器，它依据Pattern对象做为匹配模式对字符串展开匹配检查。
 		Matcher m = p.matcher(result);
 
@@ -147,14 +149,14 @@ public class JsSmsCardService implements SmsCardService {
 
 			if (result.length() > 4) {
 				logger.info("获取验证码：" + result);
-				
+
 				// 正则表达式，获取数字
 				String regEx = "[^0-9]";// 匹配指定范围内的数字
 				// Pattern是一个正则表达式经编译后的表现模式
 				Pattern p = Pattern.compile(regEx);
-				//把前面的时间去掉
-				result=result.substring(20);
-				
+				// 把前面的时间去掉
+				result = result.substring(20);
+
 				// 一个Matcher对象是一个状态机器，它依据Pattern对象做为匹配模式对字符串展开匹配检查。
 				Matcher m = p.matcher(result);
 
