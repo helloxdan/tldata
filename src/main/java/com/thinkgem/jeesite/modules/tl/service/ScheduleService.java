@@ -163,6 +163,7 @@ public class ScheduleService {
 					System.out.println("isBotCantAddToGroup="
 							+ u.isBotCantAddToGroup());
 				}
+				
 
 				JobUser ju = new JobUser();
 				ju.setJobId("auto");
