@@ -18,7 +18,7 @@ public class JsSmsCardServiceTests extends BaseServiceTests {
 	@Before
 	public void setup() {
 		String username = "admin";
-		String password = "admin";
+		String password = "admin@xu";
 		login(username, password);
 	}
 

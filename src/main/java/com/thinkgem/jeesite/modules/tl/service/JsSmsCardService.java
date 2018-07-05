@@ -126,8 +126,8 @@ public class JsSmsCardService implements SmsCardService {
 			String url = "http://www.js-yzm.com:9180/service.asmx/GetYzm2Str?token="
 					+ getToken() + "&xmid=2596&hm=" + phone + "&sf=0";
 			result = restTemplate.getForObject(url, String.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("取验证码结果：" + result);
+			if (logger.isDebugEnabled()) {
+				logger.debug("取验证码结果：" + result);
 			}
 
 			if (result == null)
@@ -150,8 +150,12 @@ public class JsSmsCardService implements SmsCardService {
 			} else if ("-8".equals(result)) {
 				logger.error("账号余额不足");
 				stop();
+			} else if ("1".equals(result)) {
+				logger.debug("还没收到验证码,继续....");
+			 
 			} else {
-				logger.warn("获取验证码：" + result);
+				
+				logger.warn("获取验证码失败：" + result);
 			}
 
 		} catch (RestClientException e) {

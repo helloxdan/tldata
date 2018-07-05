@@ -30,7 +30,9 @@ public class RegisteService {
 	private BotService botService;
 	@Autowired
 	private SmsCardService smsCardService;
-
+	private int phoneNum = 0;
+	private int planSize=10;//计划获取号码数
+	
 	private Map<String, String> phoneMaps = new HashMap<String, String>();
 	// 记录待取验证码的手机号
 	private Map<String, Long> codeMaps = new HashMap<String, Long>();
@@ -82,15 +84,17 @@ public class RegisteService {
 			return;
 
 		// FIXME 获取指定数量的账号即停止
-		if (phoneMaps.keySet().size() > 15) {
-			logger.info("获取手机号达到15个，停止运行。待观察效果后，再行定夺");
+		if (phoneMaps.keySet().size() > planSize) {
+			logger.info("获取手机号达到{}个，停止运行。待观察效果后，再行定夺",planSize);
 			stop();
 			return;
 		}
+		
 
 		List<String> list = getSmsCardService().getPhoneList();
 		if (list != null) {
-			logger.info("从卡商获取手机号记录数={}", list.size());
+			phoneNum=phoneNum+list.size();
+			logger.info("本次从卡商获取手机号数={},共{}个", list.size(),phoneNum);
 		}
 		for (String phone : list) {
 			phoneQueue.add(phone);
@@ -112,20 +116,18 @@ public class RegisteService {
 			long len = System.currentTimeMillis() - cacheTime;
 			if (len > 1000 * 60 * 3) {
 				// 超过3分钟，就不再查询了
-				// codeMaps.remove(phone);
 				iterator.remove();
-				logger.warn("取验证码时间超过3分钟，超时，取消操作");
+				logger.warn("{},取验证码时间超过3分钟，超时，取消操作",phone);
 				continue;
 			}
 
 			List<String[]> list = getSmsCardService().getPhoneCode(phone);
-			if (list != null) {
+			if (list != null && list.size()>0) {
 				logger.info("从卡商获取手机验证码记录数={}", list.size());
 			}
 			for (String[] pc : list) {
 				codeQueue.add(pc);
 				// 已经获取到验证码，移除记录
-				// codeMaps.remove(pc[0]);
 				iterator.remove();
 			}
 		}
@@ -143,7 +145,7 @@ public class RegisteService {
 				logger.info("{}账号已经发送过验证码", phone);
 			} else {
 				// FIXME
-				botService.registe(phone);
+//				botService.registe(phone);
 				// 存入缓存。
 				phoneMaps.put(phone, phone);
 				codeMaps.put(phone, System.currentTimeMillis());
@@ -166,9 +168,9 @@ public class RegisteService {
 				return;
 			}
 
-			JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
+//			JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
 			// FIXME
-			// JSONObject json = new JSONObject();
+			 JSONObject json = new JSONObject();
 			// 检查返回结果，如果成功，则清除记录；
 			if (json.getBooleanValue("result")) {
 				// 完成账号注册
