@@ -11,7 +11,8 @@
 		a.msg_time AS "msgTime",
 		a.star AS "star",
 		a.msg_num AS "msgNum",
-		a.update_date AS "updateDate"
+		a.update_date AS "updateDate",
+		a.userstate as "userstate"
 	</sql>
 	
 	<sql id="tlUserJoins">
@@ -82,7 +83,7 @@
 			langcode,
 			msg_time,
 			star,msg_num,
-			update_date
+			update_date,userstate
 		) VALUES (
 			#{id},
 			#{username},
@@ -92,7 +93,7 @@
 			#{msgTime},
 			#{star},
 			#{msgNum},
-			#{updateDate}
+			#{updateDate},#{userstate}
 		)
 	</insert>
 	
@@ -104,7 +105,8 @@
 			langcode = #{langcode},
 			msg_time = #{msgTime},
 			star = #{star},
-			update_date = #{updateDate}
+			update_date = #{updateDate},
+			userstate=#{userstate}
 		WHERE id = #{id}
 	</update>
 	

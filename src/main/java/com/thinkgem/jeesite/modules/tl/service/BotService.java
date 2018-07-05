@@ -337,10 +337,11 @@ public class BotService {
 			tlu.setFirstname(ju.getFirstname());
 			tlu.setLastname(ju.getLastname());
 			tlu.setUsername(ju.getUsername());
-			tlu.setBeginMsgTime(new Date());
+			tlu.setMsgTime(new Date());
 			tlu.setLangcode(u.getLangCode());
 			tlu.setUpdateDate(new Date());
 			tlu.setMsgNum(0);
+			tlu.setUserstate(u.getStatus().toString());
 			// 同时写入tl_user表
 			tlUserService.insertOrUpdate(tlu);
 			num++;

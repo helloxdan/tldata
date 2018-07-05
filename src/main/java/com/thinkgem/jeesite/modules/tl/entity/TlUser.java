@@ -24,6 +24,7 @@ public class TlUser extends DataEntity<TlUser> {
 	private Date msgTime;		// 最新发言时间
 	private int star;//评级
 	private int msgNum;//消息数量
+	private String userstate;
 	
 	private Date beginMsgTime;		// 开始 最新发言时间
 	private Date endMsgTime;		// 结束 最新发言时间
@@ -119,4 +120,13 @@ public class TlUser extends DataEntity<TlUser> {
 	public void setIds(String ids) {
 		this.ids = ids;
 	}
+
+	public String getUserstate() {
+		return userstate;
+	}
+
+	public void setUserstate(String userstate) {
+		this.userstate = userstate;
+	}
+	
 }
