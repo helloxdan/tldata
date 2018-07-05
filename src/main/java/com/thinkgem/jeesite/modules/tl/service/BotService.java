@@ -1,5 +1,6 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -616,7 +617,7 @@ public class BotService {
 	 */
 	@Transactional(readOnly = false)
 	public boolean registe(String phone) {
-		boolean success=false;
+		boolean success = false;
 		logger.info("注册，发送验证码，{}", phone);
 		String status = "FAILUE";
 		// 1.先检查账号是否已经注册过了
@@ -656,7 +657,7 @@ public class BotService {
 		if ("success".equals(json.getString("result"))) {
 			// 成功
 			status = "SENTCODE";
-			success=true;
+			success = true;
 			bot.setStatus(XUserBot.STATUS_WAIT);
 			// 等待输入验证码
 		} else if ("timeout".equals(json.getString("result"))) {
@@ -670,7 +671,7 @@ public class BotService {
 				// 成功
 				status = "SENTCODE";
 				bot.setStatus(XUserBot.STATUS_WAIT);
-				success=true;
+				success = true;
 				save = true;
 				// 等待输入验证码
 			} else if ("timeout".equals(json.getString("result"))) {
@@ -685,7 +686,15 @@ public class BotService {
 			bots.put(phone, null);
 			// FIXME 删除认证文件
 			status = "FAILURE";
-			logger.error("其他异常，注册失败," + json.getString("status"));
+			logger.error("{}其他异常，注册失败,{}", phone, json.getString("status"));
+
+			try {
+				File auth = new File("auth/" + phone + ".auth");
+				auth.deleteOnExit();
+			} catch (Exception e) { 
+				logger.warn("delete auth file error {}",e.getMessage());
+			}
+
 		}
 		if (save) {
 			// 保存try记录
@@ -700,7 +709,7 @@ public class BotService {
 			ac.setUpdateBy(new User("1"));
 			accountService.insertAccountHis(ac);
 		}
-		
+
 		return success;
 	}
 
