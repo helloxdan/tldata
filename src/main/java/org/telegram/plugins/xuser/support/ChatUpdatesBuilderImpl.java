@@ -69,18 +69,18 @@ public class ChatUpdatesBuilderImpl implements ChatUpdatesBuilder {
 	@Override
 	public void setKernelComm(final IKernelComm kernelComm) {
 		this.kernelComm = kernelComm;
-		Thread t = new Thread() {
-			public void run() {
-				try {
-					Thread.sleep(8000L);
-				} catch (InterruptedException e) {
-
-					e.printStackTrace();
-				}
-				gotoCmd(kernelComm);
-			}
-		};
-		t.start();
+//		Thread t = new Thread() {
+//			public void run() {
+//				try {
+//					Thread.sleep(8000L);
+//				} catch (InterruptedException e) {
+//
+//					e.printStackTrace();
+//				}
+////				gotoCmd(kernelComm);
+//			}
+//		};
+//		t.start();
 	}
 
 	private void gotoCmd(IKernelComm kernelComm) {

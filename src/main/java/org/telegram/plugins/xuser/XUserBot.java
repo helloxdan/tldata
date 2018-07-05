@@ -599,6 +599,7 @@ public class XUserBot implements IBot {
 						json.put("status", sentCode.getType().toString());
 					}
 				} else {
+					json.put("result", "sentCode is null");
 					result = LoginStatus.ERRORSENDINGCODE;
 					json.put("status", result.toString());
 				}
@@ -639,7 +640,7 @@ public class XUserBot implements IBot {
 		RegKernelAuth kernelAuth = (RegKernelAuth) kernel.getKernelAuth();
 		JSONObject json = kernelAuth.setRegAuthCode(code);
 		if (!json.getBooleanValue("result")) {
-			logger.error("{}，注册验证码{}校验失败", phone, code);
+			logger.error("{}，注册验证码{}校验失败,type={},msg={}", phone, code,json.getString("type"),json.getString("msg"));
 		}
 		return json;
 	}

@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.sys.entity.Log;
+import com.thinkgem.jeesite.modules.sys.entity.User;
 import com.thinkgem.jeesite.modules.sys.utils.LogUtils;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.Chat;
@@ -291,16 +292,13 @@ public class BotService {
 		Group g = groupService.get(data.getChatId() + "");
 		if (g == null) {
 			//
-			throw new RuntimeException("群组id=" + data.getChatId()
-					+ "在表tl_group 中不存在！");
+			throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
 		}
 		int offset = g.getOffset() == null ? 0 : g.getOffset();
 		int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
-				data.getChatAccessHash(), offset, limitNum);
-		logger.info("拉取群组用户结果：job={}，account={},size={}",
-				task.getString("jobId"), task.getString("account"),
+		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
+		logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
 				users.size());
 
 		// 更新群组的offset
@@ -352,8 +350,7 @@ public class BotService {
 
 		// 超过10000个账号限制
 		if (offset + limitNum > 10000) {
-			logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。",
-					task.getString("jobId"), data.getPhone());
+			logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。", task.getString("jobId"), data.getPhone());
 		}
 	}
 
@@ -450,8 +447,7 @@ public class BotService {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
-					+ " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
 		}
 	}
 
@@ -526,8 +522,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
-					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
+					c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -619,7 +615,8 @@ public class BotService {
 	 * @param phone
 	 */
 	@Transactional(readOnly = false)
-	public void registe(String phone) {
+	public boolean registe(String phone) {
+		boolean success=false;
 		logger.info("注册，发送验证码，{}", phone);
 		String status = "FAILUE";
 		// 1.先检查账号是否已经注册过了
@@ -627,12 +624,12 @@ public class BotService {
 		if (ac != null) {
 			if ("SUCCESS".equals(ac.getStatus())) {
 				logger.warn("账号{}已经在数据库中，不用注册了", phone);
-				return;
+				return success;
 			}
 			if ("FAILURE".equals(ac.getStatus())) {
 				// 2.检查账号是否已经处理过。有可能账号已经试过不成功，黑名单
 				logger.warn("账号{}注册失败，已列入黑名单", phone);
-				return;
+				return success;
 			} else {
 				// 记录尝试次数+1
 				ac.setTrynum(ac.getTrynum() + 1);
@@ -658,8 +655,8 @@ public class BotService {
 		JSONObject json = bot.registe(phone, APIKEY, APIHASH);
 		if ("success".equals(json.getString("result"))) {
 			// 成功
-			status = "SUCCESS";
-
+			status = "SENTCODE";
+			success=true;
 			bot.setStatus(XUserBot.STATUS_WAIT);
 			// 等待输入验证码
 		} else if ("timeout".equals(json.getString("result"))) {
@@ -671,8 +668,9 @@ public class BotService {
 			json = bot.registe(phone, -1, APIHASH);
 			if ("success".equals(json.getString("result"))) {
 				// 成功
-				status = "SUCCESS";
+				status = "SENTCODE";
 				bot.setStatus(XUserBot.STATUS_WAIT);
+				success=true;
 				save = true;
 				// 等待输入验证码
 			} else if ("timeout".equals(json.getString("result"))) {
@@ -697,8 +695,13 @@ public class BotService {
 			ac.setTrynum(1);
 			ac.setStatus(status);
 			ac.setUpdateDate(new Date());
+			ac.setRole("0");
+			ac.setCreateBy(new User("1"));
+			ac.setUpdateBy(new User("1"));
 			accountService.insertAccountHis(ac);
 		}
+		
+		return success;
 	}
 
 	@Transactional(readOnly = false)
@@ -751,10 +754,10 @@ public class BotService {
 		// 成功，则写入账号表
 		if ("SUCCESS".equals(status)) {
 			ac = new Account();
+			ac.setIsNewRecord(true);
 			ac.preInsert();
 			ac.setId(phone);
-			ac.setName(json.getString("firstName") + " "
-					+ json.getString("lastName"));
+			ac.setName(json.getString("firstName") + " " + json.getString("lastName"));
 			ac.setStatus("ready");
 			ac.setUsernum(0);
 			ac.setGroupnum(0);

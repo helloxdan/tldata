@@ -36,10 +36,15 @@ public class JsSmsCardService implements SmsCardService {
 			logger.warn("加入黑名单的手机号为空");
 			return;
 		}
+
+		if (phone.startsWith("86")) {
+			phone = phone.substring(2);
+		}
+
 		String result = null;
 		try {
-			String url = "http://www.js-yzm.com:9180/service.asmx/Hmd2Str?token="
-					+ getToken() + "&xmid=2596&hm=" + phone + "&sf=0";
+			String url = "http://www.js-yzm.com:9180/service.asmx/Hmd2Str?token=" + getToken() + "&xmid=2596&hm="
+					+ phone + "&sf=0";
 			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("加入黑名单结果：" + result);
@@ -61,8 +66,7 @@ public class JsSmsCardService implements SmsCardService {
 			return list;
 		String result = null;
 		try {
-			String url = "http://www.js-yzm.com:9180/service.asmx/GetHM2Str?token="
-					+ getToken()
+			String url = "http://www.js-yzm.com:9180/service.asmx/GetHM2Str?token=" + getToken()
 					+ "&xmid=2596&sl=1&lx=0&a1=&a2=&pk=&ks=0&rj=woshishui";
 			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
@@ -76,7 +80,7 @@ public class JsSmsCardService implements SmsCardService {
 				logger.info("获取号码：" + result);
 				String[] ids = result.substring(3).split(",");
 				for (String phone : ids) {
-					list.add(phone);
+					list.add("86" + phone);
 				}
 			} else if ("-8".equals(result)) {
 				logger.error("账号余额不足");
@@ -99,7 +103,8 @@ public class JsSmsCardService implements SmsCardService {
 		// Pattern是一个正则表达式经编译后的表现模式
 		Pattern p = Pattern.compile(regEx);
 
-		String result = "[mt]your verifisd code is 12312";
+		String result = "2018-07-05 16:15:21æ¶å° [mt]Your verification code is 58292";
+		result=result.substring(20);
 		// 一个Matcher对象是一个状态机器，它依据Pattern对象做为匹配模式对字符串展开匹配检查。
 		Matcher m = p.matcher(result);
 
@@ -109,6 +114,8 @@ public class JsSmsCardService implements SmsCardService {
 		// 以空格为分割符在讲数字存入一个字符串数组中
 		// String[] strArr = string.split(" ");
 		System.out.println(string);
+
+		System.out.println("8613751872".substring(2));
 	}
 
 	@Override
@@ -121,13 +128,18 @@ public class JsSmsCardService implements SmsCardService {
 			logger.warn("取验证码的手机号为空");
 			return list;
 		}
+		if (phone.startsWith("86")) {
+			phone = phone.substring(2);
+		}
+
 		String result = null;
 		try {
-			String url = "http://www.js-yzm.com:9180/service.asmx/GetYzm2Str?token="
-					+ getToken() + "&xmid=2596&hm=" + phone + "&sf=0";
+			String url = "http://www.js-yzm.com:9180/service.asmx/GetYzm2Str?token=" + getToken() + "&xmid=2596&hm="
+					+ phone + "&sf=0";
 			result = restTemplate.getForObject(url, String.class);
+			logger.info("{}取验证码结果：{}", phone, result);
 			if (logger.isDebugEnabled()) {
-				logger.debug("取验证码结果：" + result);
+				logger.debug("{}取验证码结果：{}", phone, result);
 			}
 
 			if (result == null)
@@ -135,26 +147,29 @@ public class JsSmsCardService implements SmsCardService {
 
 			if (result.length() > 4) {
 				logger.info("获取验证码：" + result);
+				
 				// 正则表达式，获取数字
 				String regEx = "[^0-9]";// 匹配指定范围内的数字
 				// Pattern是一个正则表达式经编译后的表现模式
 				Pattern p = Pattern.compile(regEx);
-
+				//把前面的时间去掉
+				result=result.substring(20);
+				
 				// 一个Matcher对象是一个状态机器，它依据Pattern对象做为匹配模式对字符串展开匹配检查。
 				Matcher m = p.matcher(result);
 
 				// 将输入的字符串中非数字部分用空格取代并存入一个字符串
 				String code = m.replaceAll(" ").trim();
-				list.add(new String[] { phone, code });
-				 
+				list.add(new String[] { "86" + phone, code });
+
 			} else if ("-8".equals(result)) {
 				logger.error("账号余额不足");
 				stop();
 			} else if ("1".equals(result)) {
 				logger.debug("还没收到验证码,继续....");
-			 
+
 			} else {
-				
+
 				logger.warn("获取验证码失败：" + result);
 			}
 
