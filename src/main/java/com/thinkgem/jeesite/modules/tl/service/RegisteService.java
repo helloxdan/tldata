@@ -142,7 +142,8 @@ public class RegisteService {
 			if (phoneMaps.containsKey(phone)) {
 				logger.info("{}账号已经发送过验证码", phone);
 			} else {
-				 botService.registe(phone);
+				// FIXME
+				botService.registe(phone);
 				// 存入缓存。
 				phoneMaps.put(phone, phone);
 				codeMaps.put(phone, System.currentTimeMillis());
@@ -165,8 +166,9 @@ public class RegisteService {
 				return;
 			}
 
-			 JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
-//			JSONObject json = new JSONObject();
+			JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
+			// FIXME
+			// JSONObject json = new JSONObject();
 			// 检查返回结果，如果成功，则清除记录；
 			if (json.getBooleanValue("result")) {
 				// 完成账号注册
