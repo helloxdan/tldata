@@ -1,5 +1,6 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
+import com.thinkgem.jeesite.modules.tl.entity.TlUser;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 @Service
@@ -41,7 +43,8 @@ public class ScheduleService {
 	private ChatService chatService;
 	@Autowired
 	private BotService botService;
-
+	@Autowired
+	private TlUserService tlUserService;
 	/**
 	 * 检查账号和群组的关系。如果发现有账号没有加入某个群组，则自动加入。
 	 */
@@ -172,10 +175,27 @@ public class ScheduleService {
 				ju.setUserid(u.getId() + "");
 				ju.setUsername(u.getUserName());
 				ju.setUserHash(u.getAccessHash());
+				ju.setFirstname(u.getFirstName());
+				ju.setLastname(u.getLastName());
+				ju.setStatus("0");
 				// u.getLangCode();
 				// u.getFirstName();
 				// u.getLastName();
 				jobUserService.insertUserToJob(ju, "auto");
+				
+				TlUser tlu = new TlUser();
+				tlu.setId(ju.getUserid());
+				tlu.setFirstname(ju.getFirstname());
+				tlu.setLastname(ju.getLastname());
+				tlu.setUsername(ju.getUsername());
+				tlu.setMsgTime(new Date());
+				tlu.setLangcode(u.getLangCode());
+				tlu.setUpdateDate(new Date());
+				tlu.setMsgNum(0);
+				tlu.setUserstate(u.getStatus().toString());
+				// 同时写入tl_user表
+				tlUserService.insertOrUpdate(tlu);
+				
 				num++;
 			}
 
