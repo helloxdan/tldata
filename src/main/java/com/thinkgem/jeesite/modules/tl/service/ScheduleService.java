@@ -23,7 +23,7 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 @Service
 @Transactional(readOnly = true)
 public class ScheduleService {
-	public static final int FETCH_PAGE_SIZE = 200;//每次抽取用户数
+	public static final int FETCH_PAGE_SIZE = 200;// 每次抽取用户数
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private BotDataService botDataService;
@@ -115,10 +115,9 @@ public class ScheduleService {
 			}
 			fetchUserFromGroup(a.getId(), g);
 		}
-		if(alist.size()>0)
-		{
-		//汇总下用户有效用户数
-		accountService.updateAccountData();
+		if (alist.size() > 0) {
+			// 汇总下用户有效用户数
+			accountService.updateAccountData();
 		}
 	}
 
@@ -153,10 +152,18 @@ public class ScheduleService {
 			// 将数据存储到数据库
 			for (TLAbsUser tluser : users) {
 				TLUser u = (TLUser) tluser;
-				if (StringUtils.isBlank(u.getUserName())){
+				if (StringUtils.isBlank(u.getUserName())) {
 					logger.info("用户没有username，忽略");
 					continue;
 				}
+				if ("wojiaoshenmehao".equals(u.getUserName())) {
+					System.out.println("isBotCantAddToGroup="
+							+ u.isBotCantAddToGroup());
+				}else{
+					System.out.println("isBotCantAddToGroup="
+							+ u.isBotCantAddToGroup());
+				}
+
 				JobUser ju = new JobUser();
 				ju.setJobId("auto");
 				ju.setAccount(phone);
@@ -167,12 +174,12 @@ public class ScheduleService {
 				// u.getLangCode();
 				// u.getFirstName();
 				// u.getLastName();
-				jobUserService.insertUserToJob(ju,"auto");
+				jobUserService.insertUserToJob(ju, "auto");
 				num++;
 			}
-			
-			//修改群组的offset值
-			g.setOffset(g.getOffset()+FETCH_PAGE_SIZE);
+
+			// 修改群组的offset值
+			g.setOffset(g.getOffset() + FETCH_PAGE_SIZE);
 			groupService.updateOffset(g);
 		} catch (Exception e) {
 			logger.error(phone + "-从群组" + g.getName() + "抽取用户异常", e);

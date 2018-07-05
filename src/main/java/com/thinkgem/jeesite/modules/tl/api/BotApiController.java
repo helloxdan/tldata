@@ -14,8 +14,11 @@ import org.telegram.bot.structure.LoginStatus;
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
+import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
+import com.thinkgem.jeesite.modules.tl.service.GroupService;
 import com.thinkgem.jeesite.modules.tl.service.RegisteService;
+import com.thinkgem.jeesite.modules.tl.service.ScheduleService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
@@ -30,9 +33,13 @@ public class BotApiController extends BaseController {
 
 	@Autowired
 	private BotService botService;
+	@Autowired
+	private GroupService groupService;
 
 	@Autowired
 	private RegisteService registeService;
+	@Autowired
+	private ScheduleService scheduleService;
 
 	@RequestMapping(value = "/reg/addPhone")
 	public ReturnWrap addRegPhone(RequestData data, HttpServletRequest request,
@@ -264,6 +271,31 @@ public class BotApiController extends BaseController {
 			result.success("OK");
 		} catch (Exception e) {
 			result.fail("收集用户信息异常，" + e.getMessage());
+			logger.error("collectUsers", e);
+		}
+
+		return result;
+	}
+
+	/**
+	 * 指定一个群组采集用户。
+	 * 
+	 * @param data
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/grepUsers")
+	public ReturnWrap grepUsers(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			Group g = new Group();
+			g = groupService.get(data.getChatId() + "");
+			scheduleService.fetchUserFromGroup(data.getPhone(), g);
+			result.success("OK");
+		} catch (Exception e) {
+			result.fail("采集用户信息异常，" + e.getMessage());
 			logger.error("collectUsers", e);
 		}
 
