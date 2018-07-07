@@ -335,8 +335,10 @@ public class XUserBot implements IBot {
 
 	@Override
 	public JSONObject getGroupInfo(int chatId, long chatAccessHash, boolean ischannel) {
-		logger.info("{}，getGroupInfo ，{}", getAccount(), chatId);
+		logger.info("{}，getGroupInfo ，{},accesshash={}", getAccount(), chatId, chatAccessHash);
 		JSONObject json = new JSONObject();
+		if (chatAccessHash == 0)
+			return json;
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
 			if (ischannel) {
@@ -354,7 +356,7 @@ public class XUserBot implements IBot {
 					json.put("username", chat.getUsername());
 				}
 				json.put("usernum", ch.getParticipantsCount());
-
+				json.put("result", true);
 				// 需要管理员权限
 
 				/*
@@ -381,6 +383,8 @@ public class XUserBot implements IBot {
 					json.put("title", ch.getTitle());
 
 				}
+				
+				json.put("result", true);
 				// System.out.println("---");
 				// System.out.println(result.getUsers().size());
 				// TLVector<TLAbsUser> users = result.getUsers();
@@ -392,6 +396,10 @@ public class XUserBot implements IBot {
 			logger.error("取群信息失败", e);
 			// if private
 			// FIXME
+			if ("CHANNEL_PRIVATE".equals(e.getMessage())) {
+				json.put("result", false);
+				json.put("msg", "CHANNEL_PRIVATE");
+			}
 		} catch (TimeoutException e) {
 			logger.error("取群信息失败，超时", e);
 		}
@@ -640,7 +648,7 @@ public class XUserBot implements IBot {
 		RegKernelAuth kernelAuth = (RegKernelAuth) kernel.getKernelAuth();
 		JSONObject json = kernelAuth.setRegAuthCode(code);
 		if (!json.getBooleanValue("result")) {
-			logger.error("{}，注册验证码{}校验失败,type={},msg={}", phone, code,json.getString("type"),json.getString("msg"));
+			logger.error("{}，注册验证码{}校验失败,type={},msg={}", phone, code, json.getString("type"), json.getString("msg"));
 		}
 		return json;
 	}
