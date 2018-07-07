@@ -82,7 +82,7 @@
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">邀请link：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="url" htmlEscape="false" maxlength="100" class="form-control required"/>
+				<form:input path="url" htmlEscape="false" maxlength="100" class="form-control  "/>
 			</div>
 			</div>
 		</div>

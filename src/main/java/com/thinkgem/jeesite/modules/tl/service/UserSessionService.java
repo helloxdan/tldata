@@ -82,7 +82,7 @@ public class UserSessionService extends
 			user.setUserHash(u.getUserhash());
 			user.setUsername(u.getUsername());
 		} else {
-			logger.error("{}用户会话id={}不存在", phone, userId);
+			logger.debug("{}用户会话id={}不存在", phone, userId);
 		}
 		return user;
 	}

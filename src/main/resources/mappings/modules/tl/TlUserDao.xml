@@ -113,7 +113,7 @@
 	<update id="updateMsgNum">
 		UPDATE tl_user SET 	
 			msg_num = msg_num+1,
-			msg_time = #{msgTime}
+			msg_time = #{msgTime},
 			update_date = #{updateDate}
 		WHERE id = #{id}
 	</update>

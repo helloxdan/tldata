@@ -103,6 +103,7 @@
 			
 			and not exists (select 1 from tl_job_user j where j.job_id=#{toJobid} and j.userid=a.userid)
 		</where> 
+		order by msg_time desc
 	 limit ${limit}
 	</select>
 

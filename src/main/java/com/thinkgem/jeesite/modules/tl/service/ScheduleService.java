@@ -169,7 +169,7 @@ public class ScheduleService {
 								.contains("电报群"))) {
 					logger.info("用户名存在  拉人  电报群 字样，忽略");
 					continue;
- 
+				}
 //				if ("wojiaoshenmehao".equals(u.getUserName())) {
 //					System.out.println("isBotCantAddToGroup="
 //							+ u.isBotCantAddToGroup());

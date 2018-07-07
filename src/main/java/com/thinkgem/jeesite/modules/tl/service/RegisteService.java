@@ -31,7 +31,7 @@ public class RegisteService {
 	@Autowired
 	private SmsCardService smsCardService;
 	private int phoneNum = 0;
-	private int planSize = 5;// 计划获取号码数
+	private int planSize = 1;// 计划获取号码数
 
 	private Map<String, String> phoneMaps = new HashMap<String, String>();
 	// 记录待取验证码的手机号
@@ -49,6 +49,7 @@ public class RegisteService {
 
 	public void addPlanSize(int num) {
 		this.planSize = this.planSize+num;
+		start();
 	}
 
 	/**
@@ -62,7 +63,7 @@ public class RegisteService {
 	 * 停止获取手机号列表。
 	 */
 	public void stop() {
-		start = true;
+		start = false;
 	}
 
 	public SmsCardService getSmsCardService() {
@@ -113,8 +114,8 @@ public class RegisteService {
 	 * 定时调度，获取手机验证码列表。
 	 */
 	public void getPhoneCodeList() {
-		if (!start)
-			return;
+//		if (!start)
+//			return;
 
 		Set<String> sets = codeMaps.keySet();
 		for (Iterator iterator = sets.iterator(); iterator.hasNext();) {
