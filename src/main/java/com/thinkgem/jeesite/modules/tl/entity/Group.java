@@ -135,7 +135,7 @@ public class Group extends DataEntity<Group> {
 	}
 
 	public Long getAccesshash() {
-		return accesshash;
+		return accesshash==null ?0L:accesshash;
 	}
 
 	public void setAccesshash(Long accesshash) {
