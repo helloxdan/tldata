@@ -317,8 +317,16 @@ public class BotService {
 				logger.info("用户没有username，忽略");
 				continue;
 			}
+			if (u.getFirstName() != null
+					&& (u.getFirstName().contains("拉人") || u.getFirstName()
+							.contains("电报群"))) {
+				logger.info("用户名存在  拉人  电报群 字样，忽略");
+				continue;
+			}
+
 			JobUser ju = new JobUser();
 			ju.setJobId(task.getString("jobId"));
+			ju.setTaskId(taskid);
 			ju.setAccount(task.getString("account"));
 			ju.setFromGroup(data.getChatId() + "");
 			ju.setUserid(u.getId() + "");
@@ -330,14 +338,15 @@ public class BotService {
 			// u.getLangCode();
 			// u.getFirstName();
 			// u.getLastName();
-			jobUserService.save(ju);
+//			jobUserService.save(ju);
+			jobUserService.insertUserToJob(ju, task.getString("jobId"));
 
 			TlUser tlu = new TlUser();
 			tlu.setId(ju.getUserid());
 			tlu.setFirstname(ju.getFirstname());
 			tlu.setLastname(ju.getLastname());
 			tlu.setUsername(ju.getUsername());
-			tlu.setMsgTime(new Date());
+			tlu.setMsgTime(null);
 			tlu.setLangcode(u.getLangCode());
 			tlu.setUpdateDate(new Date());
 			tlu.setMsgNum(0);

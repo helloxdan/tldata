@@ -17,7 +17,8 @@ import com.thinkgem.jeesite.modules.utils.Constants;
 public class JobUser extends DataEntity<JobUser> {
 
 	private static final long serialVersionUID = 1L;
-	private String jobId; // 任务ID
+	private String jobId; // 工作ID
+	private String taskId; // 分派任务ID
 	private String account; // 登录账号
 	private String fromGroup; // 用户来源群组
 	private String userid; // 用户ID
@@ -149,6 +150,14 @@ public class JobUser extends DataEntity<JobUser> {
 
 	public void setStar(int star) {
 		this.star = star;
+	}
+
+	public String getTaskId() {
+		return taskId;
+	}
+
+	public void setTaskId(String taskId) {
+		this.taskId = taskId;
 	}
 	
 }

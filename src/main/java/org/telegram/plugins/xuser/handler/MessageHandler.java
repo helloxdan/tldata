@@ -46,7 +46,7 @@ public class MessageHandler {
 	 *            TLMessage received
 	 */
 	public void handleMessage(@NotNull IUser user, @NotNull TLMessage message) {
-		try {
+		try { 
 			handleMessageInternal(user, message.getMessage());
 		} catch (RpcException e) {
 			BotLogger.severe(LOGTAG, e);
@@ -63,8 +63,7 @@ public class MessageHandler {
 	 */
 	public void handleMessage(@NotNull IUser user,
 			@NotNull TLUpdateShortMessage message) {
-		try {
-//			message.get
+		try { 
 			handleMessageInternal(user, message.getMessage());
 		} catch (RpcException e) {
 			BotLogger.severe(LOGTAG, e);

@@ -5,6 +5,7 @@
 	<sql id="jobUserColumns">
 		a.id AS "id",
 		a.job_id AS "jobId",
+		a.task_id AS "taskId",
 		a.account AS "account",
 		a.from_group AS "fromGroup",
 		a.userid AS "userid",
@@ -70,7 +71,7 @@
 		</choose>
 	</select>
 
-	<!-- 查找job下某个用户，判断用户是否已经存在了 -->
+	<!-- 查找job下某个账号，判断用户是否已经存在了 -->
 	<select id="findUserOfJob" resultType="JobUser">
 		SELECT
 		<include refid="jobUserColumns" />
@@ -79,6 +80,7 @@
 		<where>
 			a.del_flag = #{DEL_FLAG_NORMAL}
 			AND a.job_id = #{jobId}
+			AND a.account = #{account}
 			AND a.userid = #{userid}
 		</where> 
 	</select>
@@ -126,7 +128,7 @@
 	<insert id="insert">
 		INSERT INTO tl_job_user(
 		id,
-		job_id,
+		job_id,task_id,
 		account,
 		from_group,
 		userid,
@@ -142,6 +144,7 @@
 		) VALUES (
 		#{id},
 		#{jobId},
+		#{taskId},
 		#{account},
 		#{fromGroup},
 		#{userid},
@@ -161,6 +164,7 @@
 	<update id="update">
 		UPDATE tl_job_user SET
 		job_id = #{jobId},
+		task_id = #{taskId},
 		account = #{account},
 		from_group = #{fromGroup},
 		userid = #{userid},

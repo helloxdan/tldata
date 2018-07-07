@@ -3,8 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.web;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,12 +19,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
-import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.common.utils.StringUtils;
+import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.service.AccountService;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
+import com.thinkgem.jeesite.modules.tl.service.RegisteService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
@@ -43,16 +42,18 @@ public class AccountController extends BaseController {
 	private AccountService accountService;
 	@Autowired
 	private BotService botService;
+	@Autowired
+	private RegisteService registeService;
 
 	@RequestMapping(value = "/addBatch")
 	public ReturnWrap addBatch(RequestData data, HttpServletRequest request,
 			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
-			String status = accountService.addBatch(data);
-			result.setData(status);
+			 registeService.addPlanSize(data.getNum());
+			result.setData("增加注册账号数量"+data.getNum());
 		} catch (Exception e) {
-			result.fail("启动异常，" + e.getMessage());
+			result.fail("注册新账号请求异常，" + e.getMessage());
 		}
 		return result;
 	}

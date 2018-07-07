@@ -159,13 +159,19 @@ public class ScheduleService {
 					logger.info("用户没有username，忽略");
 					continue;
 				}
-				if ("wojiaoshenmehao".equals(u.getUserName())) {
-					System.out.println("isBotCantAddToGroup="
-							+ u.isBotCantAddToGroup());
-				}else{
-					System.out.println("isBotCantAddToGroup="
-							+ u.isBotCantAddToGroup());
+				if (u.getFirstName() != null
+						&& (u.getFirstName().contains("拉人") || u.getFirstName()
+								.contains("电报群"))) {
+					logger.info("用户名存在  拉人  电报群 字样，忽略");
+					continue;
 				}
+//				if ("wojiaoshenmehao".equals(u.getUserName())) {
+//					System.out.println("isBotCantAddToGroup="
+//							+ u.isBotCantAddToGroup());
+//				}else{
+//					System.out.println("isBotCantAddToGroup="
+//							+ u.isBotCantAddToGroup());
+//				}
 
 				JobUser ju = new JobUser();
 				ju.setJobId("auto");
@@ -187,7 +193,7 @@ public class ScheduleService {
 				tlu.setFirstname(ju.getFirstname());
 				tlu.setLastname(ju.getLastname());
 				tlu.setUsername(ju.getUsername());
-				tlu.setMsgTime(new Date());
+				tlu.setMsgTime(null);
 				tlu.setLangcode(u.getLangCode());
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);

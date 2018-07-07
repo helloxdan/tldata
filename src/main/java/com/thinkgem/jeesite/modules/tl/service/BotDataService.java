@@ -154,8 +154,10 @@ public class BotDataService {
 			us.setUsername(user.getUsername());
 			userSessionService.save(us);
 
+			// 消息数量+1
 			TlUser tlUser = new TlUser();
 			tlUser.setId(user.getUserId() + "");
+			tlUser.setMsgTime(new Date());
 			tlUserService.updateMsgNum(tlUser);
 		} catch (Exception e) {
 			logger.error("addUser", e);
@@ -163,7 +165,7 @@ public class BotDataService {
 		}
 
 		return success;
-		 
+
 	}
 
 	public List<User> findUsers() {
@@ -190,7 +192,8 @@ public class BotDataService {
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateDifferencesData(String phone, int botId, int pts, int date, int seq) {
+	public boolean updateDifferencesData(String phone, int botId, int pts,
+			int date, int seq) {
 		// 检查是否存在记录，没有则新增，否则更新
 		try {
 			String id = phone + botId;

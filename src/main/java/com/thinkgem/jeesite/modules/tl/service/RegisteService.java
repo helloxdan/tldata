@@ -43,6 +43,14 @@ public class RegisteService {
 	// 启动自动获取手机账号的功能
 	private boolean start = true;
 
+	public int getPlanSize() {
+		return planSize;
+	}
+
+	public void addPlanSize(int num) {
+		this.planSize = this.planSize+num;
+	}
+
 	/**
 	 * 开始获取手机号列表。
 	 */
