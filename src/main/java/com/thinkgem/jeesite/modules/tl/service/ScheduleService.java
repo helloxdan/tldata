@@ -52,7 +52,7 @@ public class ScheduleService {
 	// @Scheduled(cron = "0/10 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleUpdateGroupInfo() {
-		logger.info("定时调度，更新群组用户数量……");
+//		logger.info("定时调度，更新群组用户数量……");
 		// TODO
 		Group group = new Group();
 		List<Group> list = groupService.findListWithoutUsernum(group);

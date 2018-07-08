@@ -85,13 +85,19 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 				update.getMessage(), update.getDate());
 	}
 
-	/**channel 消息.
+	/**
+	 * channel 消息.
+	 * 
 	 * @see org.telegram.bot.handlers.DefaultUpdatesHandler#onTLUpdateChannelNewMessageCustom(org.telegram.api.update.TLUpdateChannelNewMessage)
 	 */
 	@Override
 	protected void onTLUpdateChannelNewMessageCustom(TLUpdateChannelNewMessage update) {
 		logger.info("ChannelNewMessage:channelid={},ptsCount={},msg={} ", update.getChannelId(), update.getPtsCount(),
 				update.getMessage());
+		if (update.getMessage() instanceof TLMessage) {
+			TLMessage m = (TLMessage) update.getMessage();
+			logger.info("new message :from={},msg={},date={}", m.getFromId(), m.getMessage(), m.getDate());
+		}
 	}
 
 	/**
@@ -101,7 +107,8 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 	 */
 	@Override
 	protected void onTLUpdateUserStatusCustom(TLUpdateUserStatus update) {
-//		logger.info("onTLUpdateUserStatusCustom,userid={},status={}", update.getUserId(), update.getStatus());
+		// logger.info("onTLUpdateUserStatusCustom,userid={},status={}",
+		// update.getUserId(), update.getStatus());
 	}
 
 	@Override
