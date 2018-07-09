@@ -107,8 +107,8 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 	 */
 	@Override
 	protected void onTLUpdateUserStatusCustom(TLUpdateUserStatus update) {
-		// logger.info("onTLUpdateUserStatusCustom,userid={},status={}",
-		// update.getUserId(), update.getStatus());
+		 logger.info(messageHandler.getBotConfig().getPhoneNumber()+"  onTLUpdateUserStatusCustom,userid={},status={}",
+		 update.getUserId(), update.getStatus());
 	}
 
 	@Override
