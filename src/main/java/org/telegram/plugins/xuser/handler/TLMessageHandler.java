@@ -29,12 +29,12 @@ public class TLMessageHandler {
     public void onTLMessage(TLMessage message) {
         final TLAbsPeer absPeer = message.getToId();
         if (absPeer instanceof TLPeerUser) {
-        	logger.info("用户消息:"+message.getMessage()+",from="+message.getFromId());
+        	logger.info(messageHandler.getBotConfig().getPhoneNumber()+"用户消息:"+message.getMessage()+",from="+message.getFromId());
             onTLMessageForUser(message);
         } else {
            // BotLogger.severe(LOGTAG, "Unsupported Peer: " + absPeer.toString());
           
-        	logger.info("群组消息:"+message.getChatId()+","+message.getMessage()+",from="+message.getFromId()+",date="+message.getDate());
+        	logger.info(messageHandler.getBotConfig().getPhoneNumber()+"群组消息:"+message.getChatId()+","+message.getMessage()+",from="+message.getFromId()+",date="+message.getDate());
         }
     }
 
@@ -44,7 +44,7 @@ public class TLMessageHandler {
             if (user != null) {
                 this.messageHandler.handleMessage(user, message);
             }else{
-            	logger.info(" messaget from="+message.getFromId()+" user not exist !");
+            	logger.info(messageHandler.getBotConfig().getPhoneNumber()+" messaget from="+message.getFromId()+" user not exist !");
             	
             }
         }

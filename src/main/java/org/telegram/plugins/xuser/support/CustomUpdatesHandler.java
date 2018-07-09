@@ -122,7 +122,7 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 			BotLogger.debug(LOGTAG, "Received TLMessage");
 			onTLMessage((TLMessage) message);
 		} else {
-			BotLogger.debug(LOGTAG, "Unsupported TLAbsMessage -> " + message.toString());
+			BotLogger.warn(LOGTAG, "Unsupported TLAbsMessage -> " + message.toString());
 		}
 	}
 
