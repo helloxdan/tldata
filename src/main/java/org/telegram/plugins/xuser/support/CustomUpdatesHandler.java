@@ -61,7 +61,7 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 	}
 
 	/**
-	 * user to user message .
+	 * 用户消息 message .
 	 * 
 	 * @see org.telegram.bot.handlers.DefaultUpdatesHandler#onTLUpdateShortMessageCustom(org.telegram.api.updates.TLUpdateShortMessage)
 	 */
@@ -81,7 +81,7 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 	 */
 	@Override
 	protected void onTLUpdateShortChatMessageCustom(TLUpdateShortChatMessage update) {
-		logger.info("chatMessage:chatid={},from={},msg={},date={}", update.getChatId(), update.getFromId(),
+		logger.info(messageHandler.getBotConfig().getPhoneNumber()+" chatMessage:chatid={},from={},msg={},date={}", update.getChatId(), update.getFromId(),
 				update.getMessage(), update.getDate());
 	}
 
@@ -92,11 +92,11 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 	 */
 	@Override
 	protected void onTLUpdateChannelNewMessageCustom(TLUpdateChannelNewMessage update) {
-		logger.info("ChannelNewMessage:channelid={},ptsCount={},msg={} ", update.getChannelId(), update.getPtsCount(),
+		logger.info(messageHandler.getBotConfig().getPhoneNumber()+" ChannelNewMessage:channelid={},ptsCount={},msg={} ", update.getChannelId(), update.getPtsCount(),
 				update.getMessage());
 		if (update.getMessage() instanceof TLMessage) {
 			TLMessage m = (TLMessage) update.getMessage();
-			logger.info("new message :from={},msg={},date={}", m.getFromId(), m.getMessage(), m.getDate());
+			logger.info(messageHandler.getBotConfig().getPhoneNumber()+" new message :from={},msg={},date={}", m.getFromId(), m.getMessage(), m.getDate());
 		}
 	}
 
@@ -149,7 +149,7 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 			if (user != null) {
 				this.tlMessageHandler.onTLMessage(message);
 			} else {
-				logger.info("new user message:chatid :{},from: {},msg:{} ", message.getChatId(), message.getFromId(),
+				logger.info(messageHandler.getBotConfig().getPhoneNumber()+"new user message:chatid :{},from: {},msg:{} ", message.getChatId(), message.getFromId(),
 						message.getMessage());
 			}
 		}
