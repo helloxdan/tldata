@@ -10,9 +10,11 @@ select account,count(*) from tl_job_user where job_id ='auto' group by account;
 select * from tl_job_user where userid='263197640';
 #copy to tl_job_user
 insert into tl_job_user 
-select u.id,'auto',u.account,u.from_group,u.userId,u.username,u.userHash,tu.firstname,tu.lastname,'0','1',CURRENT_TIMESTAMP,'1',CURRENT_TIMESTAMP,'0' from tl_users u
+select u.id,'auto','0',u.account,u.from_group,u.userId,u.username,u.userHash,tu.firstname,tu.lastname,'0','1',CURRENT_TIMESTAMP,'1',CURRENT_TIMESTAMP,'0' from tl_users u
 left join tl_user tu on tu.id=u.userId
-where u.username is not null and u.username!='';
+where u.username is not null and u.username!=''
+and not exists (select 1 from tl_job_user ju where ju.account=u.account and ju.userid=u.userId)
+;
 
 #
 
