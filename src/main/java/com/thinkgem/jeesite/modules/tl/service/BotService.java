@@ -113,7 +113,8 @@ public class BotService {
 			IBot ins = bots.get(botkey);
 			ins.stop();
 			// 去除引用
-			bots.remove(botkey);
+//			bots.remove(botkey);
+			iterator.remove();
 		}
 		// 3.管理员账号登录
 		logger.info("启动管理员账号");
