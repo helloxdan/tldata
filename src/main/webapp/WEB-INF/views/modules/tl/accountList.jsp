@@ -94,9 +94,22 @@
 		function startBatch(){
 			var url="${rctx}/api/tl/startBatch";
 			 var num = window.prompt('输入启动账号数量', '');
+			 if(!num) return;
+			 
 			 $.post(url,{num:num},function(res){
 				 if(res.success){
 					 showTip("操作完成");
+					 //document.location.reload();
+				 }else{
+					 alert(res.msg);
+				 }
+			 });
+		}
+		function stop(id){
+			var url="${rctx}/api/tl/stop";
+			 $.post(url,{phone:id},function(res){
+				 if(res.success){
+					 showTip("stop操作完成");
 					 //document.location.reload();
 				 }else{
 					 alert(res.msg);
@@ -108,6 +121,7 @@
 		function joinGroup(account){
 			var url="${rctx}/api/tl/importInvite";
 			 var link = window.prompt('输入群组邀链接', '');
+			 if(!link) return;
 			 link=encodeURI(link);
 			 $.post(url,{phone:account,url:link},function(res){
 				 if(res.success){
@@ -274,6 +288,7 @@
 					 </c:if>
 					 <c:if test="${account.status=='run' }">
 					 <a href="javascript:joinGroup('${account.id}')">入群</a>
+					 <a href="javascript:stop('${account.id}')">停止</a>
 					 </c:if>
 				</td>
 			</tr>

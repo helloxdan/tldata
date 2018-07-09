@@ -473,6 +473,8 @@ public class BotService {
 	public boolean stop(RequestData data) {
 		IBot bot = getBot(data);
 		boolean success = bot.stop();
+		
+		bots.remove(data.getPhone());
 		return success;
 	}
 
