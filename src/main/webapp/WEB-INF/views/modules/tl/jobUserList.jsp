@@ -127,7 +127,7 @@
 				<th class="sort-column a.lastname">lastname</th>
 				<th class="sort-column a.user_hash">访问码</th>
 				<th class="sort-column a.status">是否已邀请</th>
-				<th class="sort-column a.update_date">update_date</th>
+				<th class="sort-column u.msg_time">最近访问时间</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -164,7 +164,7 @@
 					${fns:getDictLabel(jobUser.status, 'yes_no', '')}
 				</td>
 				<td>
-					<fmt:formatDate value="${jobUser.updateDate}" pattern="yyyy-MM-dd HH:mm:ss"/>
+					<fmt:formatDate value="${jobUser.msgTime}" pattern="yyyy-MM-dd HH:mm:ss"/>
 				</td>
 			</tr>
 		</c:forEach>

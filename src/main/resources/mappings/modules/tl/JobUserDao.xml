@@ -20,10 +20,12 @@
 		a.update_by AS
 		"updateBy.id",
 		a.update_date AS "updateDate",
-		a.del_flag AS "delFlag"
+		a.del_flag AS "delFlag",
+		u.msg_time as "msgTime"
 	</sql>
 
 	<sql id="jobUserJoins">
+	left join tl_user u on u.id=a.userid
 	</sql>
 
 	<select id="get" resultType="JobUser">

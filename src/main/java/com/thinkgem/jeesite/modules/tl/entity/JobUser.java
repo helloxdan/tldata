@@ -3,6 +3,8 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
+import java.util.Date;
+
 import org.hibernate.validator.constraints.Length;
 
 import com.thinkgem.jeesite.common.persistence.DataEntity;
@@ -28,7 +30,7 @@ public class JobUser extends DataEntity<JobUser> {
 	private Long userHash; // 访问码
 	private String status; // 是否已邀请
 	private String ids; // 删除记录ids
-
+	private Date msgTime;		// 最新发言时间
 	private int star=0;//用于查询用户
 	
 	// 用于查询，限定查询结果数量
@@ -158,6 +160,14 @@ public class JobUser extends DataEntity<JobUser> {
 
 	public void setTaskId(String taskId) {
 		this.taskId = taskId;
+	}
+
+	public Date getMsgTime() {
+		return msgTime;
+	}
+
+	public void setMsgTime(Date msgTime) {
+		this.msgTime = msgTime;
 	}
 	
 }

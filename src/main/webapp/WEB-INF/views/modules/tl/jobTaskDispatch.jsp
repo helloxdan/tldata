@@ -208,6 +208,7 @@
 			
 					|<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue hide"  >批量执行抽取用户</a>
 					<a href="javascript:cleanJobUser('${jobTask.jobId}')"  class="btn btn-blue" title="删除重复数据，或者已经抽取的数据" >清洗用户数据</a>
+				<a href="${ctx}/tl/jobUser/list?jobId=${jobTask.jobId}" class="btn btn-blue">用户列表</a>
 					<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-blue"  >开始拉人</a>
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
 			</div>	
