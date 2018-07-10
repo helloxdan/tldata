@@ -109,9 +109,9 @@
 				<th><input type="checkbox" id="checkAll" /></th>
 				<th class="sort-column a.id">任务ID</th>
 				<th class="sort-column a.name">任务名称</th> 
-				<th class="sort-column a.group_link">群组link</th>
-				<th class="sort-column a.group_id">群组id</th>
-				<th class="sort-column a.group_name">群组名称</th>
+				<th class="sort-column a.group_link">目标群组link</th>
+				<th class="sort-column a.group_id">目标群组id</th>
+				<th class="sort-column a.group_name">目标群组名称</th>
 				<th class="sort-column a.usernum">用户数</th>
 				<th class="sort-column a.day">几天完成</th>
 				<th class="sort-column a.boss">老板</th>
