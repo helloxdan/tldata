@@ -87,7 +87,7 @@ public class JobUserService extends CrudService<JobUserDao, JobUser> {
 		List<JobUser> list = this.dao.findUserOfJob(ju);
 		if (list.size() > 0) {
 			// 用户已经存在
-			logger.info("{}用户已存在job={}", ju.getUsername(), jobId);
+			logger.info("{}用户已存在job={},account={}", ju.getUsername(), jobId,ju.getAccount());
 		} else {
 			save(ju);
 		}

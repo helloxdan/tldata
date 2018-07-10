@@ -202,7 +202,7 @@ public class ScheduleService {
 				tlu.setLangcode(u.getLangCode());
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
-				tlu.setUserstate(u.getStatus().toString());
+				tlu.setUserstate(u.getStatus()==null?null:u.getStatus().toString());
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
 

@@ -21,7 +21,7 @@
 		"updateBy.id",
 		a.update_date AS "updateDate",
 		a.del_flag AS "delFlag",
-		u.msg_time as "msgTime"
+		u.msg_time as "msgTime" ,u.star
 	</sql>
 
 	<sql id="jobUserJoins">
@@ -68,7 +68,7 @@
 				ORDER BY ${page.orderBy}
 			</when>
 			<otherwise>
-				ORDER BY a.update_date DESC
+				ORDER BY u.update_date DESC
 			</otherwise>
 		</choose>
 	</select>
@@ -90,11 +90,9 @@
 	<!-- 查找没有在job中未重复的用户 -->
 	<select id="findDistinctForJob" resultType="JobUser">
 		SELECT
-		<include refid="jobUserColumns" />
-		,u.star
+		<include refid="jobUserColumns" />	
 		FROM tl_job_user a
-		<include refid="jobUserJoins" /> 
-		LEFT JOIN tl_user u ON u.id=a.userid
+		<include refid="jobUserJoins" />  
 		<where>
 			a.del_flag = #{DEL_FLAG_NORMAL}
 			AND a.job_id = #{jobId}

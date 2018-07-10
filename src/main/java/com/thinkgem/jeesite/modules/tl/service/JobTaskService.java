@@ -51,8 +51,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 
 	@Transactional(readOnly = false)
 	public void save(JobTask jobTask) {
-		if (jobTask.getIsNewRecord())
-			jobTask.setStatus("0");
+		if (jobTask.getIsNewRecord() &&jobTask.getStatus()==null)
+			jobTask.setStatus(JobTask.STATUS_NONE);
 		super.save(jobTask);
 	}
 
@@ -243,7 +243,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			jobTask.setJobId(jobid);
 			jobTask.setAccount(ac.getId());
 			jobTask.setUsernum(users.size());
-			jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
+			jobTask.setStatus(JobTask.STATUS_FETCHED);// 已抽取
 			save(jobTask);
 
 			// 拷贝用户到jobid中
