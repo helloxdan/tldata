@@ -31,7 +31,7 @@ public class RegisteService {
 	@Autowired
 	private SmsCardService smsCardService;
 	private int phoneNum = 0;
-	private int planSize = 1;// 计划获取号码数
+	private int planSize = 0;// 计划获取号码数
 
 	private Map<String, String> phoneMaps = new HashMap<String, String>();
 	// 记录待取验证码的手机号
@@ -41,7 +41,7 @@ public class RegisteService {
 	private Queue<String[]> codeQueue = new LinkedList<String[]>();
 
 	// 启动自动获取手机账号的功能
-	private boolean start = true;
+	private boolean start = false;
 
 	public int getPlanSize() {
 		return planSize;
@@ -155,8 +155,8 @@ public class RegisteService {
 				logger.info("{}账号已经发送过验证码", phone);
 			} else {
 				// FIXME
-//				boolean success = botService.registe(phone);
-				boolean success = false;
+				boolean success = botService.registe(phone);
+//				boolean success = false;
 				// 存入缓存。
 				phoneMaps.put(phone, phone);
 				if (success) {
@@ -184,9 +184,9 @@ public class RegisteService {
 				return;
 			}
 
-//			JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
+			JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
 			// FIXME
-			 JSONObject json = new JSONObject();
+//			 JSONObject json = new JSONObject();
 			// 检查返回结果，如果成功，则清除记录；
 			if (json.getBooleanValue("result")) {
 				// 完成账号注册
