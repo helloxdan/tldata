@@ -56,6 +56,7 @@ public class RegisteService {
 	 * 开始获取手机号列表。
 	 */
 	public void start() {
+		logger.warn("注册程序启动");
 		start = true;
 	}
 
@@ -63,6 +64,7 @@ public class RegisteService {
 	 * 停止获取手机号列表。
 	 */
 	public void stop() {
+		logger.warn("注册程序停止");
 		start = false;
 	}
 

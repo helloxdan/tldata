@@ -68,7 +68,7 @@
 			var url="${ctx}/tl/account/addBatch";
 			 var num = window.prompt('输入新增数量', '');
 			if(!num) return;
-		alert('-'+num+'-');
+		//alert('-'+num+'-');
 			 $.post(url,{num:num},function(res){
 				 if(res.success){
 					 showTip("添加注册操作完成");

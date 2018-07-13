@@ -81,8 +81,8 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 	 */
 	@Override
 	protected void onTLUpdateShortChatMessageCustom(TLUpdateShortChatMessage update) {
-		logger.info(messageHandler.getBotConfig().getPhoneNumber()+" chatMessage:chatid={},from={},msg={},date={}", update.getChatId(), update.getFromId(),
-				update.getMessage(), update.getDate());
+//		logger.info(messageHandler.getBotConfig().getPhoneNumber()+" chatMessage:chatid={},from={},msg={},date={}", update.getChatId(), update.getFromId(),
+//				update.getMessage(), update.getDate());
 	}
 
 	/**
@@ -92,11 +92,11 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 	 */
 	@Override
 	protected void onTLUpdateChannelNewMessageCustom(TLUpdateChannelNewMessage update) {
-		logger.info(messageHandler.getBotConfig().getPhoneNumber()+" ChannelNewMessage:channelid={},ptsCount={},msg={} ", update.getChannelId(), update.getPtsCount(),
-				update.getMessage());
+//		logger.info(messageHandler.getBotConfig().getPhoneNumber()+" ChannelNewMessage:channelid={},ptsCount={},msg={} ", update.getChannelId(), update.getPtsCount(),
+//				update.getMessage());
 		if (update.getMessage() instanceof TLMessage) {
 			TLMessage m = (TLMessage) update.getMessage();
-			logger.info(messageHandler.getBotConfig().getPhoneNumber()+" new message :from={},msg={},date={}", m.getFromId(), m.getMessage(), m.getDate());
+//			logger.info(messageHandler.getBotConfig().getPhoneNumber()+" new message :from={},msg={},date={}", m.getFromId(), m.getMessage(), m.getDate());
 		}
 	}
 
@@ -107,8 +107,8 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 	 */
 	@Override
 	protected void onTLUpdateUserStatusCustom(TLUpdateUserStatus update) {
-		 logger.info(messageHandler.getBotConfig().getPhoneNumber()+"  onTLUpdateUserStatusCustom,userid={},status={}",
-		 update.getUserId(), update.getStatus());
+//		 logger.info(messageHandler.getBotConfig().getPhoneNumber()+"  onTLUpdateUserStatusCustom,userid={},status={}",
+//		 update.getUserId(), update.getStatus());
 	}
 
 	@Override
