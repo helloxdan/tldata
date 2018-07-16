@@ -1,0 +1,5 @@
+http://www-us.apache.org/dist/tomcat/tomcat-7/v7.0.88/bin/apache-tomcat-7.0.88-windows-x64.zip
+
+http://download.oracle.com/otn-pub/java/jdk/8u171-b11/512cd62ec5174c3487ac17c61aaa89e8/jdk-8u171-windows-x64.exe?AuthParam=1527090294_cb8484591787d060776893eee4ccddc6
+
+https://cdn.mysql.com/archives/mysql-5.6/mysql-5.6.10-winx64.zip
