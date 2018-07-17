@@ -47,6 +47,7 @@ public class BotService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	private static final int APIKEY = 202491; // your api key
 	private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; // your
+	private String adminAccount="8618566104318";
 
 	private Map<String, IBot> bots = new HashMap<String, IBot>();
 	@Autowired
@@ -142,7 +143,7 @@ public class BotService {
 	 */
 	public String getAdminAccount() {
 		// TODO Auto-generated method stub
-		return "8618566104318";
+		return adminAccount;
 	}
 
 	/**
