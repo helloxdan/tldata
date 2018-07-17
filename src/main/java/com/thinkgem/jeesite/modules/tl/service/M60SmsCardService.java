@@ -200,7 +200,7 @@ public class M60SmsCardService implements SmsCardService {
 					+ "&userkey="
 					+ getToken()
 					+ "&telnum="
-					+ phone + "&docks=B3244DD57208B76&dtype=json";
+					+ phone + "&dockcode=B3244DD57208B76&dtype=json";
 			logger.info("取验证码url={}",url); 
 			result = restTemplate.getForObject(url, JSONObject.class);
 			logger.info("{}取验证码结果：{}", phone, result);
@@ -208,6 +208,8 @@ public class M60SmsCardService implements SmsCardService {
 			if (logger.isDebugEnabled()) {
 				logger.debug("{}取验证码结果：{}", phone, result);
 			}
+			
+			result=result.getJSONObject("Return");
 			String staus = result.getString("Staus");
 			if (!"0".equals(staus)) {
 				// throw new RuntimeException("获取验证码失败");
@@ -220,7 +222,7 @@ public class M60SmsCardService implements SmsCardService {
 				// Pattern是一个正则表达式经编译后的表现模式
 				Pattern p = Pattern.compile(regEx);
 				// 把前面的时间去掉
-				content = content.substring(20);
+				content = content.substring(10);
 
 				// 一个Matcher对象是一个状态机器，它依据Pattern对象做为匹配模式对字符串展开匹配检查。
 				Matcher m = p.matcher(content);
