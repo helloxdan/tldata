@@ -21,8 +21,9 @@ public class Constants {
 
 	public static final double PER_SIZE_DOUBLE=50D;
 	
-	public static final int MIN_CACHE_USER_NUM=100;//最低的储备用户数
+	public static final int MIN_CACHE_USER_NUM=500;//最低的储备用户数
 	
 	public static final int APIKEY = 202491; // your api key
 	public static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; // your api hash
+	public static final String ADMIN_ACCOUNT="";
 }

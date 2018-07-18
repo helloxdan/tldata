@@ -71,7 +71,7 @@
 			a.del_flag = #{DEL_FLAG_NORMAL}
 			and a.url is not null
 			and a.out_='0'	
-			and a.usernum <![CDATA[ > ]]> 1000
+			and a.usernum <![CDATA[ > ]]> 10
 		</where>
 		 order by offset_  limit 1
 	</select>
