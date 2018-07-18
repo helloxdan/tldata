@@ -201,7 +201,7 @@ public class M60SmsCardService implements SmsCardService {
 					+ getToken()
 					+ "&telnum="
 					+ phone + "&dockcode=B3244DD57208B76&dtype=json";
-			logger.info("取验证码url={}",url); 
+			//logger.info("取验证码url={}",url); 
 			result = restTemplate.getForObject(url, JSONObject.class);
 			logger.info("{}取验证码结果：{}", phone, result);
 			// 返回示例：{"Return":{"Staus":"0","SmsContent":"你正在注册微信帐号，验证码71408。请勿转发。【腾讯科技】,"ErrorInfo":"成功！}}
