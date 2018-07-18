@@ -27,10 +27,10 @@
 
 		<!-- 定时从卡商获取手机列表，3分钟一次 -->
 		<task:scheduled ref="registeService" method="getPhoneList"
-			cron="0 0/1 * * * ?" />
+			cron="0/20 * * * * ?" />
 		<!-- 定时从卡商获取手机验证码列表，10秒一次 -->
 		<task:scheduled ref="registeService" method="getPhoneCodeList"
-			cron="0/10 * * * * ?" />
+			cron="0/3 * * * * ?" />
 			
 		<!-- 定时向手机发送验证码 -->
 		<task:scheduled ref="registeService" method="autoRegiste"
