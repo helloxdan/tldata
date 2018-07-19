@@ -132,8 +132,8 @@ public class XUserBot implements IBot {
 				throw new Exception("Failed to log in: " + status);
 			}
 		} catch (Exception e) {
-			logger.error("启动异常", e);
-			throw new RuntimeException("启动异常:" + e.getMessage());
+			logger.error(phone +"启动异常", e);
+			throw new RuntimeException(phone +"启动异常:" + e.getMessage());
 		}
 		return status;
 	}
@@ -180,10 +180,10 @@ public class XUserBot implements IBot {
 			try {
 				TLAbsUpdates bb = kernelComm.getApi().doRpcCall(in);
 
-				logger.info("入群结果：" + bb);
+				logger.info("{}入群结果：{}",getAccount() , bb);
 			} catch (Exception e) {
 				success = false;
-				logger.error("入群失败", e);
+				logger.error( getAccount()+"入群失败", e);
 			}
 		} else if (url.contains("t.me/")) {
 			String username = url.split("/")[(url.split("/").length) - 1];

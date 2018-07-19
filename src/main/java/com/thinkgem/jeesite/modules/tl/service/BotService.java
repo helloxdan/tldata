@@ -46,13 +46,14 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 public class BotService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	//客户
-	private static final int APIKEY = 432207; // your api key
-	private static final String APIHASH = "3ebb326385fa410f83e4b33efd7ea1f4"; // your
-	private String adminAccount="8613726447007";
+//	private static final int APIKEY = 432207; // your api key
+//	private static final String APIHASH = "3ebb326385fa410f83e4b33efd7ea1f4"; // your
+//	private String adminAccount="8613726447007";
 	
-//	private static final int APIKEY = 202491; // your api key
-//	private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; // your
-//	private String adminAccount="8618566104318";
+	private static final int APIKEY = 202491; // your api key
+	private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; // your
+//	private String adminAccount="8618566104318";//已阵亡
+	private String adminAccount="8615734657443";
 
 	private Map<String, IBot> bots = new HashMap<String, IBot>();
 	@Autowired
