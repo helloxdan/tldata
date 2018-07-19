@@ -58,10 +58,8 @@ public class JobController extends BaseController {
 
 	@RequiresPermissions("tl:job:view")
 	@RequestMapping(value = { "list", "" })
-	public String list(Job job, HttpServletRequest request,
-			HttpServletResponse response, Model model) {
-		Page<Job> page = jobService.findPage(new Page<Job>(request, response),
-				job);
+	public String list(Job job, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Page<Job> page = jobService.findPage(new Page<Job>(request, response), job);
 		model.addAttribute("page", page);
 		return "modules/tl/jobList";
 	}
@@ -70,7 +68,10 @@ public class JobController extends BaseController {
 	@RequestMapping(value = "form")
 	public String form(Job job, Model model) {
 		if (job.getIsNewRecord()) {
-			job.setId(DateUtils.formatDate(new Date(), "yyyyMMdd-01"));
+			job.setId(DateUtils.formatDate(new Date(), "yyyyMMddHHmmss"));
+			job.setBoss("boss");
+			job.setUsernum(100);
+			job.setDay(1);
 			job.setIsNewRecord(true);
 		}
 		model.addAttribute("job", job);
@@ -79,16 +80,14 @@ public class JobController extends BaseController {
 
 	@RequiresPermissions("tl:job:edit")
 	@RequestMapping(value = "save")
-	public String save(Job job, Model model,
-			RedirectAttributes redirectAttributes) {
+	public String save(Job job, Model model, RedirectAttributes redirectAttributes) {
 		if (!beanValidator(model, job)) {
 			return form(job, model);
 		}
 		// if (job.getIsNewRecord()) {
 		// 获取目标群组信息
 		if (StringUtils.isNotBlank(job.getGroupUrl())) {
-			JSONObject result = botService.updateGroupInfoByLink(job
-					.getGroupUrl());
+			JSONObject result = botService.updateGroupInfoByLink(job.getGroupUrl());
 			job.setGroupId(result.getInteger("groupid"));
 			job.setGroupName(result.getString("name"));
 		}

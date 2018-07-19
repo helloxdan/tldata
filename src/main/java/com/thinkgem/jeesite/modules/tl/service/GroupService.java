@@ -38,7 +38,7 @@ public class GroupService extends CrudService<GroupDao, Group> {
 
 	@Transactional(readOnly = false)
 	public void save(Group group) {
-		if(group.getOut()==null)
+		if (group.getOut() == null)
 			group.setOut("0");
 		super.save(group);
 	}
@@ -74,26 +74,31 @@ public class GroupService extends CrudService<GroupDao, Group> {
 	public void insertOrUpdate(Group group) {
 		Group g = get(group.getId());
 		if (g == null) {
-			logger.info("新增群组，{}，{}，{}", group.getId(), group.getName(),
-					group.getIsChannel());
+			logger.info("新增群组，{}，{}，{}", group.getId(), group.getName(), group.getIsChannel());
 			group.setIsNewRecord(true);
 			group.preInsert();
 			save(group);
 		} else {
 			group.preUpdate();
-			//this.dao.updateUpdateNum(group);
+			// this.dao.updateUpdateNum(group);
 			// logger.info("更新群组，{}，{}，{}", group.getId(), group.getName(),
 			// group.getIsChannel());
 			// group.setIsNewRecord(false);
-			g.setName(group.getName());
-			g.setUrl(group.getUrl());
-			g.setUsername(group.getUsername());
-			g.setUsernum(group.getUsernum());
+			if (StringUtils.isNotBlank(group.getName()))
+				g.setName(group.getName());
+			if (StringUtils.isNotBlank(group.getUrl()))
+				g.setUrl(group.getUrl());
+			if (StringUtils.isNotBlank(group.getUsername()))
+				g.setUsername(group.getUsername());
+			if (group.getUsernum() != null && group.getUsernum() > 0)
+				g.setUsernum(group.getUsernum());
 			save(g);
 		}
 	}
 
-	/**查找没有usernum 值录的群组，用于更新。
+	/**
+	 * 查找没有usernum 值录的群组，用于更新。
+	 * 
 	 * @param group
 	 * @return
 	 */
@@ -102,8 +107,8 @@ public class GroupService extends CrudService<GroupDao, Group> {
 	}
 
 	public Group getOneGroupForFetch() {
-		Group group=new Group();
-		return this.dao.getOneGroupForFetch(group); 
+		Group group = new Group();
+		return this.dao.getOneGroupForFetch(group);
 	}
 
 }

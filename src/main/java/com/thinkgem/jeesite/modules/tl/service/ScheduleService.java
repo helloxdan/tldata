@@ -165,9 +165,9 @@ public class ScheduleService {
 				}
  
 				if (u.getFirstName() != null
-						&& (u.getFirstName().contains("拉人") || u.getFirstName()
-								.contains("电报群"))) {
-					logger.info("用户名存在  拉人  电报群 字样，忽略");
+						&& (( u.getFirstName().length()>100  || ( u.getFirstName().contains("拉人") || u.getFirstName()
+								.contains("电报群"))))) {
+					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
 //				if ("wojiaoshenmehao".equals(u.getUserName())) {

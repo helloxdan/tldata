@@ -136,7 +136,7 @@
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">用户数：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="usernum" htmlEscape="false" maxlength="11" class="form-control  digits"/>
+				<form:input path="usernum" htmlEscape="false" maxlength="11" class="form-control  digits"  />
 			</div>
 			</div>
 		</div>
@@ -146,7 +146,7 @@
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">几天完成：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="day" htmlEscape="false" maxlength="11" class="form-control  digits"/>
+				<form:input path="day" htmlEscape="false" maxlength="11" class="form-control  digits" />
 			</div>
 			</div>
 		</div>
@@ -156,19 +156,18 @@
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">老板：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="boss" htmlEscape="false" maxlength="100" class="form-control required"/>
+				<form:input path="boss" htmlEscape="false" maxlength="100" class="form-control required"  />
 				<!-- <span class="help-inline required">*</span> -->
 			</div>
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
-		<div class="row">
+		<div class="row hide">
 		<div class="col-md-12">
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">任务状态：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
 				<form:select path="status" class="form-control required">
-					<form:option value="" label=""/>
 					<form:options items="${fns:getDictList('job_status')}" itemLabel="label" itemValue="value" htmlEscape="false"/>
 				</form:select>
 				<!-- <span class="help-inline required">*</span> -->

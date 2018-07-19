@@ -78,7 +78,7 @@ public class Group extends DataEntity<Group> {
 	}
 
 	public Integer getUsernum() {
-		return usernum;
+		return usernum == null ? 0 : usernum;
 	}
 
 	public void setUsernum(Integer usernum) {
@@ -135,7 +135,7 @@ public class Group extends DataEntity<Group> {
 	}
 
 	public Long getAccesshash() {
-		return accesshash==null ?0L:accesshash;
+		return accesshash == null ? 0L : accesshash;
 	}
 
 	public void setAccesshash(Long accesshash) {
