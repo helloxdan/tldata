@@ -51,7 +51,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 
 	@Transactional(readOnly = false)
 	public void save(JobTask jobTask) {
-		if (jobTask.getIsNewRecord() &&jobTask.getStatus()==null)
+		if (jobTask.getIsNewRecord() && jobTask.getStatus() == null)
 			jobTask.setStatus(JobTask.STATUS_NONE);
 		super.save(jobTask);
 	}
@@ -175,16 +175,22 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	public void fetchUserToAccountFromGroup(String jobid) {
 		List<JobTask> list = findUnfullJobtask(jobid);
 
-		while (list.size() > 0) {
+		//如果某个task 出错了，就死循环
+//		while (list.size() > 0) {
 			for (JobTask jt : list) {
-				RequestData data = new RequestData();
-				data.setLimit(40 - jt.getUsernum() + 10);
-				botService.collectUsersOfTask(data, jt.getId());
+				try {
+					RequestData data = new RequestData();
+					data.setLimit(40 - jt.getUsernum() + 10);
+					botService.collectUsersOfTask(data, jt.getId());
+				} catch (Exception e) {
+					logger.error("collectUsersOfTask error job={},account={}", jobid,jt.getAccount());
+				}
 			}
 
 			// 检查还有未满足的任务
-			list = findUnfullJobtask(jobid);
-		}
+//			list = findUnfullJobtask(jobid);
+//		}
+
 	}
 
 	/**
@@ -213,8 +219,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	 *            账号数量
 	 * @param data
 	 */
-	public void dispatchUserToAccount(String jobid, int accountNum,
-			RequestData data) {
+	public void dispatchUserToAccount(String jobid, int accountNum, RequestData data) {
 		String msg = "";
 		// 从账户表中查询最多num条记录
 		Account account = new Account();
@@ -223,8 +228,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		List<Account> alist = accountService.findAccountForJob(account);
 		if (alist.size() < accountNum) {
 			accountNum = alist.size();
-			msg = msg + " 只有" + accountNum
-					+ "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
+			msg = msg + " 只有" + accountNum + "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
 		}
 
 		// 遍历账号，从自己储备用户用获取40个账号

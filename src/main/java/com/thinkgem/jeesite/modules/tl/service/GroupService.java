@@ -81,7 +81,7 @@ public class GroupService extends CrudService<GroupDao, Group> {
 			save(group);
 		} else {
 			group.preUpdate();
-			this.dao.updateUpdateNum(group);
+			//this.dao.updateUpdateNum(group);
 			// logger.info("更新群组，{}，{}，{}", group.getId(), group.getName(),
 			// group.getIsChannel());
 			// group.setIsNewRecord(false);

@@ -57,6 +57,7 @@ import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.sys.entity.Log;
 import com.thinkgem.jeesite.modules.sys.utils.LogUtils;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
@@ -131,8 +132,14 @@ public class XUserBot implements IBot {
 				LogUtils.saveLog(log, null);
 				throw new Exception("Failed to log in: " + status);
 			}
-		} catch (Exception e) {
-			logger.error("启动异常", e);
+		} catch (Exception e) { 
+			String msg=e.getMessage();
+			if(StringUtils.isNotBlank(msg) && msg.contains("ERRORSENDINGCODE"))
+			{
+				logger.error("{}帐号登陆认证失败,重发验证码失败~~~~帐号失效~~~~~~~~``",phone);
+			}else {
+				logger.error("启动异常", e);
+			}
 			throw new RuntimeException("启动异常:" + e.getMessage());
 		}
 		return status;
@@ -181,10 +188,13 @@ public class XUserBot implements IBot {
 				TLAbsUpdates bb = kernelComm.getApi().doRpcCall(in);
 
 				logger.info("入群结果：" + bb);
+			}catch (TimeoutException e) {
+				success = false;
+				logger.error("入群操作超时,失败~~~~~~~~" );
 			} catch (Exception e) {
 				success = false;
 				logger.error("入群失败", e);
-			}
+			} 
 		} else if (url.contains("t.me/")) {
 			String username = url.split("/")[(url.split("/").length) - 1];
 			try {
@@ -202,6 +212,9 @@ public class XUserBot implements IBot {
 				json.put("accessHash", ch.getAccessHash());
 
 				logger.info("join channel result:{}", r);
+			}catch (TimeoutException e) {
+				success = false;
+				logger.error("入群操作超时,失败~~~~~~~~" );
 			} catch (Exception e) {
 				success = false;
 				logger.error("入群失败", e);
@@ -250,7 +263,7 @@ public class XUserBot implements IBot {
 	 */
 	@Override
 	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash, int offset, int limit) {
-		TLVector<TLAbsUser> users = null;
+		TLVector<TLAbsUser> users = new TLVector<TLAbsUser>();
 		logger.info("collectUsers from group ，" + chatId);
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
@@ -270,7 +283,7 @@ public class XUserBot implements IBot {
 		} catch (IOException e) {
 			logger.error("拉取群用户失败", e);
 		} catch (TimeoutException e) {
-			logger.error("拉取群用户失败，超时", e);
+			logger.error("拉取群用户失败，超时,超时,超时,超时" );
 		}
 		return users;
 	}
