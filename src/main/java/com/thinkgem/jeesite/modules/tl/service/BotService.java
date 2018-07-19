@@ -47,13 +47,13 @@ public class BotService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
  
 	// 客户 
-	private static final int APIKEY = 314699; // your api key
-	private static final String APIHASH = "870567202befc11fee16aa1fdea1bc37"; // your
-		private String adminAccount = "8617075494722";
+//	private static final int APIKEY = 314699; // your api key
+//	private static final String APIHASH = "870567202befc11fee16aa1fdea1bc37"; // your
+//		private String adminAccount = "8617075494722";
 //	private String adminAccount = "8613544252494";
-//	private static final int APIKEY = 432207; // your api key
-//	private static final String APIHASH = "3ebb326385fa410f83e4b33efd7ea1f4"; // your
-//	private String adminAccount = "8613726447007";
+	private static final int APIKEY = 432207; // your api key
+	private static final String APIHASH = "3ebb326385fa410f83e4b33efd7ea1f4"; // your
+	private String adminAccount ="8617075491348";// "8613726447007";
 
 	// private static final int APIKEY = 202491; // your api key
 	// private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; //

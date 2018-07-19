@@ -182,7 +182,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				try {
 					RequestData data = new RequestData();
 //					data.setLimit(40 - jt.getUsernum() + 30);
-					data.setLimit(60);
+					data.setLimit(150);
 					botService.collectUsersOfTask(data, jt.getId());
 				} catch (Exception e) {
 					logger.error("collectUsersOfTask error job={},account={}", jobid,jt.getAccount());

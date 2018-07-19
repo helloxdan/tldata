@@ -131,7 +131,7 @@
 	</bean> -->
 	 <bean id="smsCardService" class="com.thinkgem.jeesite.modules.tl.service.M60SmsCardService">
 	 <property name="restTemplate" ref="restTemplate" />
-	 <property name="username" value="cyd806" />
-	 <property name="password" value="127527" />
+	 <property name="username" value="xdan2018" />
+	 <property name="password" value="07170316" />
 	</bean>
 </beans>
