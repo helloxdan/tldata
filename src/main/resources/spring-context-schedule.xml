@@ -30,7 +30,7 @@
 			cron="0/20 * * * * ?" />
 		<!-- 定时从卡商获取手机验证码列表，10秒一次 -->
 		<task:scheduled ref="registeService" method="getPhoneCodeList"
-			cron="0/3 * * * * ?" />
+			cron="0/5 * * * * ?" />
 			
 		<!-- 定时向手机发送验证码 -->
 		<task:scheduled ref="registeService" method="autoRegiste"

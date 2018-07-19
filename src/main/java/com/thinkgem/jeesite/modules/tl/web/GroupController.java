@@ -4,6 +4,7 @@
 package com.thinkgem.jeesite.modules.tl.web;
 
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -75,20 +76,28 @@ public class GroupController extends BaseController {
 		if (!beanValidator(model, group)) {
 			return form(group, model);
 		}
-		if (StringUtils.isNotBlank(group.getUrl())) {
+		
+		try {
+			if (StringUtils.isNotBlank(group.getUrl())) {
 
-			// get group info by link
-			// 获取目标群组信息,
-			if (group.getIsNewRecord()) {
-				botService.getGroupidByUrl(group.getUrl());
+				// get group info by link
+				// 获取目标群组信息,
+				if (group.getIsNewRecord()) {
+//				botService.getGroupidByUrl(group.getUrl());
+					JSONObject json = botService.updateGroupInfoByLink(group
+							.getUrl());
+				} else {
+					groupService.save(group);
+				}
+				addMessage(redirectAttributes, "保存群组成功");
+
 			} else {
-				groupService.save(group);
+				addMessage(redirectAttributes, "link url 不能为空");
+
 			}
-			addMessage(redirectAttributes, "保存群组成功");
-
-		} else {
-			addMessage(redirectAttributes, "link url 不能为空");
-
+		} catch (Exception e) {
+			addMessage(redirectAttributes, e.getMessage());
+			logger.error("新增或更新group失败",e);
 		}
 		return "redirect:" + Global.getAdminPath() + "/tl/group/?repage";
 	}

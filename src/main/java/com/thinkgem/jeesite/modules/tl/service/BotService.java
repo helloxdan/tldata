@@ -45,21 +45,28 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 @Transactional(readOnly = true)
 public class BotService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
- 
-	// 客户 
-//	private static final int APIKEY = 314699; // your api key
-//	private static final String APIHASH = "870567202befc11fee16aa1fdea1bc37"; // your
-//		private String adminAccount = "8617075494722";
-//	private String adminAccount = "8613544252494";
-	private static final int APIKEY = 432207; // your api key
-	private static final String APIHASH = "3ebb326385fa410f83e4b33efd7ea1f4"; // your
-	private String adminAccount ="8617075491348";// "8613726447007";
+
+	// 客户
+	// private static final int APIKEY = 314699; // your api key
+	// private static final String APIHASH = "870567202befc11fee16aa1fdea1bc37";
+	// // your
+	// private String adminAccount = "8617075494722";
+	// private String adminAccount = "8613544252494";
+	// private static final int APIKEY = 432207; // your api key
+	// private static final String APIHASH = "3ebb326385fa410f83e4b33efd7ea1f4";
+	// // your
+	// private String adminAccount ="8617075491348";// "8613726447007";
 
 	// private static final int APIKEY = 202491; // your api key
-	// private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; //
+	// private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58";
+	// //
 	// your
 	// private String adminAccount="8618566104318";
- 
+
+	private static final int APIKEY = Integer.parseInt(Global
+			.getConfig("tl.apikey")); // your api key
+	private static final String APIHASH = Global.getConfig("tl.apihash"); // your
+	private String adminAccount = Global.getConfig("tl.admin.account");// 管理员账号
 
 	private Map<String, IBot> bots = new HashMap<String, IBot>();
 	@Autowired
@@ -108,9 +115,20 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public void startInit() {
 		System.out.println("Telegram bot 开始初始化……");
-		if ("true".equals(Global.getConfig("autoRun"))) {
-
-			// accountInit(null);
+		if ("true".equals(Global.getConfig("tl.autoRun"))) {
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(5000);
+						//初始化账号
+						accountInit(null);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			thread.start();
 		}
 	}
 
@@ -303,7 +321,8 @@ public class BotService {
 
 				// 来源群id
 				if (json.getLong("accessHash") == null) {
-					logger.info("{}加入群组{} failure ", data.getPhone(), data.getUrl());
+					logger.info("{}加入群组{} failure ", data.getPhone(),
+							data.getUrl());
 				} else {
 					data.setChatAccessHash(json.getLong("accessHash"));
 					data.setChatId(json.getIntValue("chatid"));
@@ -313,16 +332,19 @@ public class BotService {
 			Group g = groupService.get(data.getChatId() + "");
 			if (g == null) {
 				//
-				throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
+				throw new RuntimeException("群组id=" + data.getChatId()
+						+ "在表tl_group 中不存在！");
 			}
 			int offset = g.getOffset() == null ? 0 : g.getOffset();
 			int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-			TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
+			TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
+					data.getChatAccessHash(), offset, limitNum);
 
 			if (users == null)
 				users = new TLVector<TLAbsUser>();
-			logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+			logger.info("拉取群组用户结果：job={}，account={},size={}",
+					task.getString("jobId"), task.getString("account"),
 					users != null ? users.size() : 0);
 
 			// 更新群组的offset
@@ -337,7 +359,9 @@ public class BotService {
 					logger.info("用户没有username，忽略");
 					continue;
 				}
-				if (u.getFirstName() != null && (u.getFirstName().contains("拉人") || u.getFirstName().contains("电报群"))) {
+				if (u.getFirstName() != null
+						&& (u.getFirstName().contains("拉人") || u.getFirstName()
+								.contains("电报群"))) {
 					logger.info("用户名存在  拉人  电报群 字样，忽略");
 					continue;
 				}
@@ -368,7 +392,8 @@ public class BotService {
 				tlu.setLangcode(u.getLangCode());
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
-				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus().toString());
+				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus()
+						.toString());
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
 				num++;
@@ -384,10 +409,12 @@ public class BotService {
 
 			// 超过10000个账号限制
 			if (offset + limitNum > 10000) {
-				logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。", task.getString("jobId"), data.getPhone());
+				logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。",
+						task.getString("jobId"), data.getPhone());
 			}
 		} catch (Exception e) {
-			logger.error("采集任务失败,phone={},error={}",data.getPhone() , e.getMessage());
+			logger.error("采集任务失败,phone={},error={}", data.getPhone(),
+					e.getMessage());
 
 		}
 	}
@@ -485,7 +512,8 @@ public class BotService {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
+					+ " ，job= " + data.getJobid());
 		}
 	}
 
@@ -562,8 +590,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
-					c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
+					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -602,7 +630,7 @@ public class BotService {
 				throw new RuntimeException("通过url  加入群组失败！");
 			}
 		} catch (Exception e) {
-			logger.error("通过url更新群组信息操作失败", e);
+			logger.error("通过url更新群组信息操作失败" );
 			throw new RuntimeException("通过url更新群组信息操作失败", e);
 		}
 
@@ -813,7 +841,8 @@ public class BotService {
 			ac.setIsNewRecord(true);
 			ac.preInsert();
 			ac.setId(phone);
-			ac.setName(json.getString("firstName") + " " + json.getString("lastName"));
+			ac.setName(json.getString("firstName") + " "
+					+ json.getString("lastName"));
 			ac.setStatus("ready");
 			ac.setRole("0");
 			ac.setUsernum(0);

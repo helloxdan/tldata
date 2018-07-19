@@ -59,7 +59,7 @@ public class ScheduleService {
 		int num = 0;
 		for (Group g : list) {
 			// 暂时只执行两次，检查api接口是否支持连续执行
-			if (num == 5)
+			if (num == 2)
 				break;
 			updateGroupInfo(g);
 			num++;

@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.telegram.bot.structure.BotConfig;
 
+import com.thinkgem.jeesite.common.config.Global;
+
 /**
  * @author Ruben Bermudez
  * @version 1.0
@@ -16,11 +18,11 @@ public class BotConfigImpl extends BotConfig {
 	public BotConfigImpl(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 		// 按目录存放，auth/
-		File auth = new File("auth");
+		File auth = new File(Global.getConfig("tl.auth.path"));
 		if (!auth.exists())
 			auth.mkdir();
 
-		setAuthfile("auth/"+phoneNumber + ".auth");
+		setAuthfile(auth.getPath() + File.separator + phoneNumber + ".auth");
 	}
 
 	@Override
