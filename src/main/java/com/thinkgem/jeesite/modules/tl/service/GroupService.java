@@ -85,6 +85,11 @@ public class GroupService extends CrudService<GroupDao, Group> {
 			// logger.info("更新群组，{}，{}，{}", group.getId(), group.getName(),
 			// group.getIsChannel());
 			// group.setIsNewRecord(false);
+			g.setName(group.getName());
+			g.setUrl(group.getUrl());
+			g.setUsername(group.getUsername());
+			g.setUsernum(group.getUsernum());
+			save(g);
 		}
 	}
 

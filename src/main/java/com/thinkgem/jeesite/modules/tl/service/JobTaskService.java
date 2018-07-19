@@ -150,7 +150,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				jobTask.setGroupId(chatId + "");
 				jobTask.setGroupUrl(data.getUrl());
 				// jobTask.setOffsetNum(offsetNum);
-				jobTask.setLimitNum(50);// 默认每次查询50个用户，比 40多一些
+				jobTask.setLimitNum(0);// 默认每次查询50个用户，比 40多一些
 				jobTask.setUsernum(0);
 				jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
 
@@ -160,6 +160,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			}
 
 			// 循环拉取用户，直到满足每个账号有40个用户
+			if(alist.size()>0)
 			fetchUserToAccountFromGroup(jobid);
 
 		}
@@ -176,11 +177,12 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		List<JobTask> list = findUnfullJobtask(jobid);
 
 		//如果某个task 出错了，就死循环
-//		while (list.size() > 0) {
+		while (list.size() > 0) {
 			for (JobTask jt : list) {
 				try {
 					RequestData data = new RequestData();
-					data.setLimit(40 - jt.getUsernum() + 10);
+//					data.setLimit(40 - jt.getUsernum() + 30);
+					data.setLimit(60);
 					botService.collectUsersOfTask(data, jt.getId());
 				} catch (Exception e) {
 					logger.error("collectUsersOfTask error job={},account={}", jobid,jt.getAccount());
@@ -188,8 +190,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			}
 
 			// 检查还有未满足的任务
-//			list = findUnfullJobtask(jobid);
-//		}
+			list = findUnfullJobtask(jobid);
+		}
 
 	}
 
