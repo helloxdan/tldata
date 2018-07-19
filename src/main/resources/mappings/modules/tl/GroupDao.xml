@@ -80,12 +80,11 @@
 	<select id="findListWithoutUsernum" resultType="Group">
 		 select a.id,a.name,a.url ,c.accessHash from tl_group a
 		 join tl_chat c on c.chatid=a.id
-		  where    ( a.usernum is null or a.usernum<100)
+		  where    ( a.usernum is null or a.usernum <![CDATA[ < ]]> 100)
 		  and ( a.out_=0 or a.out_ is null )
-		  and is_channel='1'
-		  <!-- and c.account='8618566104318' -->
-		 
+		  and is_channel='1' 
 	</select>
+	  <!-- and c.account='8618566104318' -->
 	
 	<select id="findAllList" resultType="Group">
 		SELECT 

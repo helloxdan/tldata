@@ -18,7 +18,8 @@ public class BotConfigImpl extends BotConfig {
 	public BotConfigImpl(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 		// 按目录存放，auth/
-		File auth = new File(Global.getConfig("tl.auth.path"));
+		String path=Global.getConfig("tl.auth.path");
+		File auth = new File(path);
 		if (!auth.exists())
 			auth.mkdir();
 
