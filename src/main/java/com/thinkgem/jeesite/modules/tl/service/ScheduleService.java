@@ -115,7 +115,7 @@ public class ScheduleService {
 		for (Account a : alist) {
 			Group g = groupService.getOneGroupForFetch();
 			if (g == null) {
-				logger.warn("没有可抽取用户的群组");
+//				logger.warn("没有可抽取用户的群组");
 				continue;
 			}
 			if (StringUtils.isBlank(g.getUrl())) {

@@ -48,7 +48,7 @@ public class RegisteService {
 	}
 
 	public void addPlanSize(int num) {
-		this.planSize = this.planSize+num;
+		this.planSize = this.planSize + num;
 		start();
 	}
 
@@ -116,8 +116,8 @@ public class RegisteService {
 	 * 定时调度，获取手机验证码列表。
 	 */
 	public void getPhoneCodeList() {
-//		if (!start)
-//			return;
+		// if (!start)
+		// return;
 
 		Set<String> sets = codeMaps.keySet();
 		for (Iterator iterator = sets.iterator(); iterator.hasNext();) {
@@ -132,7 +132,17 @@ public class RegisteService {
 				continue;
 			}
 
-			List<String[]> list = getSmsCardService().getPhoneCode(phone);
+			List<String[]> list = null;
+			try {
+				list = getSmsCardService().getPhoneCode(phone);
+			} catch (Exception e) {
+				if ("ignore".equals(e.getMessage())) {
+					iterator.remove();
+					//加入黑名单
+					continue;
+				}
+			}
+
 			if (list != null && list.size() > 0) {
 				logger.info("从卡商获取手机验证码记录数={}", list.size());
 			}
@@ -158,12 +168,12 @@ public class RegisteService {
 			} else {
 				// FIXME
 				boolean success = botService.registe(phone);
-//				boolean success = false;
+				// boolean success = false;
 				// 存入缓存。
 				phoneMaps.put(phone, phone);
 				if (success) {
 					codeMaps.put(phone, System.currentTimeMillis());
-				}else {
+				} else {
 					logger.warn("发验证码失败,不列入取码队列");
 				}
 			}
@@ -188,7 +198,7 @@ public class RegisteService {
 
 			JSONObject json = botService.setRegAuthCode(kv[0], kv[1]);
 			// FIXME
-//			 JSONObject json = new JSONObject();
+			// JSONObject json = new JSONObject();
 			// 检查返回结果，如果成功，则清除记录；
 			if (json.getBooleanValue("result")) {
 				// 完成账号注册

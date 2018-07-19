@@ -89,7 +89,7 @@
 	</select>
 	
 	<!-- 查询用于分配任务的账号 -->
-	<select id="findAccountForJob" resultType="Account">
+	<select id="findAccountForJob222" resultType="Account">
 		SELECT 
 			<include refid="accountColumns"/>
 		FROM tl_account a
@@ -99,10 +99,25 @@
 			and a.role_='0'
 			 <!-- 账号没有被分配过 -->
 			and a.id not in (select account from tl_job_user j where j.job_id=#{jobid})
+		 
+			
 		</where>		
 		order by a.usernum desc limit ${limit}
 	</select>
-	
+	<select id="findAccountForJob" resultType="Account">
+		SELECT 
+			<include refid="accountColumns"/>
+		  ,b.anum
+		FROM tl_account a 
+		left join 	(	select count(*) anum,account from tl_job_user where job_id=#{jobid} group by account ) b  on 	a.id=b.account
+		<include refid="accountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.role_='0' 
+		  	and (b.anum <![CDATA[ < ]]> #{minUsernum}	 or b.anum is null)		
+		</where>		
+		order by a.usernum desc limit ${limit}
+	</select>
 	
 	<insert id="insert">
 		INSERT INTO tl_account(

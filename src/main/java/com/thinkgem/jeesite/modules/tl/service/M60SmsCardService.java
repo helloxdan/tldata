@@ -214,6 +214,10 @@ public class M60SmsCardService implements SmsCardService {
 			if (!"0".equals(staus)) {
 				// throw new RuntimeException("获取验证码失败");
 				logger.error("获取验证码失败：", result);
+				if(result.getString("ErrorInfo").contains("您并未拥有此卡")) {
+					//忽略此卡
+					throw new RuntimeException("ingore");
+				}
 			} else {
 				String content = result.getString("SmsContent");
 				logger.info("获取验证码：" + content);

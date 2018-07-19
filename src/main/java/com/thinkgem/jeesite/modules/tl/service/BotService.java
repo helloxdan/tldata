@@ -45,15 +45,21 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 @Transactional(readOnly = true)
 public class BotService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
-	//客户
+ 
+	// 客户 
+	private static final int APIKEY = 314699; // your api key
+	private static final String APIHASH = "870567202befc11fee16aa1fdea1bc37"; // your
+		private String adminAccount = "8617075494722";
+//	private String adminAccount = "8613544252494";
 //	private static final int APIKEY = 432207; // your api key
 //	private static final String APIHASH = "3ebb326385fa410f83e4b33efd7ea1f4"; // your
-//	private String adminAccount="8613726447007";
-	
-	private static final int APIKEY = 202491; // your api key
-	private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; // your
-//	private String adminAccount="8618566104318";//已阵亡
-	private String adminAccount="8615734657443";
+//	private String adminAccount = "8613726447007";
+
+	// private static final int APIKEY = 202491; // your api key
+	// private static final String APIHASH = "9f32d44fca581599dbbe02cec25ffe58"; //
+	// your
+	// private String adminAccount="8618566104318";
+ 
 
 	private Map<String, IBot> bots = new HashMap<String, IBot>();
 	@Autowired
@@ -120,7 +126,7 @@ public class BotService {
 			IBot ins = bots.get(botkey);
 			ins.stop();
 			// 去除引用
-//			bots.remove(botkey);
+			// bots.remove(botkey);
 			iterator.remove();
 		}
 		// 3.管理员账号登录
@@ -284,98 +290,105 @@ public class BotService {
 		data.setUrl(task.getString("groupUrl"));
 		data.setChatAccessHash(task.getLongValue("accessHash"));
 		data.setChatId(task.getIntValue("chatid"));
+		try {
 
-		IBot bot = getBot(data, true);
-		// if (task.getInteger("chatid") == null) {
-		// throw new RuntimeException("taskid="+taskid+"的用户还没加入来源群组");
-		if (data.getChatAccessHash() == 0) {
-			logger.warn("taskid={}的用户{}还没加入来源群组", taskid, data.getPhone());
-			logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
-			JSONObject json = bot.importInvite(data.getUrl());
+			IBot bot = getBot(data, true);
 
-			// 来源群id
-			data.setChatAccessHash(json.getLong("accessHash"));
-			data.setChatId(json.getIntValue("chatid"));
-		}
+			// if (task.getInteger("chatid") == null) {
+			// throw new RuntimeException("taskid="+taskid+"的用户还没加入来源群组");
+			if (data.getChatAccessHash() == 0) {
+				logger.warn("taskid={}的用户{}还没加入来源群组", taskid, data.getPhone());
+				logger.info("{}加入群组{}", data.getPhone(), data.getUrl());
+				JSONObject json = bot.importInvite(data.getUrl());
 
-		Group g = groupService.get(data.getChatId() + "");
-		if (g == null) {
-			//
-			throw new RuntimeException("群组id=" + data.getChatId()
-					+ "在表tl_group 中不存在！");
-		}
-		int offset = g.getOffset() == null ? 0 : g.getOffset();
-		int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
-
-		TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
-				data.getChatAccessHash(), offset, limitNum);
-		logger.info("拉取群组用户结果：job={}，account={},size={}",
-				task.getString("jobId"), task.getString("account"),
-				users.size());
-
-		// 更新群组的offset
-		g.setOffset(offset + limitNum);
-		groupService.updateOffset(g);
-
-		int num = 0;
-		// 将数据存储到数据库
-		for (TLAbsUser tluser : users) {
-			TLUser u = (TLUser) tluser;
-			if (StringUtils.isBlank(u.getUserName())) {
-				logger.info("用户没有username，忽略");
-				continue;
-			}
-			if (u.getFirstName() != null
-					&& (u.getFirstName().contains("拉人") || u.getFirstName()
-							.contains("电报群"))) {
-				logger.info("用户名存在  拉人  电报群 字样，忽略");
-				continue;
+				// 来源群id
+				if (json.getLong("accessHash") == null) {
+					logger.info("{}加入群组{} failure ", data.getPhone(), data.getUrl());
+				} else {
+					data.setChatAccessHash(json.getLong("accessHash"));
+					data.setChatId(json.getIntValue("chatid"));
+				}
 			}
 
-			JobUser ju = new JobUser();
-			ju.setJobId(task.getString("jobId"));
-			ju.setTaskId(taskid);
-			ju.setAccount(task.getString("account"));
-			ju.setFromGroup(data.getChatId() + "");
-			ju.setUserid(u.getId() + "");
-			ju.setUsername(u.getUserName());
-			ju.setUserHash(u.getAccessHash());
-			ju.setFirstname(u.getFirstName());
-			ju.setLastname(u.getLastName());
-			ju.setStatus("0");
-			// u.getLangCode();
-			// u.getFirstName();
-			// u.getLastName();
-//			jobUserService.save(ju);
-			jobUserService.insertUserToJob(ju, task.getString("jobId"));
+			Group g = groupService.get(data.getChatId() + "");
+			if (g == null) {
+				//
+				throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
+			}
+			int offset = g.getOffset() == null ? 0 : g.getOffset();
+			int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-			TlUser tlu = new TlUser();
-			tlu.setId(ju.getUserid());
-			tlu.setFirstname(ju.getFirstname());
-			tlu.setLastname(ju.getLastname());
-			tlu.setUsername(ju.getUsername());
-			tlu.setMsgTime(null);
-			tlu.setLangcode(u.getLangCode());
-			tlu.setUpdateDate(new Date());
-			tlu.setMsgNum(0);
-			tlu.setUserstate(u.getStatus().toString());
-			// 同时写入tl_user表
-			tlUserService.insertOrUpdate(tlu);
-			num++;
-		}
+			TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
 
-		if (users != null && users.size() > 0) {
-			// 设置状态为已抽取
-			JobTask t = jobTaskService.get(taskid);
-			t.setUsernum(num);
-			t.setStatus(JobTask.STATUS_FETCHED);
-			jobTaskService.save(t);
-		}
+			if (users == null)
+				users = new TLVector<TLAbsUser>();
+			logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+					users != null ? users.size() : 0);
 
-		// 超过10000个账号限制
-		if (offset + limitNum > 10000) {
-			logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。",
-					task.getString("jobId"), data.getPhone());
+			// 更新群组的offset
+			g.setOffset(offset + limitNum);
+			groupService.updateOffset(g);
+
+			int num = 0;
+			// 将数据存储到数据库
+			for (TLAbsUser tluser : users) {
+				TLUser u = (TLUser) tluser;
+				if (StringUtils.isBlank(u.getUserName())) {
+					logger.info("用户没有username，忽略");
+					continue;
+				}
+				if (u.getFirstName() != null && (u.getFirstName().contains("拉人") || u.getFirstName().contains("电报群"))) {
+					logger.info("用户名存在  拉人  电报群 字样，忽略");
+					continue;
+				}
+
+				JobUser ju = new JobUser();
+				ju.setJobId(task.getString("jobId"));
+				ju.setTaskId(taskid);
+				ju.setAccount(task.getString("account"));
+				ju.setFromGroup(data.getChatId() + "");
+				ju.setUserid(u.getId() + "");
+				ju.setUsername(u.getUserName());
+				ju.setUserHash(u.getAccessHash());
+				ju.setFirstname(u.getFirstName());
+				ju.setLastname(u.getLastName());
+				ju.setStatus("0");
+				// u.getLangCode();
+				// u.getFirstName();
+				// u.getLastName();
+				// jobUserService.save(ju);
+				jobUserService.insertUserToJob(ju, task.getString("jobId"));
+
+				TlUser tlu = new TlUser();
+				tlu.setId(ju.getUserid());
+				tlu.setFirstname(ju.getFirstname());
+				tlu.setLastname(ju.getLastname());
+				tlu.setUsername(ju.getUsername());
+				tlu.setMsgTime(null);
+				tlu.setLangcode(u.getLangCode());
+				tlu.setUpdateDate(new Date());
+				tlu.setMsgNum(0);
+				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus().toString());
+				// 同时写入tl_user表
+				tlUserService.insertOrUpdate(tlu);
+				num++;
+			}
+
+			if (users != null && users.size() > 0) {
+				// 设置状态为已抽取
+				JobTask t = jobTaskService.get(taskid);
+				t.setUsernum(num);
+				t.setStatus(JobTask.STATUS_FETCHED);
+				jobTaskService.save(t);
+			}
+
+			// 超过10000个账号限制
+			if (offset + limitNum > 10000) {
+				logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。", task.getString("jobId"), data.getPhone());
+			}
+		} catch (Exception e) {
+			logger.error("采集任务失败,phone={},error={}",data.getPhone() , e.getMessage());
+
 		}
 	}
 
@@ -472,8 +485,7 @@ public class BotService {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
-					+ " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
 		}
 	}
 
@@ -481,7 +493,7 @@ public class BotService {
 	public boolean stop(RequestData data) {
 		IBot bot = getBot(data);
 		boolean success = bot.stop();
-		
+
 		bots.remove(data.getPhone());
 		return success;
 	}
@@ -550,8 +562,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
-					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
+					c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -801,9 +813,9 @@ public class BotService {
 			ac.setIsNewRecord(true);
 			ac.preInsert();
 			ac.setId(phone);
-			ac.setName(json.getString("firstName") + " "
-					+ json.getString("lastName"));
+			ac.setName(json.getString("firstName") + " " + json.getString("lastName"));
 			ac.setStatus("ready");
+			ac.setRole("0");
 			ac.setUsernum(0);
 			ac.setGroupnum(0);
 			accountService.save(ac);
