@@ -118,8 +118,8 @@ public class RegisteService {
 	public void getPhoneCodeList() {
 		// if (!start)
 		// return;
-
 		Set<String> sets = codeMaps.keySet();
+		logger.info("共{}个手机号待收验证码", codeMaps.size());
 		for (Iterator iterator = sets.iterator(); iterator.hasNext();) {
 			String phone = (String) iterator.next();
 
@@ -138,7 +138,7 @@ public class RegisteService {
 			} catch (Exception e) {
 				if ("ignore".equals(e.getMessage())) {
 					iterator.remove();
-					//加入黑名单
+					// 加入黑名单
 					continue;
 				}
 			}
@@ -202,7 +202,8 @@ public class RegisteService {
 			// 检查返回结果，如果成功，则清除记录；
 			if (json.getBooleanValue("result")) {
 				// 完成账号注册
-				logger.info("账号{}注册成功，{} {}", kv[0], json.getString("firstName"), json.getString("lastName"));
+				logger.info("账号{}注册成功，{} {}", kv[0],
+						json.getString("firstName"), json.getString("lastName"));
 
 				// 成功之后，移除记录，不再重复发送验证码
 				codeMaps.remove(kv[0]);
@@ -210,6 +211,9 @@ public class RegisteService {
 				// 失败，计入黑名单，调用卡商接口，标记黑名单，避免下次再获取
 				logger.info("调用卡商接口，标记黑名单，{}", kv[0]);
 				smsCardService.setForbidden(kv[0]);
+
+				// 删除文件
+				// TODO
 			}
 		}
 	}

@@ -31,6 +31,7 @@ public class Account extends DataEntity<Account> {
 	private int usernum;
 	private int groupnum;
 	private String role;
+	private String pwdLock;
 	
 	//最少用户数，默认100个
 	private int minUsernum= Constants.MIN_CACHE_USER_NUM;
@@ -137,6 +138,14 @@ public class Account extends DataEntity<Account> {
 
 	public void setTrynum(int trynum) {
 		this.trynum = trynum;
+	}
+
+	public String getPwdLock() {
+		return pwdLock;
+	}
+
+	public void setPwdLock(String pwdLock) {
+		this.pwdLock = pwdLock;
 	}
 	
 }

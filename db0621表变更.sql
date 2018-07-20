@@ -21,3 +21,7 @@ ALTER TABLE `tl_group`
 
 ALTER TABLE `tl_user`
 	ADD COLUMN `msg_num` INT(11) NULL DEFAULT NULL COMMENT '消息数量' AFTER `star`;
+
+
+ALTER TABLE `tl_account`
+	ADD COLUMN `pwd_lock` CHAR(1) NULL DEFAULT '0' COMMENT '1-设置密码，0-未设置' AFTER `role_`;

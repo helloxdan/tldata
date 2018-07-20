@@ -45,13 +45,28 @@ public class AccountController extends BaseController {
 	@Autowired
 	private RegisteService registeService;
 
+	@RequestMapping(value = "/setPwd")
+	@ResponseBody
+	public ReturnWrap setPwd(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			botService.setAccountPwd(data);
+			result.setData("设置账号密码成功" );
+		} catch (Exception e) {
+			result.fail("设置账号密码失败，" + e.getMessage());
+		}
+		return result;
+	}
+
 	@RequestMapping(value = "/addBatch")
+	@ResponseBody
 	public ReturnWrap addBatch(RequestData data, HttpServletRequest request,
 			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
-			 registeService.addPlanSize(data.getNum());
-			result.setData("增加注册账号数量"+data.getNum());
+			registeService.addPlanSize(data.getNum());
+			result.setData("增加注册账号数量" + data.getNum());
 		} catch (Exception e) {
 			result.fail("注册新账号请求异常，" + e.getMessage());
 		}

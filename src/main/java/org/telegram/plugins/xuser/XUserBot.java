@@ -1,13 +1,15 @@
 package org.telegram.plugins.xuser;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.api.TLConfig;
+import org.telegram.api.account.TLAbsAccountPassword;
+import org.telegram.api.account.TLAccountNoPassword;
+import org.telegram.api.account.TLAccountPasswordInputSettings;
 import org.telegram.api.auth.TLSentCode;
 import org.telegram.api.auth.sentcodetype.TLSentCodeTypeSms;
 import org.telegram.api.channel.TLChannelParticipants;
@@ -21,6 +23,8 @@ import org.telegram.api.contacts.TLResolvedPeer;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.engine.TelegramApi;
 import org.telegram.api.engine.storage.AbsApiState;
+import org.telegram.api.functions.account.TLRequestAccountGetPassword;
+import org.telegram.api.functions.account.TLRequestAccountUpdatePasswordSettings;
 import org.telegram.api.functions.auth.TLRequestAuthSendCode;
 import org.telegram.api.functions.channels.TLRequestChannelsGetFullChannel;
 import org.telegram.api.functions.channels.TLRequestChannelsGetParticipants;
@@ -54,6 +58,9 @@ import org.telegram.plugins.xuser.support.ChatUpdatesBuilderImpl;
 import org.telegram.plugins.xuser.support.CustomUpdatesHandler;
 import org.telegram.plugins.xuser.support.DefaultBotDataService;
 import org.telegram.plugins.xuser.support.DifferenceParametersService;
+import org.telegram.tl.TLBool;
+import org.telegram.tl.TLBoolTrue;
+import org.telegram.tl.TLBytes;
 import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONArray;
@@ -116,7 +123,8 @@ public class XUserBot implements IBot {
 					.setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
-			logger.info("创建实例，api=[{}],apihash=[{}],phone={}" ,apikey,apihash, phone);
+			logger.info("创建实例，api=[{}],apihash=[{}],phone={}", apikey, apihash,
+					phone);
 			kernel = new TelegramBot(botConfig, builder, apikey, apihash);
 			// 覆盖默认的DifferenceParametersService
 			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
@@ -696,5 +704,53 @@ public class XUserBot implements IBot {
 		return json;
 	}
 
+	/**
+	 * 设置账号密码。
+	 * 
+	 * @see org.telegram.plugins.xuser.IBot#setAccountPassword(java.lang.String,
+	 *      java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean setAccountPassword(String phone, String password, String hint) {
+		boolean success = true;
+		try {
+			// 1.先获取账号的 密码配置信息。判断是否存在密码，如果没有新增密码，有重新设置密码
+			TLRequestAccountGetPassword req = new TLRequestAccountGetPassword();
+			TLAbsAccountPassword res = kernel.getKernelComm().getApi()
+					.doRpcCall(req);
+
+			if (res instanceof TLAccountNoPassword) {
+				// 当前为空密码
+				logger.info("账号{}，当前没有设置密码！", phone);
+
+				TLRequestAccountUpdatePasswordSettings req2 = new TLRequestAccountUpdatePasswordSettings();
+				req2.setCurrentPasswordHash(new TLBytes(new byte[0]));//新设置密码时，设置空的byte
+				// 设置密码
+				TLAccountPasswordInputSettings newSettings = new TLAccountPasswordInputSettings();
+				// 新密码
+				TLBytes newPasswordHash = new TLBytes(password.getBytes());
+				newSettings.setNewPasswordHash(newPasswordHash);
+				newSettings.setNewSalt(res.getNewSalt());//
+				newSettings.setHint(hint);// 密码提示信息
+				req2.setNewSettings(newSettings);
+				TLBool res2 = kernel.getKernelComm().getApi().doRpcCall(req2);
+				if (res2 instanceof TLBoolTrue) {
+					logger.info("账号{}， 设置密码操作 成功！成功！", phone);
+				} else {
+					logger.info("账号{}， 设置密码操作 失败！失败！", phone);
+					success = false;
+				}
+
+			} else {
+				logger.info("账号{}，当前已设置密码！已经！已经！忽略~~~", phone);
+				success = false;
+			}
+
+		} catch (Exception e) {
+			success = false;
+			logger.error("设置账号密码错误，{}，{}", phone, e.getMessage());
+		}
+		return success;
+	}
 
 }

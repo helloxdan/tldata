@@ -162,7 +162,7 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/start")
-	public ReturnWrap sendImMessage(RequestData data,
+	public ReturnWrap start(RequestData data,
 			HttpServletRequest request, HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {

@@ -14,7 +14,8 @@
 		a.create_date AS "createDate",
 		a.update_by AS "updateBy.id",
 		a.update_date AS "updateDate",
-		a.del_flag AS "delFlag"
+		a.del_flag AS "delFlag",
+		a.pwd_lock as "pwdLock"
 	</sql>
 	
 	<sql id="accountJoins">
@@ -44,6 +45,9 @@
 			</if>
 			<if test="status != null and status != ''">
 				AND a.status = #{status}
+			</if>
+			<if test="pwdLock != null and pwdLock != ''">
+				AND a.pwd_lock = #{pwdLock}
 			</if>
 		</where>
 		<choose>
@@ -162,6 +166,9 @@
 	</update>
 	
 	<update id="delete">
+		DELETE FROM  tl_account WHERE id = #{id}
+	</update>
+	<update id="delete2">
 		UPDATE tl_account SET 
 			del_flag = #{DEL_FLAG_DELETE}
 		WHERE id = #{id}
@@ -204,13 +211,20 @@
 		)
 	</insert>
 	
-		<update id="updateAccountHis">
+	<update id="updateAccountHis">
 		UPDATE tl_account_his SET 	
 			id = #{id},
 			trynum = #{trynum},
 			status = #{status}, 
 			update_date = #{updateDate},
 			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<update id="updatePwdLock">
+		UPDATE tl_account_his SET  
+			pwd_lock = #{pwdLock}
 		WHERE id = #{id}
 	</update>
 </mapper>

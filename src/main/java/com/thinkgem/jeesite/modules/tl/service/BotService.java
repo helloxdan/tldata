@@ -25,6 +25,7 @@ import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
+import com.thinkgem.jeesite.common.utils.FileUtils;
 import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.sys.entity.Log;
 import com.thinkgem.jeesite.modules.sys.entity.User;
@@ -121,7 +122,7 @@ public class BotService {
 				public void run() {
 					try {
 						Thread.sleep(5000);
-						//初始化账号
+						// 初始化账号
 						accountInit(null);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -207,30 +208,56 @@ public class BotService {
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public LoginStatus start(RequestData data) {
-		XUserBot bot = (XUserBot) bots.get(data.getPhone());
-		if (bot == null) {
-			bot = new XUserBot();
-			bot.setBotDataService(botDataService);
-			bots.put(data.getPhone(), bot);
-		} else {
-			// 已经登陆过l
-			if (XUserBot.STATUS_OK.equals(bot.getStatus())) {
-				return LoginStatus.ALREADYLOGGED;
+		LoginStatus status = null;
+		try {
+			XUserBot bot = (XUserBot) bots.get(data.getPhone());
+			if (bot == null) {
+				bot = new XUserBot();
+				bot.setBotDataService(botDataService);
+				bots.put(data.getPhone(), bot);
+			} else {
+				// 已经登陆过l
+				if (XUserBot.STATUS_OK.equals(bot.getStatus())) {
+					return LoginStatus.ALREADYLOGGED;
+				}
 			}
-		}
-		LoginStatus status = bot.start(data.getPhone(), APIKEY, APIHASH);
-		logger.info("{} start status={}", data.getPhone(), status);
-		if (status == LoginStatus.ALREADYLOGGED) {
-			// bots.put(getAdminAccount(), bot);
-			bot.setStatus(XUserBot.STATUS_OK);
-			// 更改帐号状态为run
-			updateAccountState(data.getPhone(), Account.STATUS_RUN);
-		} else {
-			String title = data.getPhone() + "登录失败，status" + status;
-			logger.error(title);
-			LogUtils.saveLog(new Log("tl", title), null);
+			status = bot.start(data.getPhone(), APIKEY, APIHASH);
+			logger.info("{} start status={}", data.getPhone(), status);
+			if (status == LoginStatus.ALREADYLOGGED) {
+				// bots.put(getAdminAccount(), bot);
+				bot.setStatus(XUserBot.STATUS_OK);
+				// 更改帐号状态为run
+				updateAccountState(data.getPhone(), Account.STATUS_RUN);
+			} else {
+				String title = data.getPhone() + "登录失败，status" + status;
+				logger.error(title);
+				LogUtils.saveLog(new Log("tl", title), null);
+			}
+		} catch (Exception e) {
+			String msg = e.getMessage();
+			if (StringUtils.isNotBlank(msg) && msg.contains("ERRORSENDINGCODE")) {
+				// 登录失败，删除账号和auth文件
+				removeAccount(data.getPhone());
+			}
+			bots.put(data.getPhone(), null);
 		}
 		return status;
+	}
+
+	/**
+	 * 删除账号。
+	 * 
+	 * @param phone
+	 */
+	@Transactional(readOnly = false)
+	public void removeAccount(String phone) {
+		try {
+			accountService.delete(new Account(phone));
+			// 删除文件
+			deleteAuthFile(phone);
+		} catch (Exception e) {
+			logger.error("删除账号{},error={}", phone, e.getMessage());
+		}
 	}
 
 	private void updateAccountState(String phone, String status) {
@@ -630,7 +657,7 @@ public class BotService {
 				throw new RuntimeException("通过url  加入群组失败！");
 			}
 		} catch (Exception e) {
-			logger.error("通过url更新群组信息操作失败" );
+			logger.error("通过url更新群组信息操作失败");
 			throw new RuntimeException("通过url更新群组信息操作失败", e);
 		}
 
@@ -781,8 +808,21 @@ public class BotService {
 
 	private void deleteAuthFile(String phone) {
 		try {
-			File auth = new File("auth/" + phone + ".auth");
-			auth.deleteOnExit();
+			// File auth = new File("auth/" + phone + ".auth");
+			// auth.deleteOnExit();
+			String path = Global.getConfig("tl.auth.path") + phone + ".auth";
+			String bakpath = Global.getConfig("tl.auth.path") + "authdel"
+					+ File.separator + phone + ".auth";
+			File bakauth = new File(Global.getConfig("tl.auth.path")
+					+ "authdel");
+			if (!bakauth.exists())
+				bakauth.mkdir();
+
+			// 备份文件，避免误删除
+			FileUtils.copyFile(path, bakpath);
+
+			File authfile = new File(path);
+			authfile.deleteOnExit();
 		} catch (Exception e) {
 			logger.warn("delete auth file error {}", e.getMessage());
 		}
@@ -822,6 +862,9 @@ public class BotService {
 				status = "FAILURE";
 				// 清除
 				bots.put(phone, null);
+
+				// 删除auth文件
+				removeAccount(phone);
 			}
 		}
 
@@ -848,7 +891,44 @@ public class BotService {
 			ac.setUsernum(0);
 			ac.setGroupnum(0);
 			accountService.save(ac);
+
+			// 设置用户密码，防止被占用
+			// TODO 设置用户密码，防止被占用
+			setAccountPassword(phone);
 		}
 		return json;
 	}
+
+	/**
+	 * 设置用户名密码。
+	 * 
+	 * @param phone
+	 */
+	@Transactional(readOnly = false)
+	public void setAccountPassword(String phone) {
+		IBot bot = getBotByPhone(phone);
+		String password = "xln2018";// 默认的统一密码
+		String hint = "已被你大爷占用了，不送！ 三人行留字";
+		boolean success = bot.setAccountPassword(phone, password, hint);
+		if (success) {
+			// 标记账号为已设置密码 
+			accountService.updatePwdLock(phone);
+		}
+	}
+
+	/**
+	 * 将未设置密码的账号添加密码。
+	 * 
+	 * @param data
+	 */
+	@Transactional(readOnly = false)
+	public void setAccountPwd(RequestData data) {
+		Account account = new Account();
+		account.setPwdLock(Global.YES);
+		List<Account> list = accountService.findList(account);
+		for (Account ac : list) {
+			setAccountPassword(ac.getId());
+		}
+	}
+
 }
