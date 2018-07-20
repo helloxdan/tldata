@@ -10,6 +10,7 @@ import org.telegram.bot.kernel.IKernelComm;
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.IUser;
+import org.telegram.plugins.xuser.XUtils;
 
 /**
  * @author Ruben Bermudez
@@ -84,6 +85,6 @@ public class MessageHandler {
 		// kernelComm.performMarkAsRead(user, 0);
 
 		// 记录谁发送消息
-		logger.info(getBotConfig()==null ? "":getBotConfig().getPhoneNumber()+"-新消息,from={},message={}", user.getUserId(), message);
+		logger.info(getBotConfig()==null ? "":getBotConfig().getPhoneNumber()+"-新消息,from={},message={}", user.getUserId(), XUtils.transChartset(message));
 	}
 }

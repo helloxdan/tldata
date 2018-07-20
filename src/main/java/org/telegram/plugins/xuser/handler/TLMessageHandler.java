@@ -8,6 +8,7 @@ import org.telegram.api.peer.TLPeerUser;
 import org.telegram.bot.kernel.database.DatabaseManager;
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.IUser;
+import org.telegram.plugins.xuser.XUtils;
 
 /**
  * @author Ruben Bermudez
@@ -29,12 +30,12 @@ public class TLMessageHandler {
     public void onTLMessage(TLMessage message) {
         final TLAbsPeer absPeer = message.getToId();
         if (absPeer instanceof TLPeerUser) {
-        	logger.info(messageHandler.getBotConfig().getPhoneNumber()+"用户消息:"+message.getMessage()+",from="+message.getFromId());
+        	logger.info(messageHandler.getBotConfig().getPhoneNumber()+",用户消息:"+ XUtils.transChartset(message.getMessage())+",from="+message.getFromId());
             onTLMessageForUser(message);
         } else {
            // BotLogger.severe(LOGTAG, "Unsupported Peer: " + absPeer.toString());
           
-        	logger.info(messageHandler.getBotConfig().getPhoneNumber()+"群组消息:"+message.getChatId()+","+message.getMessage()+",from="+message.getFromId()+",date="+message.getDate());
+        	logger.info(messageHandler.getBotConfig().getPhoneNumber()+",群组消息:"+message.getChatId()+","+ XUtils.transChartset(message.getMessage())+",from="+message.getFromId()+",date="+message.getDate());
         }
     }
 
