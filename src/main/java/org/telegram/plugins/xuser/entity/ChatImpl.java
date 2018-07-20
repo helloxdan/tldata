@@ -2,6 +2,7 @@ package org.telegram.plugins.xuser.entity;
 
 import org.telegram.api.chat.channel.TLChannel;
 import org.telegram.bot.structure.Chat;
+import org.telegram.plugins.xuser.XUtils;
 
 /**
  * @author Ruben Bermudez
@@ -69,7 +70,7 @@ public class ChatImpl implements Chat {
 	}
 
 	public void setTitle(String title) {
-		this.title = title;
+		this.title =XUtils.transChartset( title);
 	}
 
 	public int getChatid() {

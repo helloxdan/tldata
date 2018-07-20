@@ -3,6 +3,7 @@ package org.telegram.plugins.xuser.entity;
 import org.telegram.api.user.profile.photo.TLAbsUserProfilePhoto;
 import org.telegram.api.user.status.TLAbsUserStatus;
 import org.telegram.bot.structure.IUser;
+import org.telegram.plugins.xuser.XUtils;
 
 /**
  * @author Ruben Bermudez
@@ -69,7 +70,7 @@ public class User implements IUser {
 	}
 
 	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+		this.firstName = XUtils.transChartset(firstName);
 	}
 
 	public String getLastName() {
@@ -77,7 +78,7 @@ public class User implements IUser {
 	}
 
 	public void setLastName(String lastName) {
-		this.lastName = lastName;
+		this.lastName = XUtils.transChartset(lastName);
 	}
 
 	public String getLangCode() {

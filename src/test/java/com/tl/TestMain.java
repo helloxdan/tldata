@@ -74,36 +74,49 @@ public class TestMain {
 		System.out.println(getEncoding(s3));
 
 		try {
-			String name = "Bitkeep 瀹樻柟涓枃绀惧尯";
+			// String name = "Bitkeep 瀹樻柟涓枃绀惧尯";
+			String name = "BIHUO甯佺伀瀹樻柟绀剧兢";
 			// 用新的字符编码生成字符串ASCII,ISO-8859-1
 			testCharset(name, "UTF-8", "UTF-8");
 			testCharset(name, "UTF-8", "ASCII");
 			testCharset(name, "UTF-8", "ISO-8859-1");
 			testCharset(name, "UTF-8", "GB2312");
-			
-			testCharset(name, "GB2312", "UTF-8");
+
+			testCharset(name, "GBK", "UTF-8");
 			testCharset(name, "GB2312", "ASCII");
 			testCharset(name, "GB2312", "ISO-8859-1");
-			
+
 			testCharset(name, "ISO-8859-1", "UTF-8");
 			testCharset(name, "ISO-8859-1", "ASCII");
 			testCharset(name, "ISO-8859-1", "GB2312");
-			
+
 			testCharset(name, "ASCII", "UTF-8");
 			testCharset(name, "ASCII", "ISO-8859-1");
 			testCharset(name, "ASCII", "GB2312");
-			
-//			testCharset(name, "UTF-8", "UTF-16");
+
+			// testCharset(name, "UTF-8", "UTF-16");
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	private static void testCharset(String name, String c1, String c2)
+	public static String transChartset(String name, String before, String after) {
+		String str = name;
+		try {
+			byte[] bs = name.getBytes(before);
+			str = new String(bs, after);
+		} catch (UnsupportedEncodingException e) {
+//			logger.warn("字符转换异常");
+		}
+		return str;
+	}
+
+	private static String testCharset(String name, String c1, String c2)
 			throws UnsupportedEncodingException {
 		byte[] bs = name.getBytes(c1);
 		String str = new String(bs, c2); // 用新的字符编码生成字符串ASCII,ISO-8859-1
 		System.out.println(str);
+		return str;
 	}
 }
