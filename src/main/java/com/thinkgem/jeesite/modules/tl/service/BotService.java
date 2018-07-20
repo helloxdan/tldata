@@ -387,9 +387,9 @@ public class BotService {
 					continue;
 				}
 				if (u.getFirstName() != null
-						&& (u.getFirstName().contains("拉人") || u.getFirstName()
-								.contains("电报群"))) {
-					logger.info("用户名存在  拉人  电报群 字样，忽略");
+						&& (( u.getFirstName().length()>100 || u.getLastName().length() > 100  || ( u.getFirstName().contains("拉人") || u.getFirstName()
+								.contains("电报群"))))) {
+					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
 
@@ -443,6 +443,9 @@ public class BotService {
 			logger.error("采集任务失败,phone={},error={}", data.getPhone(),
 					e.getMessage());
 
+		}finally {
+			//
+			bots.put(data.getPhone(), null);
 		}
 	}
 
@@ -894,7 +897,7 @@ public class BotService {
 
 			// 设置用户密码，防止被占用
 			// TODO 设置用户密码，防止被占用
-			setAccountPassword(phone);
+//			setAccountPassword(phone);
 		}
 		return json;
 	}
@@ -906,7 +909,7 @@ public class BotService {
 	 */
 	@Transactional(readOnly = false)
 	public void setAccountPassword(String phone) {
-		IBot bot = getBotByPhone(phone);
+		IBot bot = getBotByPhone(phone,true);
 		String password = "xln2018";// 默认的统一密码
 		String hint = "已被你大爷占用了，不送！ 三人行留字";
 		boolean success = bot.setAccountPassword(phone, password, hint);
@@ -924,7 +927,8 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public void setAccountPwd(RequestData data) {
 		Account account = new Account();
-		account.setPwdLock(Global.YES);
+		account.setPwdLock(Global.NO);
+		account.setId(data.getPhone());
 		List<Account> list = accountService.findList(account);
 		for (Account ac : list) {
 			setAccountPassword(ac.getId());

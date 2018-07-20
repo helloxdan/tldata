@@ -52,7 +52,7 @@ public class ScheduleService {
 	// @Scheduled(cron = "0/10 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleUpdateGroupInfo() {
-//		logger.info("定时调度，更新群组用户数量……");
+		// logger.info("定时调度，更新群组用户数量……");
 		// TODO
 		Group group = new Group();
 		List<Group> list = groupService.findListWithoutUsernum(group);
@@ -105,19 +105,25 @@ public class ScheduleService {
 	@Transactional(readOnly = false)
 	public void scheduleFetchUser() {
 		logger.info("定时调度，从群组抽取用户数据……");
-
+		if (true)
+			return;
 		// TODO
 		// 1.查找用户数量少的账号，循环逐个处理
 		// 2.找一个link url 不为空，索引偏移量少的群组
 		// 3.执行抽取用户的操作
 		Account account = new Account();
 		List<Account> alist = accountService.findUnfullUserAccount(account);
+		int num = 0;
 		for (Account a : alist) {
 			Group g = groupService.getOneGroupForFetch();
 			if (g == null) {
-//				logger.warn("没有可抽取用户的群组");
+				// logger.warn("没有可抽取用户的群组");
 				continue;
 			}
+
+			// FIXME limit job 
+			if (num++ > 3)
+				break;
 			if (StringUtils.isBlank(g.getUrl())) {
 				logger.warn("群组{}没有邀请link", g.getName());
 				continue;
@@ -163,20 +169,19 @@ public class ScheduleService {
 					logger.info("用户没有username，忽略");
 					continue;
 				}
- 
-				if (u.getFirstName() != null
-						&& (( u.getFirstName().length()>100  || ( u.getFirstName().contains("拉人") || u.getFirstName()
-								.contains("电报群"))))) {
+
+				if (u.getFirstName() != null && ((u.getFirstName().length() > 100 || u.getLastName().length() > 100
+						|| (u.getFirstName().contains("拉人") || u.getFirstName().contains("电报群"))))) {
 					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
-//				if ("wojiaoshenmehao".equals(u.getUserName())) {
-//					System.out.println("isBotCantAddToGroup="
-//							+ u.isBotCantAddToGroup());
-//				}else{
-//					System.out.println("isBotCantAddToGroup="
-//							+ u.isBotCantAddToGroup());
-//				}
+				// if ("wojiaoshenmehao".equals(u.getUserName())) {
+				// System.out.println("isBotCantAddToGroup="
+				// + u.isBotCantAddToGroup());
+				// }else{
+				// System.out.println("isBotCantAddToGroup="
+				// + u.isBotCantAddToGroup());
+				// }
 
 				JobUser ju = new JobUser();
 				ju.setJobId("auto");
@@ -202,7 +207,7 @@ public class ScheduleService {
 				tlu.setLangcode(u.getLangCode());
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
-				tlu.setUserstate(u.getStatus()==null?null:u.getStatus().toString());
+				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus().toString());
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
 

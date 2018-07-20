@@ -122,17 +122,22 @@ public class BotDataService {
 			us.setUsername(user.getUsername());
 			userSessionService.save(us);
 
-			// 记录到用户表
-			TlUser tlUser = new TlUser();
-			tlUser.setIsNewRecord(true);
-			tlUser.preInsert();
-			tlUser.setId(user.getUserId() + "");
-			tlUser.setUsername(user.getUsername());
-			tlUser.setFirstname(user.getFirstName());
-			tlUser.setLastname(user.getLastName());
-			tlUser.setLangcode(user.getLangCode());
-			tlUser.setMsgTime(new Date());
-			tlUserService.insertOrUpdate(tlUser);
+			if (user.getFirstName() != null && ((user.getFirstName().length() > 100 || user.getLastName().length() > 100
+					|| (user.getFirstName().contains("拉人") || user.getFirstName().contains("电报群"))))) {
+				logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
+			} else {
+				// 记录到用户表
+				TlUser tlUser = new TlUser();
+				tlUser.setIsNewRecord(true);
+				tlUser.preInsert();
+				tlUser.setId(user.getUserId() + "");
+				tlUser.setUsername(user.getUsername());
+				tlUser.setFirstname(user.getFirstName());
+				tlUser.setLastname(user.getLastName());
+				tlUser.setLangcode(user.getLangCode());
+				tlUser.setMsgTime(new Date());
+				tlUserService.insertOrUpdate(tlUser);
+			}
 		} catch (Exception e) {
 			logger.error("addUser", e);
 			success = false;
@@ -192,8 +197,7 @@ public class BotDataService {
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public boolean updateDifferencesData(String phone, int botId, int pts,
-			int date, int seq) {
+	public boolean updateDifferencesData(String phone, int botId, int pts, int date, int seq) {
 		// 检查是否存在记录，没有则新增，否则更新
 		try {
 			String id = phone + botId;

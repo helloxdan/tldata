@@ -727,6 +727,7 @@ public class XUserBot implements IBot {
 				req2.setCurrentPasswordHash(new TLBytes(new byte[0]));//新设置密码时，设置空的byte
 				// 设置密码
 				TLAccountPasswordInputSettings newSettings = new TLAccountPasswordInputSettings();
+				newSettings.setFlags(0x1);//new 
 				// 新密码
 				TLBytes newPasswordHash = new TLBytes(password.getBytes());
 				newSettings.setNewPasswordHash(newPasswordHash);
