@@ -1,7 +1,7 @@
 
 #update account usernum 
 update tl_account t set usernum=(select count(distinct userid) from tl_job_user c where c.account=t.id and job_id='auto');
-update tl_account t set groupnum=(select count(distinct chatid) from tl_chat c where c.account=t.id);
+update tl_account t set groupnum=(select count(distinct chatid) from tl_chat c where c.account=t.id) where t.id='8617074888219';
 
 
 #query 

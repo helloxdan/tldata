@@ -197,7 +197,7 @@ public class ScheduleService {
 				String lastName = XUtils.transChartset(u.getLastName());
 				if (firstName != null && ((firstName.length() > 100 || firstName.length() > 100
 						|| (firstName.contains("拉人") || firstName.contains("电报群"))))) {
-					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
+					logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
 

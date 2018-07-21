@@ -140,7 +140,10 @@
 		WHERE id = #{id}
 	</update>
 	
-	<update id="delete">
+		<update id="delete">
+		DELETE FROM tl_task  WHERE id = #{id}
+	</update>
+	<update id="delete1">
 		UPDATE tl_task SET 
 			del_flag = #{DEL_FLAG_DELETE}
 		WHERE id = #{id}

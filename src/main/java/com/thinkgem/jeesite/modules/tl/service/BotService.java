@@ -394,7 +394,7 @@ public class BotService {
 						&& ((firstName.length() > 100
 								|| firstName.length() > 100 || (firstName.contains("拉人") ||  
 										firstName.contains("电报群"))))) {
-					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
+					logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
 
@@ -827,7 +827,7 @@ public class BotService {
 				bakauth.mkdir();
 
 			// 备份文件，避免误删除
-			FileUtils.copyFile(path, bakpath+File.separator + phone + ".auth");
+			FileUtils.copyFile(path, bakpath );
 
 			File authfile = new File(path);
 			authfile.deleteOnExit();

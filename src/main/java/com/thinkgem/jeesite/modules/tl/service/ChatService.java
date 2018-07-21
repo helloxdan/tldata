@@ -74,7 +74,7 @@ public class ChatService extends CrudService<ChatDao, Chat> {
 			channel.setAccessHash(chat.getAccesshash());
 			channel.setChannel(1 == chat.getIsChannel());
 		} else {
-			logger.error("{}会话id={}不存在", phone, chatId);
+			logger.debug("{}会话id={}不存在", phone, chatId);
 		}
 		return channel;
 	}
