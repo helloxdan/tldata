@@ -23,6 +23,7 @@ import org.telegram.bot.kernel.differenceparameters.IDifferenceParametersService
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.IUser;
+import org.telegram.plugins.xuser.XUtils;
 import org.telegram.plugins.xuser.handler.MessageHandler;
 import org.telegram.plugins.xuser.handler.TLMessageHandler;
 
@@ -149,8 +150,8 @@ public class CustomUpdatesHandler extends DefaultUpdatesHandler {
 			if (user != null) {
 				this.tlMessageHandler.onTLMessage(message);
 			} else {
-				logger.info(messageHandler.getBotConfig().getPhoneNumber()+"new user message:chatid :{},from: {},msg:{} ", message.getChatId(), message.getFromId(),
-						message.getMessage());
+				logger.debug(messageHandler.getBotConfig().getPhoneNumber()+" new user message:chatid :{},from: {},msg:{} ", message.getChatId(), message.getFromId(),
+						XUtils.transChartset(message.getMessage()));
 			}
 		}
 	}

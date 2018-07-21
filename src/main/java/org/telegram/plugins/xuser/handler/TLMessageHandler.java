@@ -30,12 +30,12 @@ public class TLMessageHandler {
     public void onTLMessage(TLMessage message) {
         final TLAbsPeer absPeer = message.getToId();
         if (absPeer instanceof TLPeerUser) {
-        	logger.info(messageHandler.getBotConfig().getPhoneNumber()+",用户消息:"+ XUtils.transChartset(message.getMessage())+",from="+message.getFromId());
+        	logger.debug(messageHandler.getBotConfig().getPhoneNumber()+",用户消息:"+ XUtils.transChartset(message.getMessage())+",from="+message.getFromId());
             onTLMessageForUser(message);
         } else {
            // BotLogger.severe(LOGTAG, "Unsupported Peer: " + absPeer.toString());
           
-        	logger.info(messageHandler.getBotConfig().getPhoneNumber()+",群组消息:"+message.getChatId()+","+ XUtils.transChartset(message.getMessage())+",from="+message.getFromId()+",date="+message.getDate());
+        	logger.debug(messageHandler.getBotConfig().getPhoneNumber()+",群组消息:"+message.getChatId()+","+ XUtils.transChartset(message.getMessage())+",from="+message.getFromId()+",date="+message.getDate());
         }
     }
 
@@ -45,7 +45,7 @@ public class TLMessageHandler {
             if (user != null) {
                 this.messageHandler.handleMessage(user, message);
             }else{
-            	logger.info(messageHandler.getBotConfig().getPhoneNumber()+" messaget from="+message.getFromId()+" user not exist !");
+            	logger.debug(messageHandler.getBotConfig().getPhoneNumber()+" messaget from="+message.getFromId()+" user not exist !");
             	
             }
         }

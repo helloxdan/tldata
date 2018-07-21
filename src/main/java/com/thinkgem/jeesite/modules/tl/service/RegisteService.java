@@ -119,6 +119,7 @@ public class RegisteService {
 		// if (!start)
 		// return;
 		Set<String> sets = codeMaps.keySet();
+		if(sets.size()>0)
 		logger.info("共{}个手机号待收验证码", codeMaps.size());
 		for (Iterator iterator = sets.iterator(); iterator.hasNext();) {
 			String phone = (String) iterator.next();

@@ -113,19 +113,19 @@ public class ScheduleService {
 	@Transactional(readOnly = false)
 	public void scheduleFetchUser() {
 		logger.info("定时调度，从群组抽取用户数据……");
-
 		// TODO
 		// 1.查找用户数量少的账号，循环逐个处理
 		// 2.找一个link url 不为空，索引偏移量少的群组
 		// 3.执行抽取用户的操作
 		Account account = new Account();
 		List<Account> alist = accountService.findUnfullUserAccount(account);
+		int num = 0;
 		for (Account a : alist) {
 			if (!accountFetchQueue.contains(a)) {
 				// 加入队列待处理
 				accountFetchQueue.add(a);
-			}else{
-				logger.info("{}账号已在待处理队列中，跳过",a.getId());
+			} else {
+				logger.info("{}账号已在待处理队列中，跳过", a.getId());
 			}
 		}
 
@@ -140,16 +140,17 @@ public class ScheduleService {
 				// logger.warn("没有可抽取用户的群组");
 				return;
 			}
+
 			if (StringUtils.isBlank(g.getUrl())) {
 				logger.warn("群组{}没有邀请link", g.getName());
 				return;
 			}
 
 			// 执行采集 操作
-//			fetchUserFromGroup(a.getId(), g);
+			// fetchUserFromGroup(a.getId(), g);
 
 			// 汇总下用户有效用户数
-//			accountService.updateAccountData();
+			// accountService.updateAccountData();
 		}
 	}
 
@@ -190,9 +191,11 @@ public class ScheduleService {
 				}
 
 				if (u.getFirstName() != null
-						&& ((u.getFirstName().length() > 100 || (u
+						&& ((u.getFirstName().length() > 100
+								|| u.getLastName().length() > 100 || (u
 								.getFirstName().contains("拉人") || u
 								.getFirstName().contains("电报群"))))) {
+
 					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
@@ -228,8 +231,10 @@ public class ScheduleService {
 				tlu.setLangcode(u.getLangCode());
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
+
 				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus()
 						.toString());
+
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
 
