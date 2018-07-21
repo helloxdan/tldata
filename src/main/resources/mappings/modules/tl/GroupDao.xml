@@ -61,7 +61,7 @@
 		</choose>
 	</select>
 	
-	<!-- 取一个用户数>1000,索引偏移最少offset的群组，优先从这个群组抽取用户 -->
+	<!-- 取一个用户数>1000,索引偏移最少offset的群组，优先从这个群组抽取用户  	and a.usernum <![CDATA[ > ]]> 10 -->
 	<select id="getOneGroupForFetch" resultType="Group">
 		SELECT 
 			<include refid="groupColumns"/>
@@ -71,7 +71,8 @@
 			a.del_flag = #{DEL_FLAG_NORMAL}
 			and a.url is not null
 			and a.out_='0'	
-			and a.usernum <![CDATA[ > ]]> 10
+			and offset_<![CDATA[ <   ]]>10000
+		
 		</where>
 		 order by offset_  limit 1
 	</select>

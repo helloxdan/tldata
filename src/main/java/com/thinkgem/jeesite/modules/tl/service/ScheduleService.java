@@ -112,6 +112,8 @@ public class ScheduleService {
 	// @Scheduled(cron = "0/5 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleFetchUser() {
+		if(true)
+			return;
 		// TODO
 		// 1.查找用户数量少的账号，循环逐个处理
 		// 2.找一个link url 不为空，索引偏移量少的群组
@@ -125,7 +127,7 @@ public class ScheduleService {
 				// 加入队列待处理
 				accountFetchQueue.add(a);
 			} else {
-				logger.info("{}账号已在待处理队列中，跳过", a.getId());
+				logger.debug("{}账号已在待处理队列中，跳过", a.getId());
 			}
 		}
 
@@ -133,6 +135,7 @@ public class ScheduleService {
 
 	@Transactional(readOnly = false)
 	public void handleAccountFetchUser() {
+		 
 		Account a = accountFetchQueue.poll();
 		if (a != null) {
 			Group g = groupService.getOneGroupForFetch();
@@ -147,10 +150,10 @@ public class ScheduleService {
 			}
 
 			// 执行采集 操作
-			// fetchUserFromGroup(a.getId(), g);
+			  fetchUserFromGroup(a.getId(), g);
 
 			// 汇总下用户有效用户数
-			// accountService.updateAccountData();
+			  accountService.updateAccountData();
 		}
 	}
 
