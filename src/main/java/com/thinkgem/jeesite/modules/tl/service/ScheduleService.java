@@ -1,7 +1,9 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,7 +54,7 @@ public class ScheduleService {
 	// @Scheduled(cron = "0/10 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleUpdateGroupInfo() {
-//		logger.info("定时调度，更新群组用户数量……");
+		// logger.info("定时调度，更新群组用户数量……");
 		// TODO
 		Group group = new Group();
 		List<Group> list = groupService.findListWithoutUsernum(group);
@@ -70,9 +72,11 @@ public class ScheduleService {
 	public void updateGroupInfo(Group g) {
 		// 通过管理员账号获取信息
 		try {
-			IBot bot = botService.getBotByPhone(botService.getAdminAccount(), true);
+			IBot bot = botService.getBotByPhone(botService.getAdminAccount(),
+					true);
 
-			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()), g.getAccesshash(), true);
+			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()),
+					g.getAccesshash(), true);
 			// String link = json.getString("link");
 			Integer usernum = json.getInteger("usernum");
 			if (usernum != null) {
@@ -82,7 +86,8 @@ public class ScheduleService {
 				group.preUpdate();
 				groupService.save(group);
 			} else {
-				logger.warn("通过账号{}无法获取群组【{}】的link", botService.getAdminAccount(), g.getName());
+				logger.warn("通过账号{}无法获取群组【{}】的link",
+						botService.getAdminAccount(), g.getName());
 
 				if ("CHANNEL_PRIVATE".equals(json.getString("msg"))) {
 					// remove
@@ -97,6 +102,9 @@ public class ScheduleService {
 			logger.error("更新群组的link地址异常", e);
 		}
 	}
+
+	// 采集用户的队列
+	private Queue<Account> accountFetchQueue = new LinkedList<Account>();
 
 	/**
 	 * 定时抽取用户信息。
@@ -113,20 +121,35 @@ public class ScheduleService {
 		Account account = new Account();
 		List<Account> alist = accountService.findUnfullUserAccount(account);
 		for (Account a : alist) {
+			if (!accountFetchQueue.contains(a)) {
+				// 加入队列待处理
+				accountFetchQueue.add(a);
+			}else{
+				logger.info("{}账号已在待处理队列中，跳过",a.getId());
+			}
+		}
+
+	}
+
+	@Transactional(readOnly = false)
+	public void handleAccountFetchUser() {
+		Account a = accountFetchQueue.poll();
+		if (a != null) {
 			Group g = groupService.getOneGroupForFetch();
 			if (g == null) {
-//				logger.warn("没有可抽取用户的群组");
-				continue;
+				// logger.warn("没有可抽取用户的群组");
+				return;
 			}
 			if (StringUtils.isBlank(g.getUrl())) {
 				logger.warn("群组{}没有邀请link", g.getName());
-				continue;
+				return;
 			}
-			fetchUserFromGroup(a.getId(), g);
-		}
-		if (alist.size() > 0) {
+
+			// 执行采集 操作
+//			fetchUserFromGroup(a.getId(), g);
+
 			// 汇总下用户有效用户数
-			accountService.updateAccountData();
+//			accountService.updateAccountData();
 		}
 	}
 
@@ -151,9 +174,11 @@ public class ScheduleService {
 			int chatid = result.getIntValue("chatid");
 			long accessHash = result.getLong("accessHash");
 			// 3.抽取用户
-			TLVector<TLAbsUser> users = bot.collectUsers(chatid, accessHash, g.getOffset(), FETCH_PAGE_SIZE);
+			TLVector<TLAbsUser> users = bot.collectUsers(chatid, accessHash,
+					g.getOffset(), FETCH_PAGE_SIZE);
 
-			logger.info("拉取群组用户结果： account={},group={},size={}", phone, g.getName(), users.size());
+			logger.info("拉取群组用户结果： account={},group={},size={}", phone,
+					g.getName(), users.size());
 
 			int num = 0;
 			// 将数据存储到数据库
@@ -163,20 +188,21 @@ public class ScheduleService {
 					logger.info("用户没有username，忽略");
 					continue;
 				}
- 
+
 				if (u.getFirstName() != null
-						&& (( u.getFirstName().length()>100  || ( u.getFirstName().contains("拉人") || u.getFirstName()
-								.contains("电报群"))))) {
+						&& ((u.getFirstName().length() > 100 || (u
+								.getFirstName().contains("拉人") || u
+								.getFirstName().contains("电报群"))))) {
 					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
-//				if ("wojiaoshenmehao".equals(u.getUserName())) {
-//					System.out.println("isBotCantAddToGroup="
-//							+ u.isBotCantAddToGroup());
-//				}else{
-//					System.out.println("isBotCantAddToGroup="
-//							+ u.isBotCantAddToGroup());
-//				}
+				// if ("wojiaoshenmehao".equals(u.getUserName())) {
+				// System.out.println("isBotCantAddToGroup="
+				// + u.isBotCantAddToGroup());
+				// }else{
+				// System.out.println("isBotCantAddToGroup="
+				// + u.isBotCantAddToGroup());
+				// }
 
 				JobUser ju = new JobUser();
 				ju.setJobId("auto");
@@ -202,7 +228,8 @@ public class ScheduleService {
 				tlu.setLangcode(u.getLangCode());
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
-				tlu.setUserstate(u.getStatus()==null?null:u.getStatus().toString());
+				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus()
+						.toString());
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
 

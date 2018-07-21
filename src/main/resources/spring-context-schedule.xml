@@ -21,9 +21,13 @@
 			cron="0 0/10 * * * ?" />
 		<!-- 账号自动加入有效群组 <task:scheduled ref="scheduleService" method="scheduleJoinGroup" 
 			cron="0 0/5 * * * ?" /> -->
-		<!-- 抽取用户 -->
+		<!-- 抽取用户任务查询，将待处理任务放入队列中 -->
 		<task:scheduled ref="scheduleService" method="scheduleFetchUser"
 			cron="0/30 * * * * ?" />
+			
+		<!-- 执行抽取用户，没2秒执行一次，控制频率，不被电报封 -->
+		<task:scheduled ref="scheduleService" method="handleAccountFetchUser"
+			cron="0/2 * * * * ?" />
 
 		<!-- 定时从卡商获取手机列表，3分钟一次 -->
 		<task:scheduled ref="registeService" method="getPhoneList"

@@ -32,14 +32,14 @@ public class Account extends DataEntity<Account> {
 	private int groupnum;
 	private String role;
 	private String pwdLock;
-	
-	//最少用户数，默认100个
-	private int minUsernum= Constants.MIN_CACHE_USER_NUM;
-	//用于查询，限定用户数量
-	private int limit=10;
+
+	// 最少用户数，默认100个
+	private int minUsernum = Constants.MIN_CACHE_USER_NUM;
+	// 用于查询，限定用户数量
+	private int limit = 10;
 	private String jobid;
-	
-	private int trynum=1;
+
+	private int trynum = 1;
 
 	public Account() {
 		super();
@@ -147,5 +147,10 @@ public class Account extends DataEntity<Account> {
 	public void setPwdLock(String pwdLock) {
 		this.pwdLock = pwdLock;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		Account a = (Account) obj;
+		return this.id != null && this.id.equals(a.getId());
+	}
 }
