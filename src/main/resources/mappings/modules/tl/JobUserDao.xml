@@ -8,6 +8,7 @@
 		a.task_id AS "taskId",
 		a.account AS "account",
 		a.from_group AS "fromGroup",
+		g.name as "fromGroupName",
 		a.userid AS "userid",
 		a.username AS
 		"username",a.firstname AS "firstname",
@@ -26,6 +27,7 @@
 
 	<sql id="jobUserJoins">
 	left join tl_user u on u.id=a.userid
+	left join tl_group g on g.id=a.from_group
 	</sql>
 
 	<select id="get" resultType="JobUser">
@@ -52,6 +54,9 @@
 			</if>
 			<if test="fromGroup != null and fromGroup != ''">
 				AND a.from_group = #{fromGroup}
+			</if>
+			<if test="fromGroupName != null and fromGroupName != ''">
+				AND g.name  LIKE  '%'+#{fromGroupName}+'%' 
 			</if>
 			<if test="userid != null and userid != ''">
 				AND a.userid = #{userid}
@@ -180,6 +185,10 @@
 	</update>
 
 	<update id="delete">
+		delete from tl_job_user WHERE id = #{id}
+	</update>
+	
+	<update id="delete2">
 		UPDATE tl_job_user SET
 		del_flag = #{DEL_FLAG_DELETE}
 		WHERE id = #{id}

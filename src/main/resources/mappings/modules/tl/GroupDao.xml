@@ -57,6 +57,7 @@
 				ORDER BY ${page.orderBy}
 			</when>
 			<otherwise>
+			order by upcate_date desc
 			</otherwise>
 		</choose>
 	</select>

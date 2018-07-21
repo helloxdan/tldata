@@ -85,9 +85,6 @@
 			<div class="form-group cxtj_text"><label>任务类型：</label>
 				<form:input path="type" htmlEscape="false" maxlength="50" class="form-control"/>
 			</div>
-			<div class="form-group cxtj_text"><label>开始位置：</label>
-				<form:input path="offsetNum" htmlEscape="false" maxlength="11" class="form-control"/>
-			</div>
 			<div class="form-group cxtj_text">
 						<input id="btnSubmit" class="btn btn-blue" type="submit"
 							value="查询" />
@@ -115,7 +112,6 @@
 				<th class="sort-column a.account">登录账号</th>
 				<th class="sort-column a.type">任务类型</th>
 				<th class="sort-column a.from_group_link">来源群组链接</th>
-				<th class="sort-column a.offset">开始位置</th>
 				<th class="sort-column a.limit">记录数</th>
 				<th class="sort-column a.usernum">有效用户数</th>
 				<th class="sort-column a.status">任务状态</th>
@@ -137,13 +133,11 @@
 					${jobTask.account}
 				</td>
 				<td>
-					${jobTask.type}
+					${fns:getDictLabel(jobTask.type, 'jobtask_type', '采集')}
 				</td>
 				<td>
-					${jobTask.groupId}
+					${jobTask.groupUrl}
 				</td>
-				<td>
-					${jobTask.offsetNum}
 				</td>
 				<td>
 					${jobTask.limitNum}

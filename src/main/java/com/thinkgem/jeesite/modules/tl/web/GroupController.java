@@ -3,8 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.web;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,11 +20,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
-import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.common.utils.StringUtils;
+import com.thinkgem.jeesite.common.web.BaseController;
+import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
 import com.thinkgem.jeesite.modules.tl.service.GroupService;
+import com.thinkgem.jeesite.modules.tl.service.ScheduleService;
+import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
  * 群组Controller
@@ -42,6 +43,38 @@ public class GroupController extends BaseController {
 	private GroupService groupService;
 	@Autowired
 	private BotService botService;
+	@Autowired
+	private ScheduleService scheduleService;
+
+	@RequestMapping(value = "/startSchedule")
+	@ResponseBody
+	public ReturnWrap startSchedule(HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			scheduleService.setRun(true);
+			result.setData("OK");
+		} catch (Exception e) {
+			logger.error("启动调度异常，", e);
+			result.fail("启动调度异常，");
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/stopSchedule")
+	@ResponseBody
+	public ReturnWrap stopSchedule(HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			scheduleService.setRun(false);
+			result.setData("OK");
+		} catch (Exception e) {
+			logger.error("启动调度异常，", e);
+			result.fail("启动调度异常，");
+		}
+		return result;
+	}
 
 	@ModelAttribute
 	public Group get(@RequestParam(required = false) String id) {
@@ -57,8 +90,10 @@ public class GroupController extends BaseController {
 
 	@RequiresPermissions("tl:group:view")
 	@RequestMapping(value = { "list", "" })
-	public String list(Group group, HttpServletRequest request, HttpServletResponse response, Model model) {
-		Page<Group> page = groupService.findPage(new Page<Group>(request, response), group);
+	public String list(Group group, HttpServletRequest request,
+			HttpServletResponse response, Model model) {
+		Page<Group> page = groupService.findPage(new Page<Group>(request,
+				response), group);
 		model.addAttribute("page", page);
 		return "modules/tl/groupList";
 	}
@@ -72,18 +107,19 @@ public class GroupController extends BaseController {
 
 	@RequiresPermissions("tl:group:edit")
 	@RequestMapping(value = "save")
-	public String save(Group group, Model model, RedirectAttributes redirectAttributes) {
+	public String save(Group group, Model model,
+			RedirectAttributes redirectAttributes) {
 		if (!beanValidator(model, group)) {
 			return form(group, model);
 		}
-		
+
 		try {
 			if (StringUtils.isNotBlank(group.getUrl())) {
 
 				// get group info by link
 				// 获取目标群组信息,
 				if (group.getIsNewRecord()) {
-//				botService.getGroupidByUrl(group.getUrl());
+					// botService.getGroupidByUrl(group.getUrl());
 					JSONObject json = botService.updateGroupInfoByLink(group
 							.getUrl());
 				} else {
@@ -97,7 +133,7 @@ public class GroupController extends BaseController {
 			}
 		} catch (Exception e) {
 			addMessage(redirectAttributes, e.getMessage());
-			logger.error("新增或更新group失败",e);
+			logger.error("新增或更新group失败", e);
 		}
 		return "redirect:" + Global.getAdminPath() + "/tl/group/?repage";
 	}

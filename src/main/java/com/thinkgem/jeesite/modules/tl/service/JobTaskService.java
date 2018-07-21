@@ -19,6 +19,7 @@ import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
+import com.thinkgem.jeesite.modules.utils.Constants;
 
 /**
  * 调度任务Service
@@ -38,8 +39,6 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	@Autowired
 	private GroupService groupService;
 	
-	private static final int FETCH_PAGE_SIZE = Integer.parseInt(Global.getConfig("tl.fetch.pagesize"));//150;
-
 	public JobTask get(String id) {
 		return super.get(id);
 	}
@@ -191,7 +190,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				try {
 					RequestData data = new RequestData();
 					// data.setLimit(40 - jt.getUsernum() + 30);
-					data.setLimit(FETCH_PAGE_SIZE);
+					data.setLimit(Constants.FETCH_PAGE_SIZE);
 					botService.collectUsersOfTask(data, jt.getId());
 				} catch (Exception e) {
 					logger.error("collectUsersOfTask error job={},account={}",

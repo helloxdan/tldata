@@ -23,6 +23,7 @@ public class JobUser extends DataEntity<JobUser> {
 	private String taskId; // 分派任务ID
 	private String account; // 登录账号
 	private String fromGroup; // 用户来源群组
+	private String fromGroupName; // 用户来源群组
 	private String userid; // 用户ID
 	private String username; // 用户名
 	private String firstname;		//  
@@ -34,7 +35,7 @@ public class JobUser extends DataEntity<JobUser> {
 	private int star=0;//用于查询用户
 	
 	// 用于查询，限定查询结果数量
-	private int limit = Constants.PER_SIZE;
+	private int limit = Constants.USER_LIMIT_SIZE;
 	//用户查询
 	private String toJobid;
 
@@ -168,6 +169,14 @@ public class JobUser extends DataEntity<JobUser> {
 
 	public void setMsgTime(Date msgTime) {
 		this.msgTime = msgTime;
+	}
+
+	public String getFromGroupName() {
+		return fromGroupName;
+	}
+
+	public void setFromGroupName(String fromGroupName) {
+		this.fromGroupName = fromGroupName;
 	}
 	
 }
