@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
@@ -117,6 +118,7 @@ public class AccountService extends CrudService<AccountDao, Account> {
 	 */
 	public void updatePwdLock(String phone) {
 		Account account = new Account(phone);
+		account.setPwdLock(Global.YES);
 		this.dao.updatePwdLock(account);
 	}
 

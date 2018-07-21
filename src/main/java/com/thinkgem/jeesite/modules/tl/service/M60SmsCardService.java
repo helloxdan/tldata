@@ -56,7 +56,7 @@ public class M60SmsCardService implements SmsCardService {
 
 		JSONObject result = null;
 		try {
-			String url = "http://sms.60ma.net/newsmssrv?cmd=getsms&encode=utf-8&userid="
+			String url = "http://sms.60ma.net/newsmssrv?cmd=addblacktelnum&encode=utf-8&userid="
 					+ getUserid()
 					+ "&userkey="
 					+ getToken()
@@ -77,8 +77,8 @@ public class M60SmsCardService implements SmsCardService {
 			}
 
 		} catch (RestClientException e) {
-			logger.error("加入黑名单失败", e);
-			throw new RuntimeException(e.getMessage());
+			logger.error("加入黑名单失败,{}", e.getMessage());
+//			throw new RuntimeException(e.getMessage());
 		}
 	}
 

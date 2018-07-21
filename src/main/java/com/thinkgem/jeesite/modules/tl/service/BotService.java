@@ -900,7 +900,7 @@ public class BotService {
 
 			// 设置用户密码，防止被占用
 			// TODO 设置用户密码，防止被占用
-			// setAccountPassword(phone);
+			 setAccountPassword(phone);
 		}
 		return json;
 	}
@@ -913,8 +913,14 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public void setAccountPassword(String phone) {
 		IBot bot = getBotByPhone(phone, true);
-		String password = "xln2018";// 默认的统一密码
-		String hint = "已被你大爷占用了，不送！ 三人行留字";
+		String password =Global.getConfig("tl.account.password") ;//"xln2018";// 默认的统一密码
+		if(password==null)
+			password="xln2018";
+			
+		String hint =Global.getConfig("tl.account.password.hint") ;// "已被你大爷占用了，不送！ 三人行留字";
+		if(hint==null)
+			hint="ye zan yong le ,bye! san ren xing 2018";
+			
 		boolean success = bot.setAccountPassword(phone, password, hint);
 		if (success) {
 			// 标记账号为已设置密码

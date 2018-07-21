@@ -226,7 +226,7 @@
 	
 	
 	<update id="updatePwdLock">
-		UPDATE tl_account_his SET  
+		UPDATE tl_account  SET  
 			pwd_lock = #{pwdLock}
 		WHERE id = #{id}
 	</update>
