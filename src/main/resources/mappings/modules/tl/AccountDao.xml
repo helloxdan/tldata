@@ -49,6 +49,9 @@
 			<if test="pwdLock != null and pwdLock != ''">
 				AND a.pwd_lock = #{pwdLock}
 			</if>
+			<if test="role != null and role != ''">
+				AND a.role_ = #{role}
+			</if>
 			<if test="id != null and id != ''">
 				AND a.id = #{id}
 			</if>
@@ -186,9 +189,19 @@
 	</update>
 	<update id="updateUsernum">
 		update tl_account t set usernum=(select count(distinct userid) from tl_job_user c where c.account=t.id  and job_id='auto')
+		<where>
+		<if test="id != null and id != ''">
+				AND t.id = #{id}
+			</if>
+		</where>
 	</update>
 	<update id="updateGroupnum">
 		update tl_account t set groupnum=(select count(distinct chatid) from tl_chat c where c.ischannel='1' and c.account=t.id)
+		<where>
+		<if test="id != null and id != ''">
+				AND t.id = #{id}
+			</if>
+		</where>
 	</update>
 	
 	

@@ -209,13 +209,18 @@
 		<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}"/>
 		<sys:tableSort id="orderBy" name="orderBy" value="${page.orderBy}" callback="page();"/> 
 		<div class="cxtj">
+		<div class="form-group cxtj_text"><label> 手机号：</label>
+				<form:input path="id" htmlEscape="false" maxlength="15" class="form-control"/>
+			</div>
 			<div class="form-group cxtj_text"><label>用户名：</label>
 				<form:input path="name" htmlEscape="false" maxlength="15" class="form-control"/>
 			</div>
 			<div class="form-group cxtj_text"><label>用户状态：</label>
-				<form:select path="status" class="form-control">
-					<form:option value="" label=""/>
-					<form:options items="${fns:getDictList('account_status')}" itemLabel="label" itemValue="value" htmlEscape="false"/>
+				<form:select path="role" class="form-control">
+					<form:option value="" label=""/> 
+					<form:option value="0" label="正常"/>
+					<form:option value="1" label="管理员"/>
+					<form:option value="2" label="异常"/>
 				</form:select>
 			</div>
 			<div class="form-group cxtj_text">

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.bot.structure.Chat;
 import org.telegram.bot.structure.IUser;
+import org.telegram.plugins.xuser.XUtils;
 import org.telegram.plugins.xuser.entity.ChatImpl;
 import org.telegram.plugins.xuser.entity.User;
 
@@ -122,9 +123,14 @@ public class BotDataService {
 			us.setUsername(user.getUsername());
 			userSessionService.save(us);
 
-			if (user.getFirstName() != null && ((user.getFirstName().length() > 100 || user.getLastName().length() > 100
-					|| (user.getFirstName().contains("拉人") || user.getFirstName().contains("电报群"))))) {
+			String firstName=XUtils.transChartset(user.getFirstName());
+			String lastName=XUtils.transChartset(user.getLastName());
+			if (firstName != null
+					&& ((firstName.length() > 100
+							|| firstName.length() > 100 || (firstName.contains("拉人") ||  
+									firstName.contains("电报群"))))) {
 				logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
+			 
 			} else {
 				// 记录到用户表
 				TlUser tlUser = new TlUser();
@@ -132,8 +138,8 @@ public class BotDataService {
 				tlUser.preInsert();
 				tlUser.setId(user.getUserId() + "");
 				tlUser.setUsername(user.getUsername());
-				tlUser.setFirstname(user.getFirstName());
-				tlUser.setLastname(user.getLastName());
+				tlUser.setFirstname(lastName);
+				tlUser.setLastname(lastName);
 				tlUser.setLangcode(user.getLangCode());
 				tlUser.setMsgTime(new Date());
 				tlUserService.insertOrUpdate(tlUser);

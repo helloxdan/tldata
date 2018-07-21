@@ -21,6 +21,7 @@ import org.telegram.api.user.TLUser;
 import org.telegram.bot.structure.LoginStatus;
 import org.telegram.plugins.xuser.IBot;
 import org.telegram.plugins.xuser.XUserBot;
+import org.telegram.plugins.xuser.XUtils;
 import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
@@ -387,11 +388,12 @@ public class BotService {
 					logger.info("用户没有username，忽略");
 					continue;
 				}
-				if (u.getFirstName() != null
-						&& ((u.getFirstName().length() > 100
-								|| u.getLastName().length() > 100 || (u
-								.getFirstName().contains("拉人") || u
-								.getFirstName().contains("电报群"))))) {
+				String firstName=XUtils.transChartset(u.getFirstName());
+				String lastName=XUtils.transChartset(u.getLastName());
+				if (firstName != null
+						&& ((firstName.length() > 100
+								|| firstName.length() > 100 || (firstName.contains("拉人") ||  
+										firstName.contains("电报群"))))) {
 					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
@@ -404,8 +406,8 @@ public class BotService {
 				ju.setUserid(u.getId() + "");
 				ju.setUsername(u.getUserName());
 				ju.setUserHash(u.getAccessHash());
-				ju.setFirstname(u.getFirstName());
-				ju.setLastname(u.getLastName());
+				ju.setFirstname(firstName);
+				ju.setLastname(lastName);
 				ju.setStatus("0");
 				// u.getLangCode();
 				// u.getFirstName();

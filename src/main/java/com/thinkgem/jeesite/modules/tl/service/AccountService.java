@@ -84,9 +84,9 @@ public class AccountService extends CrudService<AccountDao, Account> {
 	 * 计算账号关联的群组数和用户数数。
 	 */
 	@Transactional(readOnly = false)
-	public void updateAccountData() {
-		this.dao.updateUsernum();
-		this.dao.updateGroupnum();
+	public void updateAccountData(String id) {
+		this.dao.updateUsernum(  id);
+		this.dao.updateGroupnum(  id);
 	}
 
 	public List<Account> findUnfullUserAccount(Account account) {

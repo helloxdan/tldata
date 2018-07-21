@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
 import org.telegram.plugins.xuser.IBot;
+import org.telegram.plugins.xuser.XUtils;
 import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
@@ -109,8 +110,8 @@ public class ScheduleService {
 	// @Scheduled(cron = "0/5 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleFetchUser() {
-		 if(true)
-		 return;
+		// if(true)
+		// return;
 		// TODO
 		// 1.查找用户数量少的账号，循环逐个处理
 		// 2.找一个link url 不为空，索引偏移量少的群组
@@ -118,7 +119,7 @@ public class ScheduleService {
 		Account account = new Account();
 		List<Account> alist = accountService.findUnfullUserAccount(account);
 		if (accountFetchQueue.size() > 0) {
-//待队列中执行完
+			// 待队列中执行完
 			return;
 		}
 		if (alist.size() > 0)
@@ -154,7 +155,7 @@ public class ScheduleService {
 			fetchUserFromGroup(a.getId(), g);
 
 			// 汇总下用户有效用户数
-			// accountService.updateAccountData();
+			accountService.updateAccountData(a.getId());
 		}
 	}
 
@@ -192,12 +193,14 @@ public class ScheduleService {
 					continue;
 				}
 
-				if (u.getFirstName() != null && ((u.getFirstName().length() > 100 || u.getLastName().length() > 100
-						|| (u.getFirstName().contains("拉人") || u.getFirstName().contains("电报群"))))) {
-
+				String firstName = XUtils.transChartset(u.getFirstName());
+				String lastName = XUtils.transChartset(u.getLastName());
+				if (firstName != null && ((firstName.length() > 100 || firstName.length() > 100
+						|| (firstName.contains("拉人") || firstName.contains("电报群"))))) {
 					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
+
 				// if ("wojiaoshenmehao".equals(u.getUserName())) {
 				// System.out.println("isBotCantAddToGroup="
 				// + u.isBotCantAddToGroup());
@@ -213,8 +216,8 @@ public class ScheduleService {
 				ju.setUserid(u.getId() + "");
 				ju.setUsername(u.getUserName());
 				ju.setUserHash(u.getAccessHash());
-				ju.setFirstname(u.getFirstName());
-				ju.setLastname(u.getLastName());
+				ju.setFirstname(firstName);
+				ju.setLastname(lastName);
 				ju.setStatus("0");
 				// u.getLangCode();
 				// u.getFirstName();
@@ -243,7 +246,7 @@ public class ScheduleService {
 			g.setOffset(g.getOffset() + FETCH_PAGE_SIZE);
 			groupService.updateOffset(g);
 		} catch (Exception e) {
-			logger.error(phone + "-从群组" + g.getName() + "抽取用户异常", e);
+			logger.error(phone + "-从群组" + g.getName() + "抽取用户异常,{}", e.getMessage());
 		}
 	}
 

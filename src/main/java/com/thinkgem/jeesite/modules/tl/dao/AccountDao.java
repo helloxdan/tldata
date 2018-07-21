@@ -5,6 +5,8 @@ package com.thinkgem.jeesite.modules.tl.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.thinkgem.jeesite.common.persistence.CrudDao;
 import com.thinkgem.jeesite.common.persistence.annotation.MyBatisDao;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
@@ -20,9 +22,9 @@ public interface AccountDao extends CrudDao<Account> {
 
 	void resetAccountStatus();
 
-	void updateUsernum();
+	void updateUsernum(@Param("id") String id);
 
-	void updateGroupnum();
+	void updateGroupnum(@Param("id") String id);
 
 	List<Account> findUnfullUserAccount(Account account);
 

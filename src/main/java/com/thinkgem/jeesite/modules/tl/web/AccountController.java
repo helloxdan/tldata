@@ -144,7 +144,7 @@ public class AccountController extends BaseController {
 	public ModelMap updateAccountData(RedirectAttributes redirectAttributes) {
 		ModelMap modelMap = new ModelMap();
 		try {
-			accountService.updateAccountData();
+			accountService.updateAccountData(null);
 			modelMap.put("success", true);
 		} catch (Exception e) {
 			logger.error("统计账号的数据失败", e);
