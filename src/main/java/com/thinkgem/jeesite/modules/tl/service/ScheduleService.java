@@ -19,11 +19,11 @@ import org.telegram.plugins.xuser.XUtils;
 import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
+import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.entity.TlUser;
-import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 @Service
 @Transactional(readOnly = true)
@@ -49,13 +49,29 @@ public class ScheduleService {
 	@Autowired
 	private TlUserService tlUserService;
 
+	Boolean run = null;
+
+	public boolean isRun() {
+		if (run == null) {
+			run = Boolean.valueOf(Global.getConfig("tl.autoRun"));
+			logger.info("是否启动调度程序，{}",run);
+		}
+		return run;
+	}
+
+	public void setRun(boolean run) {
+		this.run = run;
+	}
+
 	/**
-	 * 检查账号和群组的关系。如果发现有账号没有加入某个群组，则自动加入。
+	 * 更新群组信息，总用户数，名称、title。
 	 */
 	// @Scheduled(cron = "0/10 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleUpdateGroupInfo() {
 		// logger.info("定时调度，更新群组用户数量……");
+		if(!isRun())
+			return;
 		// TODO
 		Group group = new Group();
 		List<Group> list = groupService.findListWithoutUsernum(group);
@@ -73,9 +89,11 @@ public class ScheduleService {
 	public void updateGroupInfo(Group g) {
 		// 通过管理员账号获取信息
 		try {
-			IBot bot = botService.getBotByPhone(botService.getAdminAccount(), true);
+			IBot bot = botService.getBotByPhone(botService.getAdminAccount(),
+					true);
 
-			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()), g.getAccesshash(), true);
+			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()),
+					g.getAccesshash(), true);
 			// String link = json.getString("link");
 			Integer usernum = json.getInteger("usernum");
 			if (usernum != null) {
@@ -85,7 +103,8 @@ public class ScheduleService {
 				group.preUpdate();
 				groupService.save(group);
 			} else {
-				logger.warn("通过账号{}无法获取群组【{}】的link", botService.getAdminAccount(), g.getName());
+				logger.warn("通过账号{}无法获取群组【{}】详情", botService.getAdminAccount(),
+						g.getName());
 
 				if ("CHANNEL_PRIVATE".equals(json.getString("msg"))) {
 					// remove
@@ -110,8 +129,8 @@ public class ScheduleService {
 	// @Scheduled(cron = "0/5 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleFetchUser() {
-		// if(true)
-		// return;
+		if(!isRun())
+			return;
 		// TODO
 		// 1.查找用户数量少的账号，循环逐个处理
 		// 2.找一个link url 不为空，索引偏移量少的群组
@@ -180,23 +199,27 @@ public class ScheduleService {
 			int chatid = result.getIntValue("chatid");
 			long accessHash = result.getLong("accessHash");
 			// 3.抽取用户
-			TLVector<TLAbsUser> users = bot.collectUsers(chatid, accessHash, g.getOffset(), FETCH_PAGE_SIZE);
+			TLVector<TLAbsUser> users = bot.collectUsers(chatid, accessHash,
+					g.getOffset(), FETCH_PAGE_SIZE);
 
-			logger.info("拉取群组用户结果： account={},group={},size={}", phone, g.getName(), users.size());
+			logger.info("拉取群组用户结果： account={},group={},size={}", phone,
+					g.getName(), users.size());
 
 			int num = 0;
 			// 将数据存储到数据库
 			for (TLAbsUser tluser : users) {
 				TLUser u = (TLUser) tluser;
 				if (StringUtils.isBlank(u.getUserName())) {
-					logger.info("用户没有username，忽略");
+					logger.debug("用户没有username，忽略");
 					continue;
 				}
 
 				String firstName = XUtils.transChartset(u.getFirstName());
 				String lastName = XUtils.transChartset(u.getLastName());
-				if (firstName != null && ((firstName.length() > 100 || firstName.length() > 100
-						|| (firstName.contains("拉人") || firstName.contains("电报群"))))) {
+				if (firstName != null
+						&& ((firstName.length() > 100
+								|| firstName.length() > 100 || (firstName
+								.contains("拉人") || firstName.contains("电报群"))))) {
 					logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
@@ -234,7 +257,8 @@ public class ScheduleService {
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
 
-				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus().toString());
+				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus()
+						.toString());
 
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
@@ -246,7 +270,8 @@ public class ScheduleService {
 			g.setOffset(g.getOffset() + FETCH_PAGE_SIZE);
 			groupService.updateOffset(g);
 		} catch (Exception e) {
-			logger.error(phone + "-从群组" + g.getName() + "抽取用户异常,{}", e.getMessage());
+			logger.error(phone + "-从群组" + g.getName() + "抽取用户异常,{}",
+					e.getMessage());
 		}
 	}
 

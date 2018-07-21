@@ -83,14 +83,12 @@
 				<form:input path="account" htmlEscape="false" maxlength="64" class="form-control"/>
 			</div>
 			<div class="form-group cxtj_text"><label>用户来源群组：</label>
-				<form:input path="fromGroup" htmlEscape="false" maxlength="11" class="form-control"/>
-			</div>
-			<div class="form-group cxtj_text"><label>用户ID：</label>
-				<form:input path="userid" htmlEscape="false" maxlength="11" class="form-control"/>
+				<form:input path="fromGroupName" htmlEscape="false" maxlength="11" class="form-control"/>
 			</div>
 			<div class="form-group cxtj_text"><label>用户名：</label>
 				<form:input path="username" htmlEscape="false" maxlength="100" class="form-control"/>
 			</div>
+			 <p>
 			<div class="form-group cxtj_text"><label>是否已邀请：</label>
 				<form:select path="status" class="form-control">
 					<form:option value="" label=""/>
@@ -121,11 +119,9 @@
 				<th class="sort-column a.job_id">任务ID</th>
 				<th class="sort-column a.account">登录账号</th>
 				<th class="sort-column a.from_group">用户来源群组</th>
-				<th class="sort-column a.userid">用户ID</th>
 				<th class="sort-column a.username">用户名</th>
 				<th class="sort-column a.firstname">firstname</th>
 				<th class="sort-column a.lastname">lastname</th>
-				<th class="sort-column a.user_hash">访问码</th>
 				<th class="sort-column a.status">是否已邀请</th>
 				<th class="sort-column u.msg_time">最近访问时间</th>
 			</tr>
@@ -143,10 +139,7 @@
 					${jobUser.account}
 				</td>
 				<td>
-					${jobUser.fromGroup}
-				</td>
-				<td>
-					${jobUser.userid}
+					${jobUser.fromGroupName}
 				</td>
 				<td>
 					${jobUser.username}
@@ -158,10 +151,7 @@
 					${jobUser.lastname}
 				</td>
 				<td>
-					${jobUser.userHash}
-				</td>
-				<td>
-					${fns:getDictLabel(jobUser.status, 'yes_no', '')}
+					${fns:getDictLabel(jobUser.status, 'yes_no', '否')}
 				</td>
 				<td>
 					<fmt:formatDate value="${jobUser.msgTime}" pattern="yyyy-MM-dd HH:mm:ss"/>

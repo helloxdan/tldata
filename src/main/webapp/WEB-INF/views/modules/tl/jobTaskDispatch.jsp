@@ -212,8 +212,8 @@
 					<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-blue"  >开始拉人</a>
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
 			</div>	
-			<div class="form-group cxtj_text">
-				<div>任务数：${jobTaskStats.taskNum}</div><div>待添加用户数：${jobTaskStats.userNum}</div><div>已添加用户数：${jobTaskStats.invitedUserNum}</div>
+			<div class="form-group cxtj_text pull-right">
+				<div style="display:inline;margin:0px 10px;">任务数：${jobTaskStats.taskNum}</div><div style="display:inline;margin:0px 10px;">待添加用户数：${jobTaskStats.userNum}</div><div style="display:inline;margin:0px 10px;">已添加用户数：${jobTaskStats.invitedUserNum}</div>
 			</div>
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>

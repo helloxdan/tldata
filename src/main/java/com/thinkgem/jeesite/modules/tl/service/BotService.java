@@ -385,7 +385,7 @@ public class BotService {
 			for (TLAbsUser tluser : users) {
 				TLUser u = (TLUser) tluser;
 				if (StringUtils.isBlank(u.getUserName())) {
-					logger.info("用户没有username，忽略");
+					logger.debug("用户没有username，忽略");
 					continue;
 				}
 				String firstName=XUtils.transChartset(u.getFirstName());

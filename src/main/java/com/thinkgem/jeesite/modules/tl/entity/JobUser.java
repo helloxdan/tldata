@@ -23,6 +23,7 @@ public class JobUser extends DataEntity<JobUser> {
 	private String taskId; // 分派任务ID
 	private String account; // 登录账号
 	private String fromGroup; // 用户来源群组
+	private String fromGroupName; // 用户来源群组
 	private String userid; // 用户ID
 	private String username; // 用户名
 	private String firstname;		//  
@@ -168,6 +169,14 @@ public class JobUser extends DataEntity<JobUser> {
 
 	public void setMsgTime(Date msgTime) {
 		this.msgTime = msgTime;
+	}
+
+	public String getFromGroupName() {
+		return fromGroupName;
+	}
+
+	public void setFromGroupName(String fromGroupName) {
+		this.fromGroupName = fromGroupName;
 	}
 	
 }

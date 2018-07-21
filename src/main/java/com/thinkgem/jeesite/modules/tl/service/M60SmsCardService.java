@@ -62,12 +62,12 @@ public class M60SmsCardService implements SmsCardService {
 					+ getToken()
 					+ "&telnum="
 					+ phone + "&docks=B3244DD57208B76&dtype=json";
-			logger.info("拉黑url={}",url);
+			logger.info("拉黑url={}", url);
 			result = restTemplate.getForObject(url, JSONObject.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("加入黑名单结果：" + result);
 			}
-			result=result.getJSONObject("Return");
+			result = result.getJSONObject("Return");
 			String staus = result.getString("Staus");
 			if (!"0".equals(staus)) {
 				// throw new RuntimeException("加入黑名单失败");
@@ -77,8 +77,9 @@ public class M60SmsCardService implements SmsCardService {
 			}
 
 		} catch (RestClientException e) {
-			logger.error("加入黑名单失败,{}", e.getMessage());
-//			throw new RuntimeException(e.getMessage());
+			logger.error("加入黑名单失败,{}", e.getMessage() == null ? "" : e
+					.getMessage().substring(0, 20));
+			// throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -89,7 +90,7 @@ public class M60SmsCardService implements SmsCardService {
 			return list;
 		JSONObject result = null;
 		try {
-			String token=getToken();
+			String token = getToken();
 			String url = "http://sms.60ma.net/newsmssrv?cmd=gettelnum&encode=utf-8&userid="
 					+ getUserid()
 					+ "&userkey="
@@ -101,7 +102,7 @@ public class M60SmsCardService implements SmsCardService {
 			if (logger.isInfoEnabled()) {
 				logger.info("取号码结果：" + result);
 			}
-			result=result.getJSONObject("Return");
+			result = result.getJSONObject("Return");
 			String staus = result.getString("Staus");
 			if (!"0".equals(staus)) {
 				// throw new RuntimeException("获取号码失败"
@@ -201,21 +202,22 @@ public class M60SmsCardService implements SmsCardService {
 					+ getToken()
 					+ "&telnum="
 					+ phone + "&dockcode=B3244DD57208B76&dtype=json";
-			//logger.info("取验证码url={}",url); 
+			// logger.info("取验证码url={}",url);
 			result = restTemplate.getForObject(url, JSONObject.class);
-			logger.info("{}取验证码结果：{}", phone, result);
+			if(logger.isDebugEnabled())
+			logger.debug("{}取验证码结果：{}", phone, result);
 			// 返回示例：{"Return":{"Staus":"0","SmsContent":"你正在注册微信帐号，验证码71408。请勿转发。【腾讯科技】,"ErrorInfo":"成功！}}
 			if (logger.isDebugEnabled()) {
 				logger.debug("{}取验证码结果：{}", phone, result);
 			}
-			
-			result=result.getJSONObject("Return");
+
+			result = result.getJSONObject("Return");
 			String staus = result.getString("Staus");
 			if (!"0".equals(staus)) {
 				// throw new RuntimeException("获取验证码失败");
-				logger.error("获取验证码失败：", result);
-				if(result.getString("ErrorInfo").contains("您并未拥有此卡")) {
-					//忽略此卡
+				logger.error("获取验证码失败：{}", result);
+				if (result.getString("ErrorInfo").contains("您并未拥有此卡")) {
+					// 忽略此卡
 					throw new RuntimeException("ingore");
 				}
 			} else {

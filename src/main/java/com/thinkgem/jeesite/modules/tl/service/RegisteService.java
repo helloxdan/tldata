@@ -120,8 +120,8 @@ public class RegisteService {
 		// if (!start)
 		// return;
 		Set<String> sets = codeMaps.keySet();
-		if(sets.size()>0)
-		logger.info("共{}个手机号待收验证码", codeMaps.size());
+		if (sets.size() > 0)
+			logger.info("共{}个手机号待收验证码", codeMaps.size());
 		for (Iterator iterator = sets.iterator(); iterator.hasNext();) {
 			String phone = (String) iterator.next();
 
@@ -138,15 +138,17 @@ public class RegisteService {
 			try {
 				list = getSmsCardService().getPhoneCode(phone);
 			} catch (Exception e) {
-				if ("ignore".equals(e.getMessage())) {
+				if ("ignore".equals(e.getMessage())
+						|| e.getMessage().contains("ignore")) {
 					iterator.remove();
 					// 加入黑名单
+					smsCardService.setForbidden(phone);
 					continue;
 				}
 			}
 
 			if (list != null && list.size() > 0) {
-				logger.info("从卡商获取手机验证码记录数={}", list.size());
+				logger.debug("从卡商获取手机验证码记录数={}", list.size());
 			}
 			for (String[] pc : list) {
 				codeQueue.add(pc);

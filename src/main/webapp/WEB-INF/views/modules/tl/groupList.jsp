@@ -63,6 +63,23 @@
 			$("#searchForm").submit();
         	return false;
         }
+		
+		function runJob(run){
+			var url="${ctx}/tl/group/startSchedule";
+			if(!run){ 
+				url="${ctx}/tl/group/stopSchedule";
+			}
+			$.post(url, { }, function(result) {
+				if (result.success) { 
+					top.$.jBox.tip(result.data, 'info');
+					//刷新页面
+					document.location.reload();
+				}else{
+					top.$.jBox.tip(result.msg, 'warning');
+				}
+			});
+		}
+		
 	</script>
 </head>
 <body>
@@ -104,6 +121,8 @@
 			<div class="form-group cxtj_text">
 				<a href="${ctx}/tl/group/form" class="btn btn-blue">新增</a>
 				<input id="btnDel" class="btn btn-blue" type="button" value="删除" />
+				|<a href="javascript:runJob(true)" class="btn btn-blue">启动采集用户调度</a>
+				<a href="javascript:runJob(false)" class="btn btn-blue">关闭调度</a>
 			</div>	
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>
@@ -136,7 +155,7 @@
 					${group.url}
 				</td>
 				<td>
-					${fns:getDictLabel(group.isChannel, 'yes_no', '')}
+					${fns:getDictLabel(group.isChannel, 'yes_no', '否')}
 				</td>
 				<td>
 					${group.usernum}
@@ -148,7 +167,7 @@
 					${group.offset}
 				</td>
 				<td>
-					${group.out}
+					${fns:getDictLabel(group.out, 'yes_no', '否')}
 				</td>
 				 
 				<td> 
