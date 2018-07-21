@@ -24,11 +24,11 @@ import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.entity.TlUser;
+import com.thinkgem.jeesite.modules.utils.Constants;
 
 @Service
 @Transactional(readOnly = true)
 public class ScheduleService {
-	public static final int FETCH_PAGE_SIZE = 200;// 每次抽取用户数
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private BotDataService botDataService;
@@ -200,7 +200,7 @@ public class ScheduleService {
 			long accessHash = result.getLong("accessHash");
 			// 3.抽取用户
 			TLVector<TLAbsUser> users = bot.collectUsers(chatid, accessHash,
-					g.getOffset(), FETCH_PAGE_SIZE);
+					g.getOffset(), Constants.FETCH_PAGE_SIZE);
 
 			logger.info("拉取群组用户结果： account={},group={},size={}", phone,
 					g.getName(), users.size());
@@ -267,7 +267,7 @@ public class ScheduleService {
 			}
 
 			// 修改群组的offset值
-			g.setOffset(g.getOffset() + FETCH_PAGE_SIZE);
+			g.setOffset(g.getOffset() + Constants.FETCH_PAGE_SIZE);
 			groupService.updateOffset(g);
 		} catch (Exception e) {
 			logger.error(phone + "-从群组" + g.getName() + "抽取用户异常,{}",

@@ -35,7 +35,7 @@ public class JobUser extends DataEntity<JobUser> {
 	private int star=0;//用于查询用户
 	
 	// 用于查询，限定查询结果数量
-	private int limit = Constants.PER_SIZE;
+	private int limit = Constants.USER_LIMIT_SIZE;
 	//用户查询
 	private String toJobid;
 
