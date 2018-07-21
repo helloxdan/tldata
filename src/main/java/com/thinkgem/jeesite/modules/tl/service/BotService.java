@@ -323,8 +323,8 @@ public class BotService {
 		}
 	}
 
-	// @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	@Transactional(readOnly = false)
+	// @Transactional(readOnly = false)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public void collectUsersOfTask(RequestData data, String taskid) {
 		// 根据任务id，找到调用方法的参数
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
@@ -387,8 +387,10 @@ public class BotService {
 					continue;
 				}
 				if (u.getFirstName() != null
-						&& (( u.getFirstName().length()>100 || u.getLastName().length() > 100  || ( u.getFirstName().contains("拉人") || u.getFirstName()
-								.contains("电报群"))))) {
+						&& ((u.getFirstName().length() > 100
+								|| u.getLastName().length() > 100 || (u
+								.getFirstName().contains("拉人") || u
+								.getFirstName().contains("电报群"))))) {
 					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
@@ -443,7 +445,7 @@ public class BotService {
 			logger.error("采集任务失败,phone={},error={}", data.getPhone(),
 					e.getMessage());
 
-		}finally {
+		} finally {
 			//
 			bots.put(data.getPhone(), null);
 		}
@@ -897,7 +899,7 @@ public class BotService {
 
 			// 设置用户密码，防止被占用
 			// TODO 设置用户密码，防止被占用
-//			setAccountPassword(phone);
+			// setAccountPassword(phone);
 		}
 		return json;
 	}
@@ -909,12 +911,12 @@ public class BotService {
 	 */
 	@Transactional(readOnly = false)
 	public void setAccountPassword(String phone) {
-		IBot bot = getBotByPhone(phone,true);
+		IBot bot = getBotByPhone(phone, true);
 		String password = "xln2018";// 默认的统一密码
 		String hint = "已被你大爷占用了，不送！ 三人行留字";
 		boolean success = bot.setAccountPassword(phone, password, hint);
 		if (success) {
-			// 标记账号为已设置密码 
+			// 标记账号为已设置密码
 			accountService.updatePwdLock(phone);
 		}
 	}

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
+import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.dao.JobTaskDao;
@@ -36,6 +37,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	private BotService botService;
 	@Autowired
 	private GroupService groupService;
+	
+	private static final int FETCH_PAGE_SIZE = Integer.parseInt(Global.getConfig("tl.fetch.pagesize"));//150;
 
 	public JobTask get(String id) {
 		return super.get(id);
@@ -188,7 +191,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				try {
 					RequestData data = new RequestData();
 					// data.setLimit(40 - jt.getUsernum() + 30);
-					data.setLimit(150);
+					data.setLimit(FETCH_PAGE_SIZE);
 					botService.collectUsersOfTask(data, jt.getId());
 				} catch (Exception e) {
 					logger.error("collectUsersOfTask error job={},account={}",

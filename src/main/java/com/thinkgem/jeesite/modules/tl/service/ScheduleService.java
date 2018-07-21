@@ -112,14 +112,14 @@ public class ScheduleService {
 	// @Scheduled(cron = "0/5 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleFetchUser() {
-		logger.info("定时调度，从群组抽取用户数据……");
 		// TODO
 		// 1.查找用户数量少的账号，循环逐个处理
 		// 2.找一个link url 不为空，索引偏移量少的群组
 		// 3.执行抽取用户的操作
 		Account account = new Account();
 		List<Account> alist = accountService.findUnfullUserAccount(account);
-		int num = 0;
+		if (alist.size() > 0)
+			logger.info("定时调度，共有{}个账号需要从群组采集用户数据……", alist.size());
 		for (Account a : alist) {
 			if (!accountFetchQueue.contains(a)) {
 				// 加入队列待处理
