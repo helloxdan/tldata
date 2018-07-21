@@ -326,7 +326,7 @@ public class BotService {
 	}
 
 	// @Transactional(readOnly = false)
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+	@Transactional(readOnly = false )
 	public void collectUsersOfTask(RequestData data, String taskid) {
 		// 根据任务id，找到调用方法的参数
 		JSONObject task = jobTaskService.getRpcCallInfo(taskid);
