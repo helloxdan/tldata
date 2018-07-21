@@ -1,5 +1,6 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -133,7 +134,7 @@ public class RegisteService {
 				continue;
 			}
 
-			List<String[]> list = null;
+			List<String[]> list = new ArrayList<String[]>();
 			try {
 				list = getSmsCardService().getPhoneCode(phone);
 			} catch (Exception e) {
