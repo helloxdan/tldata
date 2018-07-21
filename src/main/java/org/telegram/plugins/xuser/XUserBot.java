@@ -1,9 +1,13 @@
 package org.telegram.plugins.xuser;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.api.TLConfig;
@@ -724,12 +728,23 @@ public class XUserBot implements IBot {
 				logger.info("账号{}，当前没有设置密码！", phone);
 
 				TLRequestAccountUpdatePasswordSettings req2 = new TLRequestAccountUpdatePasswordSettings();
-				req2.setCurrentPasswordHash(new TLBytes(new byte[0]));//新设置密码时，设置空的byte
+				req2.setCurrentPasswordHash(new TLBytes(new byte[0]));// 新设置密码时，设置空的byte
 				// 设置密码
 				TLAccountPasswordInputSettings newSettings = new TLAccountPasswordInputSettings();
-				newSettings.setFlags(0x1);//new 
+				newSettings.setFlags(0x1);// new
 				// 新密码
-				TLBytes newPasswordHash = new TLBytes(password.getBytes());
+				TLBytes newSalt = res.getNewSalt();
+				String newSaltStr = new String(newSalt.getData());
+				password = newSaltStr + password + newSaltStr;
+				//加密
+				password = getSHA256Str(password);
+				//生成hash
+				TLBytes newPasswordHash = new TLBytes(
+						password.getBytes("UTF-8"));
+				// new_password = r.new_salt + new_password.encode('utf-8') +
+				// r.new_salt
+				// new_password_hash = sha256(new_password).digest()
+
 				newSettings.setNewPasswordHash(newPasswordHash);
 				newSettings.setNewSalt(res.getNewSalt());//
 				newSettings.setHint(hint);// 密码提示信息
@@ -754,4 +769,25 @@ public class XUserBot implements IBot {
 		return success;
 	}
 
+	/***
+	 * 利用Apache的工具类实现SHA-256加密
+	 * 
+	 * @param str
+	 *            加密后的报文
+	 * @return
+	 */
+	public static String getSHA256Str(String str) {
+		MessageDigest messageDigest;
+		String encdeStr = "";
+		try {
+			messageDigest = MessageDigest.getInstance("SHA-256");
+			byte[] hash = messageDigest.digest(str.getBytes("UTF-8"));
+			encdeStr = Hex.encodeHexString(hash);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return encdeStr;
+	}
 }
