@@ -92,7 +92,7 @@
 			and a.role_='0'
 			and a.usernum <![CDATA[ < ]]> #{minUsernum}
 		</where>		
-		order by a.usernum asc,a.update_date desc
+		order by a.usernum asc,a.create_date desc
 	</select>
 	
 	<!-- 查询用于分配任务的账号 -->

@@ -235,6 +235,7 @@ public class BotService {
 			}
 		} catch (Exception e) {
 			String msg = e.getMessage();
+			logger.error("start",e.getMessage());
 			if (StringUtils.isNotBlank(msg) && msg.contains("ERRORSENDINGCODE")) {
 				// 登录失败，删除账号和auth文件
 				removeAccount(data.getPhone());
@@ -824,7 +825,7 @@ public class BotService {
 				bakauth.mkdir();
 
 			// 备份文件，避免误删除
-			FileUtils.copyFile(path, bakpath);
+			FileUtils.copyFile(path, bakpath+File.separator + phone + ".auth");
 
 			File authfile = new File(path);
 			authfile.deleteOnExit();

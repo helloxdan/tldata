@@ -72,11 +72,9 @@ public class ScheduleService {
 	public void updateGroupInfo(Group g) {
 		// 通过管理员账号获取信息
 		try {
-			IBot bot = botService.getBotByPhone(botService.getAdminAccount(),
-					true);
+			IBot bot = botService.getBotByPhone(botService.getAdminAccount(), true);
 
-			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()),
-					g.getAccesshash(), true);
+			JSONObject json = bot.getGroupInfo(Integer.parseInt(g.getId()), g.getAccesshash(), true);
 			// String link = json.getString("link");
 			Integer usernum = json.getInteger("usernum");
 			if (usernum != null) {
@@ -86,8 +84,7 @@ public class ScheduleService {
 				group.preUpdate();
 				groupService.save(group);
 			} else {
-				logger.warn("通过账号{}无法获取群组【{}】的link",
-						botService.getAdminAccount(), g.getName());
+				logger.warn("通过账号{}无法获取群组【{}】的link", botService.getAdminAccount(), g.getName());
 
 				if ("CHANNEL_PRIVATE".equals(json.getString("msg"))) {
 					// remove
@@ -112,14 +109,18 @@ public class ScheduleService {
 	// @Scheduled(cron = "0/5 * * * * ?")
 	@Transactional(readOnly = false)
 	public void scheduleFetchUser() {
-		if(true)
-			return;
+		 if(true)
+		 return;
 		// TODO
 		// 1.查找用户数量少的账号，循环逐个处理
 		// 2.找一个link url 不为空，索引偏移量少的群组
 		// 3.执行抽取用户的操作
 		Account account = new Account();
 		List<Account> alist = accountService.findUnfullUserAccount(account);
+		if (accountFetchQueue.size() > 0) {
+//待队列中执行完
+			return;
+		}
 		if (alist.size() > 0)
 			logger.info("定时调度，共有{}个账号需要从群组采集用户数据……", alist.size());
 		for (Account a : alist) {
@@ -135,7 +136,7 @@ public class ScheduleService {
 
 	@Transactional(readOnly = false)
 	public void handleAccountFetchUser() {
-		 
+
 		Account a = accountFetchQueue.poll();
 		if (a != null) {
 			Group g = groupService.getOneGroupForFetch();
@@ -150,10 +151,10 @@ public class ScheduleService {
 			}
 
 			// 执行采集 操作
-			  fetchUserFromGroup(a.getId(), g);
+			fetchUserFromGroup(a.getId(), g);
 
 			// 汇总下用户有效用户数
-			  accountService.updateAccountData();
+			// accountService.updateAccountData();
 		}
 	}
 
@@ -178,11 +179,9 @@ public class ScheduleService {
 			int chatid = result.getIntValue("chatid");
 			long accessHash = result.getLong("accessHash");
 			// 3.抽取用户
-			TLVector<TLAbsUser> users = bot.collectUsers(chatid, accessHash,
-					g.getOffset(), FETCH_PAGE_SIZE);
+			TLVector<TLAbsUser> users = bot.collectUsers(chatid, accessHash, g.getOffset(), FETCH_PAGE_SIZE);
 
-			logger.info("拉取群组用户结果： account={},group={},size={}", phone,
-					g.getName(), users.size());
+			logger.info("拉取群组用户结果： account={},group={},size={}", phone, g.getName(), users.size());
 
 			int num = 0;
 			// 将数据存储到数据库
@@ -193,11 +192,8 @@ public class ScheduleService {
 					continue;
 				}
 
-				if (u.getFirstName() != null
-						&& ((u.getFirstName().length() > 100
-								|| u.getLastName().length() > 100 || (u
-								.getFirstName().contains("拉人") || u
-								.getFirstName().contains("电报群"))))) {
+				if (u.getFirstName() != null && ((u.getFirstName().length() > 100 || u.getLastName().length() > 100
+						|| (u.getFirstName().contains("拉人") || u.getFirstName().contains("电报群"))))) {
 
 					logger.info("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
@@ -235,8 +231,7 @@ public class ScheduleService {
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
 
-				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus()
-						.toString());
+				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus().toString());
 
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
