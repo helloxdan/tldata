@@ -26,6 +26,7 @@ public interface IBot {
 	void addUsers(int chatId, long accessHash, List<JobUser> users);
 
 	JSONObject getState();
+	public boolean isAuthCancel();
 
 	JSONObject getGroupInfo(int chatId, long chatAccessHash, boolean ischannel);
 

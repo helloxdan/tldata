@@ -185,7 +185,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 
 				// 读取任务列表循环拉取用户，直到满足每个账号有40个用户
 				if (alist.size() > 0) {
-					// fetchUserToAccountFromGroup(jobid);
+					fetchUserToAccountFromGroup(jobid);
 				}
 			} catch (Exception e) {
 				transactionManager.rollback(status);
@@ -199,10 +199,11 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	 * 定時調度執行，每次查詢為完成任務的task，并抽取數據。
 	 */
 	@Transactional(readOnly = false)
+	@Deprecated
 	public void fetchUserFromGroupForTask() {
 		List<JobTask> list = findUnfullJobtask(null);
 		// FIXME 待完善
-		
+
 	}
 
 	/**
@@ -218,14 +219,30 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		// 循環讀取，容易超出telegram 頻率限制
 		while (list.size() > 0) {
 			for (JobTask jt : list) {
+				DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+				def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+				// def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+				// // 事物隔离级别，开启新事务，这样会比较安全些。
+				TransactionStatus status = transactionManager.getTransaction(def); // 获得事务状态
+
 				try {
 					RequestData data = new RequestData();
 					// data.setLimit(40 - jt.getUsernum() + 30);
 					data.setLimit(Constants.FETCH_PAGE_SIZE);
 					botService.collectUsersOfTask(data, jt.getId());
+
+					
 				} catch (Exception e) {
 					logger.error("collectUsersOfTask error job={},account={},msg={}", jobid, jt.getAccount(),
 							e.getMessage());
+//					transactionManager.rollback(status); 
+					
+					// 出错了就直接删除，避免循环错误
+					delete(jt);
+				}finally {
+//					不管是否成功，都提交事務
+					// 每个任务提交一次，避免堆积太多数据
+					transactionManager.commit(status);
 				}
 			}
 
