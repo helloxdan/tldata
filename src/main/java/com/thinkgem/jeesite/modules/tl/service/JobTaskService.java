@@ -5,13 +5,18 @@ package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.alibaba.fastjson.JSONObject;
-import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.dao.JobTaskDao;
@@ -38,7 +43,10 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	private BotService botService;
 	@Autowired
 	private GroupService groupService;
-	
+
+	@Resource(name = "transactionManager")
+	private DataSourceTransactionManager transactionManager;
+
 	public JobTask get(String id) {
 		return super.get(id);
 	}
@@ -137,38 +145,50 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 			// int offsetNum = data.getOffset();
 			// int limitNum = data.getLimit();
 
-			// 按规则批量生成任务。
-			for (Account ac : alist) {
-				// 总数超过10000，取消。每个群组最多拉取10000人
-				// if (offsetNum + limitNum > 10000) {
-				// msg = msg + " 拉取人数超过10000人，退出；";
-				// break;
-				// }
+			DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+			def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+			// def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+			// // 事物隔离级别，开启新事务，这样会比较安全些。
+			TransactionStatus status = transactionManager.getTransaction(def); // 获得事务状态
 
-				JobTask jobTask = new JobTask();
-				jobTask.setIsNewRecord(true);
-				jobTask.preInsert();
+			try {
 
-				jobTask.setType("fetch");
-				jobTask.setJobId(jobid);
-				jobTask.setAccount(ac.getId());
-				jobTask.setGroupId(chatId + "");
-				jobTask.setGroupUrl(data.getUrl());
-				// jobTask.setOffsetNum(offsetNum);
-				jobTask.setLimitNum(0);// 默认每次查询50个用户，比 40多一些
-				jobTask.setUsernum(0);
-				jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
+				// 按规则批量生成任务。
+				for (Account ac : alist) {
+					// 总数超过10000，取消。每个群组最多拉取10000人
+					// if (offsetNum + limitNum > 10000) {
+					// msg = msg + " 拉取人数超过10000人，退出；";
+					// break;
+					// }
 
-				// offsetNum = offsetNum + limitNum;
+					JobTask jobTask = new JobTask();
+					jobTask.setIsNewRecord(true);
+					jobTask.preInsert();
 
-				save(jobTask);// 保存记录
-			}
+					jobTask.setType("fetch");
+					jobTask.setJobId(jobid);
+					jobTask.setAccount(ac.getId());
+					jobTask.setGroupId(chatId + "");
+					jobTask.setGroupUrl(data.getUrl());
+					// jobTask.setOffsetNum(offsetNum);
+					jobTask.setLimitNum(0);// 默认每次查询50个用户，比 40多一些
+					jobTask.setUsernum(0);
+					jobTask.setStatus(JobTask.STATUS_NONE);// 未抽取
 
-			// 循环拉取用户，直到满足每个账号有40个用户
-			if (alist.size() > 0){
-				fetchUserToAccountFromGroup(jobid);
-			}else{
-				
+					// offsetNum = offsetNum + limitNum;
+
+					save(jobTask);// 保存记录
+				}
+
+				// 事务提交
+				transactionManager.commit(status);
+
+				// 读取任务列表循环拉取用户，直到满足每个账号有40个用户
+				if (alist.size() > 0) {
+					fetchUserToAccountFromGroup(jobid);
+				}
+			} catch (Exception e) {
+				transactionManager.rollback(status);
 			}
 
 		}
@@ -176,7 +196,18 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	}
 
 	/**
-	 * 根据分配的账号，从知道群组中拉取用户，知道满足40个用户。
+	 * 定時調度執行，每次查詢為完成任務的task，并抽取數據。
+	 */
+	@Transactional(readOnly = false)
+	@Deprecated
+	public void fetchUserFromGroupForTask() {
+		List<JobTask> list = findUnfullJobtask(null);
+		// FIXME 待完善
+
+	}
+
+	/**
+	 * 根据分配的账号，从知道群组中拉取用户，直到满足40个用户。
 	 * 
 	 * @param jobid
 	 */
@@ -185,16 +216,33 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		List<JobTask> list = findUnfullJobtask(jobid);
 
 		// 如果某个task 出错了，就死循环
+		// 循環讀取，容易超出telegram 頻率限制
 		while (list.size() > 0) {
 			for (JobTask jt : list) {
+				DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+				def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+				// def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+				// // 事物隔离级别，开启新事务，这样会比较安全些。
+				TransactionStatus status = transactionManager.getTransaction(def); // 获得事务状态
+
 				try {
 					RequestData data = new RequestData();
 					// data.setLimit(40 - jt.getUsernum() + 30);
 					data.setLimit(Constants.FETCH_PAGE_SIZE);
 					botService.collectUsersOfTask(data, jt.getId());
+
+					
 				} catch (Exception e) {
-					logger.error("collectUsersOfTask error job={},account={}",
-							jobid, jt.getAccount());
+					logger.error("collectUsersOfTask error job={},account={},msg={}", jobid, jt.getAccount(),
+							e.getMessage());
+//					transactionManager.rollback(status); 
+					
+					// 出错了就直接删除，避免循环错误
+					delete(jt);
+				}finally {
+//					不管是否成功，都提交事務
+					// 每个任务提交一次，避免堆积太多数据
+					transactionManager.commit(status);
 				}
 			}
 
@@ -214,7 +262,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		JobTask jobTask = new JobTask();
 		jobTask.setType("fetch");
 		jobTask.setJobId(jobid);
-		jobTask.setUsernum(40);
+		jobTask.setUsernum(Constants.FETCH_TASK_USER_NUM);
 		jobTask.setStatus(JobTask.STATUS_NONE);//
 		List<JobTask> list = findList(jobTask);
 		logger.info("还有{}个账号用户数未达到40", list.size());
@@ -230,8 +278,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	 *            账号数量
 	 * @param data
 	 */
-	public void dispatchUserToAccount(String jobid, int accountNum,
-			RequestData data) {
+	public void dispatchUserToAccount(String jobid, int accountNum, RequestData data) {
 		String msg = "";
 		// 从账户表中查询最多num条记录
 		Account account = new Account();
@@ -240,8 +287,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		List<Account> alist = accountService.findAccountForJob(account);
 		if (alist.size() < accountNum) {
 			accountNum = alist.size();
-			msg = msg + " 只有" + accountNum
-					+ "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
+			msg = msg + " 只有" + accountNum + "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
 		}
 
 		// 遍历账号，从自己储备用户用获取40个账号

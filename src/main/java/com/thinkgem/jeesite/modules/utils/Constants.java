@@ -22,7 +22,7 @@ public class Constants {
 	public static final int USER_LIMIT_SIZE=50;//tl 每天最多拉40人，但很多时候给的用户加不上，只能给的值比40大
 	public static final int FETCH_PAGE_SIZE = Integer.parseInt(Global.getConfig("tl.fetch.pagesize"));//150;
 
-	public static final double PER_SIZE_DOUBLE=50D;
+	public static final int FETCH_TASK_USER_NUM=60;//根据url采集用户，最低采集数量
 	
 	public static final int MIN_CACHE_USER_NUM=200;//最低的储备用户数
 	

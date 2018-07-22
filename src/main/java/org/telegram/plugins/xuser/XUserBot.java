@@ -83,6 +83,7 @@ public class XUserBot implements IBot {
 	public static final String STATUS_WAIT = "WAIT";
 	public static final String STATUS_OK = "OK";
 	public static final String STATUS_FAIL = "FAIL";
+	public static final String STATUS_CANCEL = "CANCEL";
 
 	private static final String LOGTAG = "XUserBot";
 
@@ -124,7 +125,9 @@ public class XUserBot implements IBot {
 					.setTlMessageHandler(tlMessageHandler);
 
 			logger.info("创建实例，api=[{}],apihash=[{}],phone={}", apikey, apihash, phone);
-			kernel = new TelegramBot(botConfig, builder, apikey, apihash);
+//			kernel = new TelegramBot(botConfig, builder, apikey, apihash);
+			kernel = new XTelegramBot(botConfig, builder, apikey, apihash);
+			
 			// 覆盖默认的DifferenceParametersService
 			DifferenceParametersService differenceParametersService = new DifferenceParametersService(botDataService);
 			differenceParametersService.setAccount(getAccount());// 注入实例账号
@@ -132,10 +135,10 @@ public class XUserBot implements IBot {
 
 			// 初始化，如果已经有登录过，就直接登录，返回登录成功的状态
 			status = kernel.init();
-			if (status == LoginStatus.CODESENT) {
+ 			if (status == LoginStatus.CODESENT) {
 				logger.warn(phone + "账号，已发送验证码，等待输入验证码");
 				setStatus(STATUS_WAIT);
-			} else if (status == LoginStatus.ALREADYLOGGED) {
+			} else if (status == LoginStatus.ALREADYLOGGED) { 
 				kernel.startBot();
 				setStatus(STATUS_OK);
 			} else {
@@ -158,6 +161,17 @@ public class XUserBot implements IBot {
 		return status;
 	}
 
+	/**認證取消，說明賬號被封。
+	 * @return
+	 */
+	public boolean isAuthCancel() {
+		boolean iscancel=((XTelegramBot) this.kernel).isAuthCancel();
+		if(iscancel)
+			this.status=STATUS_CANCEL;
+		return iscancel;  
+	}
+	
+	
 	@Override
 	public JSONObject getState() {
 		logger.info("getState，" + getAccount());

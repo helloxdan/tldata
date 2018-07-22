@@ -59,7 +59,7 @@ public class MainHandler implements NotificationsService.NotificationObserver {
         this.running = true;
     }
 
-    void stop() {
+  public  void stop() {
         this.running = false;
     }
 
@@ -72,7 +72,7 @@ public class MainHandler implements NotificationsService.NotificationObserver {
      * Load Updates states from database if needed
      * @param updates Updates to add
      */
-    void onUpdate(@NotNull final TLAbsUpdates updates) {
+  public  void onUpdate(@NotNull final TLAbsUpdates updates) {
         if (this.running) {
             this.updatesQueue.addLast(updates);
             synchronized (this.updatesQueue) {

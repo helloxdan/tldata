@@ -241,7 +241,7 @@
 					<a onclick="addBatch()"class="btn btn-blue">新增注册</a>
 				<input id="btnDel" class="btn btn-blue" type="button" value="删除" />
 				
-					<a onclick="initAccount()"class="btn btn-blue">账号下线</a>
+					<a onclick="initAccount()"class="btn btn-blue">账号初始狀態</a>
 						<a onclick="startBatch()" class="btn btn-blue ">批量启动</a>
 			</div>	
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
