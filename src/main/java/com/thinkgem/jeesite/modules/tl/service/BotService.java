@@ -24,6 +24,10 @@ import org.telegram.bot.structure.LoginStatus;
 import org.telegram.plugins.xuser.IBot;
 import org.telegram.plugins.xuser.XUserBot;
 import org.telegram.plugins.xuser.XUtils;
+import org.telegram.plugins.xuser.ex.UnvalidateAccountException;
+import org.telegram.plugins.xuser.work.BotManager;
+import org.telegram.plugins.xuser.work.BotPool;
+import org.telegram.plugins.xuser.work.BotWrapper;
 import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
@@ -47,7 +51,7 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
  */
 @Service
 @Transactional(readOnly = true)
-public class BotService {
+public class BotService implements BotManager {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	// 客户
@@ -67,7 +71,8 @@ public class BotService {
 	// your
 	// private String adminAccount="8618566104318";
 
-	private static final int APIKEY = Integer.parseInt(Global.getConfig("tl.apikey")); // your api key
+	private static final int APIKEY = Integer.parseInt(Global
+			.getConfig("tl.apikey")); // your api key
 	private static final String APIHASH = Global.getConfig("tl.apihash"); // your
 	private String adminAccount = Global.getConfig("tl.admin.account");// 管理员账号
 
@@ -90,6 +95,11 @@ public class BotService {
 	private TlUserService tlUserService;
 	@Resource(name = "transactionManager")
 	private DataSourceTransactionManager transactionManager;
+
+	private BotPool botPool = null;
+
+	// 全局jobid，待完善
+	private String jobid;
 
 	public BotService() {
 	}
@@ -135,6 +145,23 @@ public class BotService {
 			};
 			thread.start();
 		}
+
+		// 创建bot池
+		botPool = new BotPool(this);
+
+		// 将数据库中的账号放入池子
+		addDbAccountToBotPool();
+	}
+
+	/**
+	 * 
+	 */
+	private void addDbAccountToBotPool() {
+		Account account = new Account();
+		// TODO 查询可用账号，放入队列
+		// 可用，1）针对本job，加入用户数未达到40人
+		accountService.findList(account);
+
 	}
 
 	@Transactional(readOnly = false)
@@ -305,6 +332,7 @@ public class BotService {
 	}
 
 	@Transactional(readOnly = false)
+	@Deprecated
 	public void collectUsers(RequestData data) {
 		String taskid = data.getTaskid();
 		if (StringUtils.isNotBlank(taskid)) {
@@ -355,7 +383,8 @@ public class BotService {
 
 				// 来源群id
 				if (json.getLong("accessHash") == null) {
-					logger.info("{}加入群组{} failure ", data.getPhone(), data.getUrl());
+					logger.info("{}加入群组{} failure ", data.getPhone(),
+							data.getUrl());
 				} else {
 					data.setChatAccessHash(json.getLong("accessHash"));
 					data.setChatId(json.getIntValue("chatid"));
@@ -365,16 +394,19 @@ public class BotService {
 			Group g = groupService.get(data.getChatId() + "");
 			if (g == null) {
 				//
-				throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
+				throw new RuntimeException("群组id=" + data.getChatId()
+						+ "在表tl_group 中不存在！");
 			}
 			int offset = g.getOffset() == null ? 0 : g.getOffset();
 			int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-			TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
+			TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
+					data.getChatAccessHash(), offset, limitNum);
 
 			if (users == null)
 				users = new TLVector<TLAbsUser>();
-			logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+			logger.info("拉取群组用户结果：job={}，account={},size={}",
+					task.getString("jobId"), task.getString("account"),
 					users != null ? users.size() : 0);
 
 			// 更新群组的offset
@@ -391,8 +423,10 @@ public class BotService {
 				}
 				String firstName = XUtils.transChartset(u.getFirstName());
 				String lastName = XUtils.transChartset(u.getLastName());
-				if (firstName != null && ((firstName.length() > 100 || firstName.length() > 100
-						|| (firstName.contains("拉人") || firstName.contains("电报群"))))) {
+				if (firstName != null
+						&& ((firstName.length() > 100
+								|| firstName.length() > 100 || (firstName
+								.contains("拉人") || firstName.contains("电报群"))))) {
 					logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
@@ -423,7 +457,8 @@ public class BotService {
 				tlu.setLangcode(u.getLangCode());
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
-				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus().toString());
+				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus()
+						.toString());
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
 				num++;
@@ -439,10 +474,12 @@ public class BotService {
 
 			// 超过10000个账号限制
 			if (offset + limitNum > 10000) {
-				logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。", task.getString("jobId"), data.getPhone());
+				logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。",
+						task.getString("jobId"), data.getPhone());
 			}
 		} catch (Exception e) {
-			logger.error("采集任务失败,phone={},error={}", data.getPhone(), e.getMessage());
+			logger.error("采集任务失败,phone={},error={}", data.getPhone(),
+					e.getMessage());
 
 		} finally {
 			//
@@ -543,7 +580,8 @@ public class BotService {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
+					+ " ，job= " + data.getJobid());
 		}
 	}
 
@@ -598,6 +636,12 @@ public class BotService {
 				bot = bots.get(phone);
 				if (bot == null) {
 					throw new RuntimeException(phone + "账号启动失败");
+				} else {
+					// 等待1s，便于检查isAuthCancel，auth cancel是异步回调方法回写
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
 				}
 			} else {
 				throw new RuntimeException(phone + "账号实例不存在");
@@ -607,7 +651,7 @@ public class BotService {
 		if (bot.isAuthCancel()) {
 			bots.put(phone, null);
 			removeAccount(phone);
-			throw new RuntimeException(phone + "账号失效");
+			throw new UnvalidateAccountException(phone + "账号失效");
 		}
 		return bot;
 	}
@@ -632,8 +676,8 @@ public class BotService {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
-					c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
+					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -826,8 +870,10 @@ public class BotService {
 			// File auth = new File("auth/" + phone + ".auth");
 			// auth.deleteOnExit();
 			String path = Global.getConfig("tl.auth.path") + phone + ".auth";
-			String bakpath = Global.getConfig("tl.auth.path") + "authdel" + File.separator + phone + ".auth";
-			File bakauth = new File(Global.getConfig("tl.auth.path") + "authdel");
+			String bakpath = Global.getConfig("tl.auth.path") + "authdel"
+					+ File.separator + phone + ".auth";
+			File bakauth = new File(Global.getConfig("tl.auth.path")
+					+ "authdel");
 			if (!bakauth.exists())
 				bakauth.mkdir();
 
@@ -897,7 +943,8 @@ public class BotService {
 			ac.setIsNewRecord(true);
 			ac.preInsert();
 			ac.setId(phone);
-			ac.setName(json.getString("firstName") + " " + json.getString("lastName"));
+			ac.setName(json.getString("firstName") + " "
+					+ json.getString("lastName"));
 			ac.setStatus("ready");
 			ac.setRole("0");
 			ac.setUsernum(0);
@@ -906,9 +953,20 @@ public class BotService {
 
 			// 设置用户密码，防止被占用
 			// TODO 设置用户密码，防止被占用
-			setAccountPassword(phone);
+			// setAccountPassword(phone);
+
+			// 加入任务队列
+			addBot(getJobid(), phone);
 		}
 		return json;
+	}
+
+	private String getJobid() {
+		return jobid;
+	}
+
+	public void setJobid(String jobid) {
+		this.jobid = jobid;
 	}
 
 	/**
@@ -919,7 +977,8 @@ public class BotService {
 	@Transactional(readOnly = false)
 	public void setAccountPassword(String phone) {
 		IBot bot = getBotByPhone(phone, true);
-		String password = Global.getConfig("tl.account.password");// "xln2018";// 默认的统一密码
+		String password = Global.getConfig("tl.account.password");// "xln2018";//
+																	// 默认的统一密码
 		if (password == null)
 			password = "xln2018";
 
@@ -948,6 +1007,42 @@ public class BotService {
 		for (Account ac : list) {
 			setAccountPassword(ac.getId());
 		}
+	}
+
+	/**
+	 * 
+	 */
+	@Transactional(readOnly = false)
+	public void addBot(String jobid, String phone) {
+		XUserBot bot = null;
+		try {
+			bot = (XUserBot) getBotByPhone(phone, true);
+			bot.setPhone(phone);
+			BotWrapper botw = new BotWrapper(jobid, bot);
+			botPool.addBot(botw);
+		} catch (UnvalidateAccountException e) {
+			// 删除账号
+			if (bot != null)
+				deleteBot(bot, "失效账号");
+		} catch (Exception e) {
+			logger.error("账号启动失败！");
+
+		}
+	}
+
+	@Override
+	public void destroy(XUserBot bot) {
+		logger.info("{}，{}完成任务，退出", bot.getJobid(), bot.getPhone());
+		bot.stop();
+		bots.put(bot.getPhone(), null);
+		// System.out.println("清除账号");
+	}
+
+	@Override
+	public void deleteBot(XUserBot bot, String error) {
+		logger.info("{}，{}任务失败，删除账号,error={}", bot.getJobid(), bot.getPhone(),
+				error);
+		System.out.println("删除账号");
 	}
 
 }

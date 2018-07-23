@@ -88,7 +88,8 @@ public class XUserBot implements IBot {
 	private static final String LOGTAG = "XUserBot";
 
 	private String status = STATUS_READY;
-
+	private String jobid;
+	private String phone;
 	private BotDataService botDataService;
 	TelegramBot kernel = null;
 
@@ -105,8 +106,25 @@ public class XUserBot implements IBot {
 		return kernel;
 	}
 
+	public String getJobid() {
+		return jobid;
+	}
+
+	public void setJobid(String jobid) {
+		this.jobid = jobid;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
 	@Override
 	public LoginStatus start(String phone, int apikey, String apihash) {
+		this.phone=phone;
 		LoginStatus status = null;
 		try {
 			final BotConfig botConfig = new BotConfigImpl(phone);
@@ -117,28 +135,34 @@ public class XUserBot implements IBot {
 			final IChatsHandler chatsHandler = new ChatsHandler(botDataService);
 			final MessageHandler messageHandler = new MessageHandler();
 			messageHandler.setBotConfig(botConfig);
-			final TLMessageHandler tlMessageHandler = new TLMessageHandler(messageHandler, botDataService);
+			final TLMessageHandler tlMessageHandler = new TLMessageHandler(
+					messageHandler, botDataService);
 
-			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(CustomUpdatesHandler.class);
-			builder.setBotConfig(botConfig).setDatabaseManager(botDataService).setUsersHandler(usersHandler)
-					.setChatsHandler(chatsHandler).setMessageHandler(messageHandler)
+			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(
+					CustomUpdatesHandler.class);
+			builder.setBotConfig(botConfig).setDatabaseManager(botDataService)
+					.setUsersHandler(usersHandler)
+					.setChatsHandler(chatsHandler)
+					.setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
-			logger.info("创建实例，api=[{}],apihash=[{}],phone={}", apikey, apihash, phone);
-//			kernel = new TelegramBot(botConfig, builder, apikey, apihash);
+			logger.info("创建实例，api=[{}],apihash=[{}],phone={}", apikey, apihash,
+					phone);
+			// kernel = new TelegramBot(botConfig, builder, apikey, apihash);
 			kernel = new XTelegramBot(botConfig, builder, apikey, apihash);
-			
+
 			// 覆盖默认的DifferenceParametersService
-			DifferenceParametersService differenceParametersService = new DifferenceParametersService(botDataService);
+			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
+					botDataService);
 			differenceParametersService.setAccount(getAccount());// 注入实例账号
 			builder.setDifferenceParametersService(differenceParametersService);
 
 			// 初始化，如果已经有登录过，就直接登录，返回登录成功的状态
 			status = kernel.init();
- 			if (status == LoginStatus.CODESENT) {
+			if (status == LoginStatus.CODESENT) {
 				logger.warn(phone + "账号，已发送验证码，等待输入验证码");
 				setStatus(STATUS_WAIT);
-			} else if (status == LoginStatus.ALREADYLOGGED) { 
+			} else if (status == LoginStatus.ALREADYLOGGED) {
 				kernel.startBot();
 				setStatus(STATUS_OK);
 			} else {
@@ -161,21 +185,23 @@ public class XUserBot implements IBot {
 		return status;
 	}
 
-	/**認證取消，說明賬號被封。
+	/**
+	 * 認證取消，說明賬號被封。
+	 * 
 	 * @return
 	 */
 	public boolean isAuthCancel() {
-		boolean iscancel=((XTelegramBot) this.kernel).isAuthCancel();
-		if(iscancel)
-			this.status=STATUS_CANCEL;
-		return iscancel;  
+		boolean iscancel = ((XTelegramBot) this.kernel).isAuthCancel();
+		if (iscancel)
+			this.status = STATUS_CANCEL;
+		return iscancel;
 	}
-	
-	
+
 	@Override
 	public JSONObject getState() {
 		logger.info("getState，" + getAccount());
-		boolean isAuthenticated = kernel.getKernelComm().getApi().getState().isAuthenticated();
+		boolean isAuthenticated = kernel.getKernelComm().getApi().getState()
+				.isAuthenticated();
 		JSONObject json = new JSONObject();
 		json.put("isAuthenticated", isAuthenticated);
 		json.put("isRunning", kernel.getMainHandler().isRunning());
@@ -231,7 +257,8 @@ public class XUserBot implements IBot {
 				TLRequestChannelsJoinChannel join = new TLRequestChannelsJoinChannel();
 				TLInputChannel ch = new TLInputChannel();
 				ch.setChannelId(peer.getChats().get(0).getId());
-				ch.setAccessHash(((TLChannel) peer.getChats().get(0)).getAccessHash());
+				ch.setAccessHash(((TLChannel) peer.getChats().get(0))
+						.getAccessHash());
 				join.setChannel(ch);
 				TLAbsUpdates r = kernelComm.getApi().doRpcCall(join);
 
@@ -261,7 +288,8 @@ public class XUserBot implements IBot {
 		try {
 			TLRequestMessagesImportChatInvite req = new TLRequestMessagesImportChatInvite();
 			req.setHash(hash);
-			TLAbsUpdates result = kernel.getKernelComm().getApi().doRpcCall(req);
+			TLAbsUpdates result = kernel.getKernelComm().getApi()
+					.doRpcCall(req);
 			logger.info("入群结果：" + result);
 		} catch (IOException e) {
 			success = false;
@@ -289,7 +317,8 @@ public class XUserBot implements IBot {
 	 * @see org.telegram.plugins.xuser.IBot#collectUsers(java.lang.String)
 	 */
 	@Override
-	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash, int offset, int limit) {
+	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash,
+			int offset, int limit) {
 		TLVector<TLAbsUser> users = new TLVector<TLAbsUser>();
 		logger.info("collectUsers from group ，" + chatId);
 		try {
@@ -351,6 +380,7 @@ public class XUserBot implements IBot {
 
 	@Override
 	public boolean stop() {
+		if(kernel!=null)
 		kernel.stopBot();
 		// TODO 停止
 		return true;
@@ -374,8 +404,10 @@ public class XUserBot implements IBot {
 	}
 
 	@Override
-	public JSONObject getGroupInfo(int chatId, long chatAccessHash, boolean ischannel) {
-		logger.info("{}，getGroupInfo ，{},accesshash={}", getAccount(), chatId, chatAccessHash);
+	public JSONObject getGroupInfo(int chatId, long chatAccessHash,
+			boolean ischannel) {
+		logger.info("{}，getGroupInfo ，{},accesshash={}", getAccount(), chatId,
+				chatAccessHash);
 		JSONObject json = new JSONObject();
 		if (chatAccessHash == 0)
 			return json;
@@ -400,9 +432,10 @@ public class XUserBot implements IBot {
 				// 需要管理员权限
 
 				/*
-				 * TLRequestChannelsExportInvite req2=new TLRequestChannelsExportInvite();
-				 * req2.setChannel(channel); TLAbsChatInvite r2 = api.doRpcCall(req2); if(r2
-				 * instanceof TLChatInviteExported) { json.put("link",
+				 * TLRequestChannelsExportInvite req2=new
+				 * TLRequestChannelsExportInvite(); req2.setChannel(channel);
+				 * TLAbsChatInvite r2 = api.doRpcCall(req2); if(r2 instanceof
+				 * TLChatInviteExported) { json.put("link",
 				 * ((TLChatInviteExported)r2).getLink()); }
 				 */
 
@@ -510,30 +543,33 @@ public class XUserBot implements IBot {
 			startRegBot(phone, apikey, apihash);
 		}
 		data = registe();
-		logger.info("send registe code result:{},status={}", data.getString("result"), data.getString("status"));
+		logger.info("send registe code result:{},status={}",
+				data.getString("result"), data.getString("status"));
 		/*
 		 * final BotConfig config = kernel.getConfig();
-		 * logger.info("Sending code to phone " + phone + "..."); TLSentCode sentCode =
-		 * null; try { try { final TLRequestAuthSendCode tlRequestAuthSendCode =
-		 * getSendCodeRequest(); sentCode = kernel.getKernelComm
+		 * logger.info("Sending code to phone " + phone + "..."); TLSentCode
+		 * sentCode = null; try { try { final TLRequestAuthSendCode
+		 * tlRequestAuthSendCode = getSendCodeRequest(); sentCode =
+		 * kernel.getKernelComm
 		 * ().getApi().doRpcCallNonAuth(tlRequestAuthSendCode); //
 		 * createNextCodeTimer(sentCode.getTimeout()); logger.info(
 		 * "sentCode,isPhoneRegistered={},type={},nextType={},timeout={}",
-		 * sentCode.isPhoneRegistered(), sentCode.getType(), sentCode.getNextType(),
-		 * sentCode.getTimeout()); // 判断是否为新手机号，没注册过的 if (!sentCode.isPhoneRegistered())
-		 * { // 未注册过 status = "未注册"; config.setRegistered(true); result = true; //
-		 * 进入等待状态，待输入验证码 } else { // 已注册，写入黑名单 result = false; status = "黑名单"; } } catch
-		 * (RpcException e) { logger.error("注册接口调用失败", e); result = false; } catch
-		 * (TimeoutException e) { logger.error("注册发送信息接口调用超时", e); sentCode = null;
-		 * result = false; } if (sentCode != null) {
+		 * sentCode.isPhoneRegistered(), sentCode.getType(),
+		 * sentCode.getNextType(), sentCode.getTimeout()); // 判断是否为新手机号，没注册过的 if
+		 * (!sentCode.isPhoneRegistered()) { // 未注册过 status = "未注册";
+		 * config.setRegistered(true); result = true; // 进入等待状态，待输入验证码 } else {
+		 * // 已注册，写入黑名单 result = false; status = "黑名单"; } } catch (RpcException
+		 * e) { logger.error("注册接口调用失败", e); result = false; } catch
+		 * (TimeoutException e) { logger.error("注册发送信息接口调用超时", e); sentCode =
+		 * null; result = false; } if (sentCode != null) {
 		 * config.setHashCode(sentCode.getPhoneCodeHash());
 		 * config.setRegistered(sentCode.isPhoneRegistered());
 		 * logger.info("sent Code to {}", phone); // data.put("status",
-		 * LoginStatus.CODESENT); status = LoginStatus.CODESENT.name(); } else { //
-		 * data.put("status", LoginStatus.ERRORSENDINGCODE); status =
-		 * LoginStatus.ERRORSENDINGCODE.name(); result = false; } } catch (Exception e)
-		 * { logger.error("registe Account failure", phone); // result =
-		 * LoginStatus.UNEXPECTEDERROR; result = false; }
+		 * LoginStatus.CODESENT); status = LoginStatus.CODESENT.name(); } else {
+		 * // data.put("status", LoginStatus.ERRORSENDINGCODE); status =
+		 * LoginStatus.ERRORSENDINGCODE.name(); result = false; } } catch
+		 * (Exception e) { logger.error("registe Account failure", phone); //
+		 * result = LoginStatus.UNEXPECTEDERROR; result = false; }
 		 */
 		// 记录结果
 		// data.put("result", result);
@@ -562,17 +598,22 @@ public class XUserBot implements IBot {
 			final IChatsHandler chatsHandler = new ChatsHandler(botDataService);
 			final MessageHandler messageHandler = new MessageHandler();
 			messageHandler.setBotConfig(botConfig);
-			final TLMessageHandler tlMessageHandler = new TLMessageHandler(messageHandler, botDataService);
+			final TLMessageHandler tlMessageHandler = new TLMessageHandler(
+					messageHandler, botDataService);
 
-			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(CustomUpdatesHandler.class);
-			builder.setBotConfig(botConfig).setDatabaseManager(botDataService).setUsersHandler(usersHandler)
-					.setChatsHandler(chatsHandler).setMessageHandler(messageHandler)
+			final ChatUpdatesBuilderImpl builder = new ChatUpdatesBuilderImpl(
+					CustomUpdatesHandler.class);
+			builder.setBotConfig(botConfig).setDatabaseManager(botDataService)
+					.setUsersHandler(usersHandler)
+					.setChatsHandler(chatsHandler)
+					.setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
 			logger.info("创建实例，" + phone);
 			kernel = new RegTelegramBot(botConfig, builder, apikey, apihash);
 			// 覆盖默认的DifferenceParametersService
-			DifferenceParametersService differenceParametersService = new DifferenceParametersService(botDataService);
+			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
+					botDataService);
 			differenceParametersService.setAccount(getAccount());// 注入实例账号
 			builder.setDifferenceParametersService(differenceParametersService);
 
@@ -596,7 +637,8 @@ public class XUserBot implements IBot {
 				result = LoginStatus.ALREADYLOGGED;
 			} else {
 				try {
-					final TLConfig config = kernelComm.getApi().doRpcCallNonAuth(new TLRequestHelpGetConfig());
+					final TLConfig config = kernelComm.getApi()
+							.doRpcCallNonAuth(new TLRequestHelpGetConfig());
 					BotLogger.info(LOGTAG, "Loaded DC list");
 					getApiState().updateSettings(config);
 				} catch (IOException | TimeoutException e) {
@@ -604,12 +646,16 @@ public class XUserBot implements IBot {
 					logger.warn("send getconfig request timeout ");
 				}
 				BotConfig config = kernel.getConfig();
-				BotLogger.info(LOGTAG, "Sending code to phone " + config.getPhoneNumber() + "...");
+				BotLogger.info(LOGTAG,
+						"Sending code to phone " + config.getPhoneNumber()
+								+ "...");
 				TLSentCode sentCode = null;
-				RegKernelAuth kernelAuth = (RegKernelAuth) kernel.getKernelAuth();
+				RegKernelAuth kernelAuth = (RegKernelAuth) kernel
+						.getKernelAuth();
 				try {
 					final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
-					sentCode = kernelComm.getApi().doRpcCallNonAuth(tlRequestAuthSendCode);
+					sentCode = kernelComm.getApi().doRpcCallNonAuth(
+							tlRequestAuthSendCode);
 					kernelAuth.createNextCodeTimer(sentCode.getTimeout());
 
 				} catch (RpcException e) {
@@ -671,11 +717,13 @@ public class XUserBot implements IBot {
 		return kernel.getKernelAuth().getApiState();
 	}
 
-	private TLSentCode retryRegiste(int destDC) throws IOException, TimeoutException {
+	private TLSentCode retryRegiste(int destDC) throws IOException,
+			TimeoutException {
 		final TLSentCode sentCode;
 		kernel.getKernelComm().getApi().switchToDc(destDC);
 		final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
-		sentCode = kernel.getKernelComm().getApi().doRpcCallNonAuth(tlRequestAuthSendCode);
+		sentCode = kernel.getKernelComm().getApi()
+				.doRpcCallNonAuth(tlRequestAuthSendCode);
 		RegKernelAuth kernelAuth = (RegKernelAuth) kernel.getKernelAuth();
 		kernelAuth.resetTimer();
 		kernelAuth.createNextCodeTimer(sentCode.getTimeout());
@@ -688,7 +736,8 @@ public class XUserBot implements IBot {
 		RegKernelAuth kernelAuth = (RegKernelAuth) kernel.getKernelAuth();
 		JSONObject json = kernelAuth.setRegAuthCode(code);
 		if (!json.getBooleanValue("result")) {
-			logger.error("{}，注册验证码{}校验失败,type={},msg={}", phone, code, json.getString("type"), json.getString("msg"));
+			logger.error("{}，注册验证码{}校验失败,type={},msg={}", phone, code,
+					json.getString("type"), json.getString("msg"));
 		}
 		return json;
 	}
@@ -705,7 +754,8 @@ public class XUserBot implements IBot {
 		try {
 			// 1.先获取账号的 密码配置信息。判断是否存在密码，如果没有新增密码，有重新设置密码
 			TLRequestAccountGetPassword req = new TLRequestAccountGetPassword();
-			TLAbsAccountPassword res = kernel.getKernelComm().getApi().doRpcCall(req);
+			TLAbsAccountPassword res = kernel.getKernelComm().getApi()
+					.doRpcCall(req);
 
 			if (res instanceof TLAccountNoPassword) {
 				// 当前为空密码
@@ -722,11 +772,16 @@ public class XUserBot implements IBot {
 				byte[] newPasswordBytes = password.getBytes("UTF-8");
 
 				byte[] new_salt = newSalt.getData();
-				byte[] hash = new byte[new_salt.length * 2 + newPasswordBytes.length];
+				byte[] hash = new byte[new_salt.length * 2
+						+ newPasswordBytes.length];
 				System.arraycopy(new_salt, 0, hash, 0, new_salt.length);
-				System.arraycopy(newPasswordBytes, 0, hash, new_salt.length, newPasswordBytes.length);
-				System.arraycopy(new_salt, 0, hash, hash.length - new_salt.length, new_salt.length);
-				byte[] newPasswordHashByte =getSHA256Str(hash);// Utilities.computeSHA256(hash, 0, hash.length);
+				System.arraycopy(newPasswordBytes, 0, hash, new_salt.length,
+						newPasswordBytes.length);
+				System.arraycopy(new_salt, 0, hash, hash.length
+						- new_salt.length, new_salt.length);
+				byte[] newPasswordHashByte = getSHA256Str(hash);// Utilities.computeSHA256(hash,
+																// 0,
+																// hash.length);
 				// String newSaltStr = new String(newSalt.getData());
 				// password = newSaltStr + password + newSaltStr;
 				// 加密
@@ -740,7 +795,7 @@ public class XUserBot implements IBot {
 
 				TLBytes newPasswordHash = new TLBytes(newPasswordHashByte);
 				newSettings.setNewPasswordHash(newPasswordHash);
-				TLBytes newslat=new TLBytes(new_salt);
+				TLBytes newslat = new TLBytes(new_salt);
 				newSettings.setNewSalt(newslat);//
 				newSettings.setHint(hint);// 密码提示信息
 				req2.setNewSettings(newSettings);
@@ -791,10 +846,10 @@ public class XUserBot implements IBot {
 		byte[] hash = null;
 		try {
 			messageDigest = MessageDigest.getInstance("SHA-256");
-			hash = messageDigest.digest(b); 
+			hash = messageDigest.digest(b);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-		}  
+		}
 		return hash;
 	}
 }

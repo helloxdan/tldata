@@ -24,6 +24,7 @@ public class JobTask extends DataEntity<JobTask> {
 	
 	
 	private String jobId; // 任务ID
+	private String jobGroupUrl; //  
 	private String account; // 登录账号
 	private String type; // 任务类型
 	private String groupId; // 来源群组链接
@@ -164,4 +165,14 @@ public class JobTask extends DataEntity<JobTask> {
 	public void setGroupUrl(String groupUrl) {
 		this.groupUrl = groupUrl;
 	}
+
+	public String getJobGroupUrl() {
+		return jobGroupUrl;
+	}
+
+	public void setJobGroupUrl(String jobGroupUrl) {
+		this.jobGroupUrl = jobGroupUrl;
+	}
+	
+	
 }

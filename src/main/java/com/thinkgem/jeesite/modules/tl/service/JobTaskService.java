@@ -15,8 +15,12 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.telegram.plugins.xuser.XUserBot;
+import org.telegram.plugins.xuser.work.TaskData;
+import org.telegram.plugins.xuser.work.TaskQuery;
 
 import com.alibaba.fastjson.JSONObject;
+import com.thinkgem.jeesite.common.mapper.JsonMapper;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.dao.JobTaskDao;
@@ -34,7 +38,8 @@ import com.thinkgem.jeesite.modules.utils.Constants;
  */
 @Service
 @Transactional(readOnly = true)
-public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
+public class JobTaskService extends CrudService<JobTaskDao, JobTask> implements
+		TaskQuery {
 	@Autowired
 	private AccountService accountService;
 	@Autowired
@@ -223,7 +228,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 				def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 				// def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 				// // 事物隔离级别，开启新事务，这样会比较安全些。
-				TransactionStatus status = transactionManager.getTransaction(def); // 获得事务状态
+				TransactionStatus status = transactionManager
+						.getTransaction(def); // 获得事务状态
 
 				try {
 					RequestData data = new RequestData();
@@ -231,16 +237,16 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 					data.setLimit(Constants.FETCH_PAGE_SIZE);
 					botService.collectUsersOfTask(data, jt.getId());
 
-					
 				} catch (Exception e) {
-					logger.error("collectUsersOfTask error job={},account={},msg={}", jobid, jt.getAccount(),
-							e.getMessage());
-//					transactionManager.rollback(status); 
-					
+					logger.error(
+							"collectUsersOfTask error job={},account={},msg={}",
+							jobid, jt.getAccount(), e.getMessage());
+					// transactionManager.rollback(status);
+
 					// 出错了就直接删除，避免循环错误
 					delete(jt);
-				}finally {
-//					不管是否成功，都提交事務
+				} finally {
+					// 不管是否成功，都提交事務
 					// 每个任务提交一次，避免堆积太多数据
 					transactionManager.commit(status);
 				}
@@ -278,7 +284,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 	 *            账号数量
 	 * @param data
 	 */
-	public void dispatchUserToAccount(String jobid, int accountNum, RequestData data) {
+	public void dispatchUserToAccount(String jobid, int accountNum,
+			RequestData data) {
 		String msg = "";
 		// 从账户表中查询最多num条记录
 		Account account = new Account();
@@ -287,7 +294,8 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		List<Account> alist = accountService.findAccountForJob(account);
 		if (alist.size() < accountNum) {
 			accountNum = alist.size();
-			msg = msg + " 只有" + accountNum + "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
+			msg = msg + " 只有" + accountNum
+					+ "个账号运行中,全部提交运行。需要再启动更多的账号,才能满足需求！！";
 		}
 
 		// 遍历账号，从自己储备用户用获取40个账号
@@ -338,5 +346,33 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> {
 		JobTask jobTask = new JobTask();
 		jobTask.setJobId(jobId);
 		return this.dao.findJobTaskStatsData(jobTask);
+	}
+
+	@Override
+	public TaskData getTaskData(String jobid) {
+		JobTask jobtask = new JobTask();
+		jobtask.setJobId(jobid);
+		jobtask.setStatus(JobTask.STATUS_NONE);//
+		JobTask task = findOneOfJob(jobtask);
+		TaskData data = new TaskData();
+		data.setTaskid(task.getId());
+		data.setDestGroupUrl(task.getJobGroupUrl());
+		data.setSrcGroupUrl(task.getGroupUrl());
+		data.setOffset(task.getOffsetNum()==null ?0:task.getOffsetNum());
+		data.setLimit(task.getLimitNum()==null ?Constants.FETCH_TASK_USER_NUM:task.getLimitNum());
+
+		logger.info("任务数据，{}", JsonMapper.toJsonString(data));
+		return data;
+
+	}
+
+	private JobTask findOneOfJob(JobTask jobtask) {
+		return this.dao.findOneOfJob(jobtask);
+	}
+
+	@Override
+	public void deleteTaskData(XUserBot bot, TaskData data) {
+		JobTask jobTask = new JobTask(data.getTaskid());
+		delete(jobTask);
 	}
 }

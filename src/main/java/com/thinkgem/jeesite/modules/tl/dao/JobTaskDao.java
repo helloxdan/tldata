@@ -21,5 +21,7 @@ public interface JobTaskDao extends CrudDao<JobTask> {
 	JSONObject findJobTaskStatsData(JobTask jobTask);
 
 	void updateJobTaskUsernum(JobTask task);
+
+	JobTask findOneOfJob(JobTask jobtask);
 	
 }

@@ -165,6 +165,19 @@
 		</where>
 		 
 	</select>
+	<!-- 从所有分解任务中获取一条，状态为未采集、来源url不能为空 -->
+	<select id="findOneOfJob" resultType="JobTask">
+		SELECT  a.id,a.job_id as "jobId",a.account,a.offset_ as "offsetNum",a.limit_ as "limitNum",
+		 a.from_group_url as "groupUrl",j.group_url as "jobGroupUrl"
+		FROM tl_task a 
+		left join tl_job j on j.id =a.job_id 
+		<where>
+			a.from_group_url is not null
+		 	AND a.status = #{status}
+			AND a.job_id=#{jobId}
+		</where>
+		 order by a.create_date  limit 1
+	</select>
 	
 	<!-- 统计数据，任务数和有效用户数 -->
 	<select id="findJobTaskStatsData" resultType="com.alibaba.fastjson.JSONObject">
