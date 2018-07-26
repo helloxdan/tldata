@@ -27,7 +27,8 @@ public class JsSmsCardService implements SmsCardService {
 	boolean run = true;
 	// 每次获取手机号 数量
 	int maxPhoneNum = 1;
-
+	String username;
+	String password;
 	void stop() {
 		this.run = false;
 	}
@@ -203,7 +204,8 @@ public class JsSmsCardService implements SmsCardService {
 	private String login() {
 		// TODO Auto-generated method stub
 		String token = null;
-		String url = "http://www.js-yzm.com:9180/service.asmx/UserLoginStr?name=woshishui&psw=jj07170316";
+//		String url = "http://www.js-yzm.com:9180/service.asmx/UserLoginStr?name=woshishui&psw=jj07170316";
+		String url = "http://www.js-yzm.com:9180/service.asmx/UserLoginStr?name="+getUsername()+"&psw="+getPassword();
 
 		try {
 			token = restTemplate.getForObject(url, String.class);
@@ -237,6 +239,30 @@ public class JsSmsCardService implements SmsCardService {
 	public void freePhone(String phone) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public int getMaxPhoneNum() {
+		return maxPhoneNum;
+	}
+
+	public void setMaxPhoneNum(int maxPhoneNum) {
+		this.maxPhoneNum = maxPhoneNum;
 	}
 
 }

@@ -128,6 +128,9 @@
 	</bean> -->
 	<!--  <bean id="smsCardService" class="com.thinkgem.jeesite.modules.tl.service.JsSmsCardService">
 	 <property name="restTemplate" ref="restTemplate" />
+	  <property name="username" value="${tl.sms.js.username}" />
+	 <property name="password" value="${tl.sms.js.password}" />
+	 <property name="maxPhoneNum" value="5" />
 	</bean> -->
 	 <bean id="smsCardService" class="com.thinkgem.jeesite.modules.tl.service.M60SmsCardService">
 	 <property name="restTemplate" ref="restTemplate" />
