@@ -91,7 +91,7 @@ public class TaskExecutor implements Observer {
 			botpool.put(botw, 2);
 		} else {
 			int updateNum = getWorkService().inviteUsers(bot, data, users);
-			if (updateNum == 0) {
+			if (updateNum <= 0) {
 				// 累计一次更新为0的操作
 				// 如果超过5次，说明该账号，可能已经用满额度了
 				botw.setEmptyCount(botw.getEmptyCount() + 1);
@@ -104,8 +104,13 @@ public class TaskExecutor implements Observer {
 				// FIXME 如果拉的人数不够40，继续放入线程池
 				botpool.put(botw, 2);
 			} else {
-				logger.info("{}，{}，{},完成任务，退出", bot.getJobid(), bot.getPhone(),
+				if (botw.getEmptyCount() >5) {
+					logger.info("{}，{}，{},账号失效，退出", bot.getJobid(), bot.getPhone(),
+							botw.getUsernum());
+				}else {
+					logger.info("{}，{}，{},完成任务，退出", bot.getJobid(), bot.getPhone(),
 						botw.getUsernum());
+				}
 				// 删除任务数据
 				// getTaskQuery().deleteTaskData(bot, data);
 

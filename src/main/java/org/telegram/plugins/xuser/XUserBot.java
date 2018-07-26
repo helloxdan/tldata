@@ -372,11 +372,11 @@ public class XUserBot implements IBot {
 			TLAbsUpdates result = api.doRpcCall(req);
 			if (result instanceof TLUpdates) {
 				TLUpdates re = (TLUpdates) result;
-				usernum=re.getUpdates().size();
-				logger.info("updateSize={},userSize={},chatSize={}", re.getUpdates().size(), re.getUsers().size(),
+				usernum = re.getUsers().size()-1;
+				logger.info("updateSize={},userSize={},chatSize={}", re.getUpdates().size(), usernum,
 						re.getChats().size());
+				logger.info("成功拉{}人", usernum);
 			}
-			logger.info("拉人结果：" + result);
 		} catch (IOException e) {
 			logger.error("拉取群用户失败", e);
 		} catch (TimeoutException e) {

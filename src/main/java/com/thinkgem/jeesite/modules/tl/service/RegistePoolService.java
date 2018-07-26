@@ -62,23 +62,23 @@ public class RegistePoolService {
 
 	public void addPlanSize(int num, boolean delay) {
 		this.planSize = this.planSize + num;
-		
+
 		start();
 		int tryNum = num * 2;// 3倍成功记录数
 		// 直接所有任务放入线程池
 		for (int i = 0; i < tryNum; i++) {
 			regPool.execute(new Runnable() {
 				public void run() {
-					if(delay) {
+					if (delay) {
 						try {
 							Thread.sleep(5000);
 						} catch (InterruptedException e) {
-							 
+
 						}
 					}
 					// 执行任务
 					getPhoneList();
-					
+
 				}
 			});
 		}
@@ -137,7 +137,7 @@ public class RegistePoolService {
 
 				} else {
 					logger.warn("{}-{}注册，发验证码失败,不列入取码队列", i[0], phone);
-					addPlanSize(1,true);
+					addPlanSize(1, true);
 				}
 			}
 		} catch (Exception e) {
@@ -183,7 +183,7 @@ public class RegistePoolService {
 					smsCardService.setForbidden(phone);
 				}
 				smsCardService.freePhone(phone);
-				addPlanSize(1,true);
+				addPlanSize(1, true);
 				break;
 			}
 			if (list != null && list.size() > 0) {
@@ -194,7 +194,7 @@ public class RegistePoolService {
 						sendRegCode(regPhone.index, pc[0], pc[1]);
 					} catch (Exception e) {
 						logger.error("用注册码注册电报失败，{}", e.getMessage());
-						addPlanSize(1,true);
+						addPlanSize(1, true);
 						smsCardService.freePhone(phone);
 						break;
 					}
