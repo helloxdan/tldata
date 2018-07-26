@@ -110,6 +110,12 @@ public class WorkTests {
 				users.add(u);
 				return users;
 			}
+
+			@Override
+			public void destroy(XUserBot bot) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 

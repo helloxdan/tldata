@@ -12,4 +12,6 @@ public interface WorkService {
 
 	int inviteUsers(XUserBot bot, TaskData data, List<JobUser> users);
 
+	void destroy(XUserBot bot);
+
 }

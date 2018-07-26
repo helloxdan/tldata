@@ -111,7 +111,8 @@ public class TaskExecutor implements Observer {
 
 				// bot用完，注销
 				getBotManager().destroy(bot);
-
+				
+				getWorkService().destroy(bot);
 				//
 				botw.setBot(null);
 			}

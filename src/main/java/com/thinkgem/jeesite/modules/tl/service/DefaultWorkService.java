@@ -91,6 +91,8 @@ public class DefaultWorkService implements WorkService {
 						logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 						continue;
 					}
+					
+					//FIXEM  能判断用户是否已经加过是最好了，数据有点大，用其它缓存才行
 
 					JobUser ju = new JobUser();
 					ju.setUserid(u.getId() + "");
@@ -149,5 +151,11 @@ public class DefaultWorkService implements WorkService {
 			u.setFromGroupName(data.getSrcGroupUrl());
 			list.add(u);
 		}
+	}
+
+	@Override
+	public void destroy(XUserBot bot) {
+		chatIdMap.remove(bot.getPhone());
+		chatAccessMap.remove(bot.getPhone());
 	}
 }
