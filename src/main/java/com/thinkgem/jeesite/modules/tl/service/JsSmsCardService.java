@@ -233,4 +233,10 @@ public class JsSmsCardService implements SmsCardService {
 		this.token = token;
 	}
 
+	@Override
+	public void freePhone(String phone) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

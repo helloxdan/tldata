@@ -14,4 +14,5 @@ public interface SmsCardService {
 	List<String[]> getPhoneCode (String phone);
 
 	void setForbidden(String phone);
+	void freePhone(String phone);
 }

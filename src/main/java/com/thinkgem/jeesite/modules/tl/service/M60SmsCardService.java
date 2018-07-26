@@ -39,6 +39,8 @@ public class M60SmsCardService implements SmsCardService {
 
 	private String userid;
 
+	private static Object lock = new Object();
+
 	void stop() {
 		this.run = false;
 	}
@@ -56,13 +58,9 @@ public class M60SmsCardService implements SmsCardService {
 
 		JSONObject result = null;
 		try {
-			String url = "http://sms.60ma.net/newsmssrv?cmd=addblacktelnum&encode=utf-8&userid="
-					+ getUserid()
-					+ "&userkey="
-					+ getToken()
-					+ "&telnum="
-					+ phone + "&docks=B3244DD57208B76&dtype=json";
-			logger.info("拉黑url={}", url);
+			String url = "http://sms.60ma.net/newsmssrv?cmd=addblacktelnum&encode=utf-8&userid=" + getUserid()
+					+ "&userkey=" + getToken() + "&telnum=" + phone + "&docks=B3244DD57208B76&dtype=json";
+			logger.debug("拉黑url={}", url);
 			result = restTemplate.getForObject(url, JSONObject.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("加入黑名单结果：" + result);
@@ -76,9 +74,8 @@ public class M60SmsCardService implements SmsCardService {
 				logger.info("加入黑名单成功");
 			}
 
-		} catch (RestClientException e) {
-			logger.error("加入黑名单失败,{}", e.getMessage() == null ? "" : e
-					.getMessage().substring(0, 20));
+		} catch (Exception e) {
+			logger.error("加入黑名单失败,{}", e.getMessage() == null ? "" : e.getMessage().substring(0, 20));
 			// throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -91,11 +88,8 @@ public class M60SmsCardService implements SmsCardService {
 		JSONObject result = null;
 		try {
 			String token = getToken();
-			String url = "http://sms.60ma.net/newsmssrv?cmd=gettelnum&encode=utf-8&userid="
-					+ getUserid()
-					+ "&userkey="
-					+ token
-					+ "&docks=B3244DD57208B76&dtype=json";
+			String url = "http://sms.60ma.net/newsmssrv?cmd=gettelnum&encode=utf-8&userid=" + getUserid() + "&userkey="
+					+ token + "&docks=B3244DD57208B76&dtype=json";
 			result = restTemplate.getForObject(url, JSONObject.class);
 
 			// 返回示例：{"Return":{"Staus":"0","Telnum":"17011134058","ErrorInfo":"获取成功！}}
@@ -108,12 +102,13 @@ public class M60SmsCardService implements SmsCardService {
 				// throw new RuntimeException("获取号码失败"
 				// + result.getString("ErrorInfo"));
 				logger.error("获取号码失败," + result.getString("ErrorInfo"));
+				throw new RuntimeException(result.getString("ErrorInfo"));
 			} else {
 				String phone = result.getString("Telnum");
 				list.add("86" + phone);
 			}
 
-		} catch (RestClientException e) {
+		} catch (Exception e) {
 			logger.error("取号码", e);
 			throw new RuntimeException(e.getMessage());
 		}
@@ -144,8 +139,7 @@ public class M60SmsCardService implements SmsCardService {
 		try {
 			String password = "123456";
 			MessageDigest md5 = MessageDigest.getInstance("MD5");
-			password = new String(md5.digest(password.getBytes("utf-8")),
-					"utf-8");
+			password = new String(md5.digest(password.getBytes("utf-8")), "utf-8");
 			System.out.println(password);
 			System.out.println(Digests.md5("123456".getBytes("utf-8")));
 			System.out.println(M60SmsCardService.encryption("123456"));
@@ -196,16 +190,12 @@ public class M60SmsCardService implements SmsCardService {
 
 		JSONObject result = null;
 		try {
-			String url = "http://sms.60ma.net/newsmssrv?cmd=getsms&encode=utf-8&userid="
-					+ getUserid()
-					+ "&userkey="
-					+ getToken()
-					+ "&telnum="
-					+ phone + "&dockcode=B3244DD57208B76&dtype=json";
+			String url = "http://sms.60ma.net/newsmssrv?cmd=getsms&encode=utf-8&userid=" + getUserid() + "&userkey="
+					+ getToken() + "&telnum=" + phone + "&dockcode=B3244DD57208B76&dtype=json";
 			// logger.info("取验证码url={}",url);
 			result = restTemplate.getForObject(url, JSONObject.class);
-			if(logger.isDebugEnabled())
-			logger.debug("{}取验证码结果：{}", phone, result);
+			if (logger.isDebugEnabled())
+				logger.debug("{}取验证码结果：{}", phone, result);
 			// 返回示例：{"Return":{"Staus":"0","SmsContent":"你正在注册微信帐号，验证码71408。请勿转发。【腾讯科技】,"ErrorInfo":"成功！}}
 			if (logger.isDebugEnabled()) {
 				logger.debug("{}取验证码结果：{}", phone, result);
@@ -215,14 +205,14 @@ public class M60SmsCardService implements SmsCardService {
 			String staus = result.getString("Staus");
 			if (!"0".equals(staus)) {
 				// throw new RuntimeException("获取验证码失败");
-				logger.error("获取验证码失败：{}", result);
+				logger.error("{}获取验证码失败：{}", phone, result);
 				if (result.getString("ErrorInfo").contains("您并未拥有此卡")) {
 					// 忽略此卡
 					throw new RuntimeException("ingore");
 				}
 			} else {
 				String content = result.getString("SmsContent");
-				logger.info("获取验证码：" + content);
+				logger.info("{}获取验证码：{}", phone, content);
 				// 正则表达式，获取数字
 				String regEx = "[^0-9]";// 匹配指定范围内的数字
 				// Pattern是一个正则表达式经编译后的表现模式
@@ -239,8 +229,8 @@ public class M60SmsCardService implements SmsCardService {
 
 			}
 
-		} catch (RestClientException e) {
-			logger.error("取验证码", e);
+		} catch (Exception e) {
+			logger.error("取验证码失败：" + e.getMessage());
 			throw new RuntimeException(e.getMessage());
 		}
 		return list;
@@ -256,7 +246,12 @@ public class M60SmsCardService implements SmsCardService {
 
 	public String getToken() {
 		if (token == null) {
-			token = login();
+			synchronized (lock) {
+				if (token == null) {
+					token = login();
+				}
+			}
+
 		}
 		return token;
 	}
@@ -267,8 +262,8 @@ public class M60SmsCardService implements SmsCardService {
 	private String login() {
 		// TODO Auto-generated method stub
 		JSONObject re = null;
-		String url = "http://sms.60ma.net/loginuser?cmd=login&encode=utf-8&dtype=json&username="
-				+ getUsername() + "&password=" + getPassword();
+		String url = "http://sms.60ma.net/loginuser?cmd=login&encode=utf-8&dtype=json&username=" + getUsername()
+				+ "&password=" + getPassword();
 
 		try {
 			re = restTemplate.getForObject(url, JSONObject.class);
@@ -285,10 +280,11 @@ public class M60SmsCardService implements SmsCardService {
 			} else {
 				token = null;
 				logger.info("登录60码短信平台失败，error={}", re.getString("ErrorInfo"));
+				throw new RuntimeException("登录60码短信平台失败");
 			}
 
 		} catch (Exception e) {
-			logger.error("登录异常异常", e);
+			logger.error("登录异常:" + e.getMessage());
 			throw new RuntimeException(e.getMessage());
 		}
 		return token;
@@ -325,6 +321,46 @@ public class M60SmsCardService implements SmsCardService {
 
 	public void setUserid(String userid) {
 		this.userid = userid;
+	}
+
+	@Override
+	public void freePhone(String phone) {
+		if (StringUtils.isBlank(phone)) {
+			logger.warn("手机号为空");
+			return;
+		}
+
+		if (phone.startsWith("86")) {
+			phone = phone.substring(2);
+		}
+
+		JSONObject result = null;
+		try {
+			String url = "http://sms.60ma.net/newsmssrv?cmd=freetelnum&encode=utf-8&userid="
+					+ getUserid()
+					+ "&userkey="
+					+ getToken()
+					+ "&telnum="
+					+ phone + "&docks=B3244DD57208B76&dtype=json";
+			logger.debug("釋放url={}", url);
+			result = restTemplate.getForObject(url, JSONObject.class);
+			if (logger.isInfoEnabled()) {
+				logger.info("釋放手机号结果：" + result); 
+			}
+			result = result.getJSONObject("Return");
+			String staus = result.getString("Staus");
+			if (!"0".equals(staus)) {
+				// throw new RuntimeException("加入黑名单失败");
+				logger.error("釋放手机号失败" + result.getString("ErrorInfo"));
+			} else {
+				logger.info("釋放手机号成功");
+			}
+
+		} catch (Exception e) {
+			logger.error("釋放手机号失败,{}", e.getMessage() == null ? "" : e
+					.getMessage().substring(0, 20));
+			// throw new RuntimeException(e.getMessage());
+		}
 	}
 
 }

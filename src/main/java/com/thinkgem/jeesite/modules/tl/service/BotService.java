@@ -812,6 +812,7 @@ public class BotService implements BotManager {
 				ac.setUpdateDate(new Date());
 				accountService.updateAccountHis(ac);
 				logger.warn("账号{}注册失败，try again", phone);
+				
 				bots.put(phone, null);
 			}
 
@@ -855,10 +856,13 @@ public class BotService implements BotManager {
 				save = false;// dont save
 				deleteAuthFile(phone);
 			} else {
+				bot.stop();
 				bots.put(phone, null);
 				deleteAuthFile(phone);
 			}
 		} else {
+
+			bot.stop();
 			// 失败,移除map
 			bots.put(phone, null);
 			// FIXME 删除认证文件
@@ -939,12 +943,14 @@ public class BotService implements BotManager {
 						status = "FAILURE";
 						// 清除
 						bots.put(phone, null);
+						bot.stop();
 					}
 				}
 			} else {
 				// 失败,列入黑名单
 				status = "FAILURE";
 				// 清除
+				bot.stop();
 				bots.put(phone, null);
 
 				// 删除auth文件

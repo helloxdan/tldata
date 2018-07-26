@@ -31,7 +31,7 @@ public class DefaultWorkService implements WorkService {
 	@Autowired
 	private JobTaskService jobTaskService;
 	// 模拟运行的开关
-	boolean demo = true;
+	boolean demo = false;
 	Map<String, Integer> chatIdMap = Maps.newHashMap();
 	Map<String, Long> chatAccessMap = Maps.newHashMap();
 
@@ -122,6 +122,7 @@ public class DefaultWorkService implements WorkService {
 					+ updateNum);
 		} else {
 			// TODO
+			
 			String phone = bot.getPhone();
 			int chatId = 0;
 			long accessHash = 0;
@@ -129,6 +130,8 @@ public class DefaultWorkService implements WorkService {
 				chatId = chatIdMap.get(phone);
 				accessHash = chatAccessMap.get(phone);
 				updateNum = bot.addUsers(chatId, accessHash, users);
+				
+				logger.info("添加人數：{},成功 {}",users.size(),updateNum);
 			} else {
 				logger.error("拉人时，竟然没有accessHash");
 			}

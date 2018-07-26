@@ -43,8 +43,7 @@ public class RegistePoolService {
 	private static boolean start = false;
 
 	int phoneThreadNum = Integer.parseInt(Global.getConfig("thread.phone.num"));
-	int codeThreadNum = Integer
-			.parseInt(Global.getConfig("thread.regcode.num"));
+	int codeThreadNum = Integer.parseInt(Global.getConfig("thread.regcode.num"));
 	// 获取手机号的线程池
 	ExecutorService regPool = Executors.newFixedThreadPool(phoneThreadNum);
 	// 查询短信验证码的线程池
@@ -58,15 +57,28 @@ public class RegistePoolService {
 	 *            需要的成功记录数
 	 */
 	public void addPlanSize(int num) {
+		addPlanSize(num, false);
+	}
+
+	public void addPlanSize(int num, boolean delay) {
 		this.planSize = this.planSize + num;
+		
 		start();
 		int tryNum = num * 2;// 3倍成功记录数
 		// 直接所有任务放入线程池
 		for (int i = 0; i < tryNum; i++) {
 			regPool.execute(new Runnable() {
 				public void run() {
+					if(delay) {
+						try {
+							Thread.sleep(5000);
+						} catch (InterruptedException e) {
+							 
+						}
+					}
 					// 执行任务
 					getPhoneList();
+					
 				}
 			});
 		}
@@ -95,35 +107,45 @@ public class RegistePoolService {
 		if (!start)
 			return;
 		final int[] i = new int[] { phoneNum.get() };
-
-		// AtomicInteger index = new AtomicInteger(phoneNum);
-		// 从卡商获取电话列表
-		List<String> list = getSmsCardService().getPhoneList();
-		if (list != null) {
-			int total = phoneNum.addAndGet(list.size());
-			logger.info("本次从卡商获取手机号数={},共{}个", list.size(), total);
-		}
-		for (String phone : list) {
-			// 检查是否查询过该账号
-			if (existsPhone(phone))
-				continue;
-
-			// 执行电报的注册接口，发送验证码
-			boolean success = botService.registe(phone);
-			if (success) {
-				// 放入线程池，等待调度
-				queryCodePool.execute(new Runnable() {
-					public void run() {
-						// 执行查询验证码的程序
-						i[0] = i[0] + 1;
-						queryCode(new RegPhone(phone, i[0]));
-					}
-
-				});
-
-			} else {
-				logger.warn("{}-{}注册，发验证码失败,不列入取码队列", i[0], phone);
+		String phone1 = null;
+		try {
+			// AtomicInteger index = new AtomicInteger(phoneNum);
+			// 从卡商获取电话列表
+			List<String> list = getSmsCardService().getPhoneList();
+			if (list != null) {
+				int total = phoneNum.addAndGet(list.size());
+				logger.info("本次从卡商获取手机号数={},共{}个", list.size(), total);
 			}
+			for (String phone : list) {
+				phone1 = phone;
+				// 检查是否查询过该账号
+				if (existsPhone(phone))
+					continue;
+
+				// 执行电报的注册接口，发送验证码
+				boolean success = botService.registe(phone);
+				if (success) {
+					// 放入线程池，等待调度
+					queryCodePool.execute(new Runnable() {
+						public void run() {
+							// 执行查询验证码的程序
+							i[0] = i[0] + 1;
+							queryCode(new RegPhone(phone, i[0]));
+						}
+
+					});
+
+				} else {
+					logger.warn("{}-{}注册，发验证码失败,不列入取码队列", i[0], phone);
+					addPlanSize(1,true);
+				}
+			}
+		} catch (Exception e) {
+			if (e.getMessage() != null && e.getMessage().contains("余额不足")) {
+				stop();
+			}
+			if (phone1 != null)
+				smsCardService.freePhone(phone1);
 		}
 	}
 
@@ -155,19 +177,27 @@ public class RegistePoolService {
 			try {
 				list = getSmsCardService().getPhoneCode(phone);
 			} catch (Exception e) {
-				if ("ignore".equals(e.getMessage())
-						|| e.getMessage().contains("ignore")) {
+				if ("ignore".equals(e.getMessage()) || e.getMessage().contains("ignore")) {
 
 					// 加入黑名单
 					smsCardService.setForbidden(phone);
-					break;
 				}
+				smsCardService.freePhone(phone);
+				addPlanSize(1,true);
+				break;
 			}
 			if (list != null && list.size() > 0) {
 				for (String[] pc : list) {
 					logger.debug("{}-{}获取验证码，{}", regPhone.index, pc[0], pc[1]);
 					// 注册电报账号
-					sendRegCode(regPhone.index, pc[0], pc[1]);
+					try {
+						sendRegCode(regPhone.index, pc[0], pc[1]);
+					} catch (Exception e) {
+						logger.error("用注册码注册电报失败，{}", e.getMessage());
+						addPlanSize(1,true);
+						smsCardService.freePhone(phone);
+						break;
+					}
 				}
 
 				// 获取到验证码，退出
@@ -192,8 +222,8 @@ public class RegistePoolService {
 			// 成功累计数
 			int size = successSize.incrementAndGet();
 			// 完成账号注册
-			logger.info("{}-{}注册成功，{}/{}，{} {}", index, phone, size, planSize,
-					json.getString("firstName"), json.getString("lastName"));
+			logger.info("{}-{}注册成功，{}/{}，{} {}", index, phone, size, planSize, json.getString("firstName"),
+					json.getString("lastName"));
 
 			if (size >= planSize) {
 				// 到达指定数量

@@ -23,4 +23,10 @@ public class EmptySmsCardService implements SmsCardService {
 		return new ArrayList<String[]>();
 	}
 
+	@Override
+	public void freePhone(String phone) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
