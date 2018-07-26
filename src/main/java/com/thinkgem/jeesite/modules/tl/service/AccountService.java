@@ -116,10 +116,16 @@ public class AccountService extends CrudService<AccountDao, Account> {
 	/**设置密码
 	 * @param phone
 	 */
+	@Transactional(readOnly = false)
 	public void updatePwdLock(String phone) {
 		Account account = new Account(phone);
 		account.setPwdLock(Global.YES);
 		this.dao.updatePwdLock(account);
+	}
+
+	@Transactional(readOnly = false)
+	public void updateSuccess(Account account) {
+		this.dao.updateSuccess(account);
 	}
 
 }

@@ -95,6 +95,8 @@ public class TaskExecutor implements Observer {
 				// 累计一次更新为0的操作
 				// 如果超过5次，说明该账号，可能已经用满额度了
 				botw.setEmptyCount(botw.getEmptyCount() + 1);
+			}else {
+				logger.info("{},本次成功{}人,总完成{}人",bot.getPhone(),updateNum,botw.getUsernum()+updateNum);
 			}
 			// 标记bot拉的人数
 			botw.setUsernum(botw.getUsernum() + updateNum);
@@ -105,11 +107,14 @@ public class TaskExecutor implements Observer {
 				botpool.put(botw, 2);
 			} else {
 				if (botw.getEmptyCount() >5) {
-					logger.info("{}，{}，{},账号失效，退出", bot.getJobid(), bot.getPhone(),
+					logger.info("{}，{}， 已完成{}，账号失效，退出", bot.getJobid(), bot.getPhone(),
 							botw.getUsernum());
 				}else {
 					logger.info("{}，{}，{},完成任务，退出", bot.getJobid(), bot.getPhone(),
 						botw.getUsernum());
+					
+					//FIXME 标记账号已完成任务
+					botManager.updateAccountSuccess(bot.getPhone(),botw.getUsernum());
 				}
 				// 删除任务数据
 				// getTaskQuery().deleteTaskData(bot, data);
@@ -117,7 +122,7 @@ public class TaskExecutor implements Observer {
 				// bot用完，注销
 				getBotManager().destroy(bot);
 				
-				getWorkService().destroy(bot);
+				getWorkService().destroy(bot,data);
 				//
 				botw.setBot(null);
 			}

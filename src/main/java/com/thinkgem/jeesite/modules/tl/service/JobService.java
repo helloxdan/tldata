@@ -64,8 +64,7 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		// super.save(job);
 
 		// 根据所需要拉的人数，推算出需要的账号
-		// 所需账号数，再乘以一个倍数，很多时候，拉人失败
-		Integer accountNum = (int) (job.getUsernum() * 1.2 / Constants.USER_LIMIT_SIZE);
+		Integer accountNum = (int) (job.getUsernum() / Constants.USER_LIMIT_SIZE);
 		job.setAccountNum(accountNum);
 
 		if (job.getIsNewRecord()) {
@@ -124,7 +123,7 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	@Override
 	public TaskData getTaskData(String jobid, String phone) {
 		if (jobGroupList.size() == 0) {
-			
+
 			return null;
 		}
 
@@ -203,8 +202,7 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	// 保存jobtask数据线程
 	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1);
 	// 用于定期更新JobGroupList中的数据到数据库中
-	ScheduledExecutorService scheduledThreadPool = Executors
-			.newScheduledThreadPool(1);
+	ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1);
 	// 存放所有采集的群组
 	List<JobGroup> jobGroupList = new ArrayList<JobGroup>();
 	Job job = null;
@@ -219,11 +217,9 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		JobGroup jobGroup = new JobGroup();
 		jobGroup.setJobId(job.getId());
 		jobGroupList = jobGroupService.findValidList(jobGroup);
-		int jobGroupNum=jobGroupList.size();
-		
-		
-		long period = Long
-				.parseLong(Global.getConfig("job.updategroup.period"));
+		int jobGroupNum = jobGroupList.size();
+
+		long period = Long.parseLong(Global.getConfig("job.updategroup.period"));
 		// 两分钟执行一次
 		scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
 			@Override
@@ -232,8 +228,7 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 			}
 		}, 1, period, TimeUnit.SECONDS);
 		// FIXME 修改更新jobGroup数据的频率
-		
-	
+
 		return jobGroupNum;
 	}
 }

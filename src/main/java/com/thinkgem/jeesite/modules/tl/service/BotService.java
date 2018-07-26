@@ -1103,6 +1103,7 @@ public class BotService implements BotManager {
 	 * @param jobid
 	 * @return
 	 */
+	@Transactional(readOnly = false)
 	public boolean stopJob(String jobid) {
 		this.jobid = jobid;
 		boolean success = true;
@@ -1140,6 +1141,7 @@ public class BotService implements BotManager {
 	 * @param jobid
 	 * @return
 	 */
+	@Transactional(readOnly = false)
 	public boolean startJob(String jobid) {
 		this.jobid = jobid;
 		boolean success = true;
@@ -1211,6 +1213,18 @@ public class BotService implements BotManager {
 		} catch (Exception e) {
 			logger.error("", e);
 		}
+	}
+ 
+
+	@Override
+	@Transactional(readOnly = false)
+	public void updateAccountSuccess(String phone, int usernum) {
+		// 标记账号已成功完成任务
+		Account ac=new Account();
+		ac.setId(phone);
+		ac.setRole("8");
+		ac.setUsernum(usernum);
+		accountService.updateSuccess(ac);
 	}
 
 }

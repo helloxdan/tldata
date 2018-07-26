@@ -238,9 +238,12 @@
 	</update>
 	
 	
-	<update id="updatePwdLock">
+
+	
+		<update id="updateSuccess">
 		UPDATE tl_account  SET  
-			pwd_lock = #{pwdLock}
+			usernum = #{usernum}, 
+			role_ = #{role}
 		WHERE id = #{id}
 	</update>
 </mapper>

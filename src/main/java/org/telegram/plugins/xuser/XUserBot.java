@@ -351,7 +351,7 @@ public class XUserBot implements IBot {
 	@Override
 	public int addUsers(int chatId, long accessHash, List<JobUser> jobUsers) {
 		// TODO Auto-generated method stub
-		logger.info("{},addUsers to group {},{}", getAccount(), chatId, jobUsers.size());
+		logger.debug("{},addUsers to group {},{}", getAccount(), chatId, jobUsers.size());
 		int usernum = jobUsers.size();
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
@@ -373,9 +373,9 @@ public class XUserBot implements IBot {
 			if (result instanceof TLUpdates) {
 				TLUpdates re = (TLUpdates) result;
 				usernum = re.getUsers().size();
-				logger.info("updateSize={},userSize={},chatSize={}", re.getUpdates().size(), usernum,
+				logger.debug("updateSize={},userSize={},chatSize={}", re.getUpdates().size(), usernum,
 						re.getChats().size());
-				logger.info("成功拉{}人", usernum);
+				logger.debug("成功拉{}人", usernum);
 			}
 		} catch (IOException e) {
 			logger.error("拉取群用户失败", e);

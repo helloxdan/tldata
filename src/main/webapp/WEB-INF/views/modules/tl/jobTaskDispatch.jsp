@@ -126,6 +126,26 @@
         	return false;
         }
 		
+		function stopReg(id) {
+			confirmx("确定要停止注册吗？",function(){
+				loading('系统处理中，请稍候……');
+				$.post('${rctx}/api/tl/stopReg', {
+					jobid : id 
+				}, function(result) {
+					if (result.success) { 
+						top.$.jBox.tip("操作成功", 'info');
+						//刷新页面
+						document.location.reload();
+					}else{
+						top.$.jBox.tip(result.msg, 'warning');
+					}
+				});
+			},function(){
+				console.log('取消执行任务');
+			});
+        	return false;
+        }
+		
 		
 		function fetchUser(id) {
 			confirmx("确定开始执行收集用户任务吗？",function(){
@@ -250,12 +270,14 @@
 				<a href="${ctx}/tl/jobTask/form?jobId=${jobTask.jobId}&type=fetch&action=dispatch" class="btn btn-blue hide">新增单一任务</a>
 			<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-success"  >开始拉人</a>
 			<a href="javascript:stopjob('${jobTask.jobId}')"  class="btn btn-warning"  >停止</a>
+			<a href="javascript:stopReg('${jobTask.jobId}')"  class="btn btn-warning"  >停止注册</a>
+					<%-- |<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue hide"
 					<%-- |<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue hide"  >批量执行抽取用户</a>
 					<a href="javascript:cleanJobUser('${jobTask.jobId}')"  class="btn btn-blue" title="删除重复数据，或者已经抽取的数据" >清洗用户数据</a>
 					<input id="btnAdds" class="btn btn-blue" type="button" value="批量新增" onclick="addTasks('${jobTask.jobId}')"/>
-				<%-- <input id="btnDel" class="btn btn-blue" type="button" value="删除任务" /> --%>
-			<a href="javascript:addUser('${jobTask.jobId}')"  class="btn btn-success"  >开始拉人-old</a>
-				 --%><a href="${ctx}/tl/jobUser/list?jobId=${jobTask.jobId}" class="btn btn-blue">用户列表</a>
+			  <input id="btnDel" class="btn btn-blue" type="button" value="删除任务" /> 
+			<a href="javascript:addUser('${jobTask.jobId}')"  class="btn btn-success"  >开始拉人-old</a>--%>
+			 <a href="${ctx}/tl/jobUser/list?jobId=${jobTask.jobId}" class="btn btn-blue">用户列表</a>
 					
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
 			</div>	

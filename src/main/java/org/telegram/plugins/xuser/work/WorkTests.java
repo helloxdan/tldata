@@ -112,7 +112,7 @@ public class WorkTests {
 			}
 
 			@Override
-			public void destroy(XUserBot bot) {
+			public void destroy(XUserBot bot, TaskData data) {
 				// TODO Auto-generated method stub
 				
 			}

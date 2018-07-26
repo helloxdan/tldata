@@ -95,6 +95,8 @@ public class BotPool extends Observable {
 			scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
+					if (!isRun())
+						return;
 					// long diff = System.currentTimeMillis()
 					// - timeMap.get(bot.getPhone());
 					// System.err.println("线程执行时间差：" + diff / 1000);

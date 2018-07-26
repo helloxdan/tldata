@@ -41,7 +41,7 @@ public class RegistePoolService {
 	private AtomicInteger successSize = new AtomicInteger(0);// 成功数
 	// 启动、停止标识位
 	private static boolean start = false;
-
+	private int phoneNumFactor = Integer.parseInt(Global.getConfig("reg.phonenum.factor"));
 	int phoneThreadNum = Integer.parseInt(Global.getConfig("thread.phone.num"));
 	int codeThreadNum = Integer.parseInt(Global.getConfig("thread.regcode.num"));
 	// 获取手机号的线程池
@@ -64,7 +64,9 @@ public class RegistePoolService {
 		this.planSize = this.planSize + num;
 
 		start();
-		int tryNum = num * 2;// 3倍成功记录数
+
+		// 所需账号数，再乘以一个倍数，很多时候，拉人失败
+		int tryNum = num * phoneNumFactor;// 3倍成功记录数
 		// 直接所有任务放入线程池
 		for (int i = 0; i < tryNum; i++) {
 			regPool.execute(new Runnable() {

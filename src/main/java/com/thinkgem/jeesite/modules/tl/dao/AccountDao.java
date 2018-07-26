@@ -37,4 +37,6 @@ public interface AccountDao extends CrudDao<Account> {
 	void updateAccountHis(Account account);
 
 	void updatePwdLock(Account account);
+
+	void updateSuccess(Account account);
 }

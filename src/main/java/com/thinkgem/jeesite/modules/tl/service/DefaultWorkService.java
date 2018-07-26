@@ -1,7 +1,6 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +21,8 @@ import org.telegram.tl.TLVector;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
-import com.thinkgem.jeesite.modules.tl.entity.TlUser;
 import com.thinkgem.jeesite.modules.utils.Constants;
+import com.thinkgem.jeesite.modules.utils.JobCacheUtils;
 
 @Service
 public class DefaultWorkService implements WorkService {
@@ -45,9 +44,10 @@ public class DefaultWorkService implements WorkService {
 			String phone = bot.getPhone();
 			int chatId = 0;
 			long accessHash = 0;
-			if (chatIdMap.containsKey(phone)) {
-				chatId = chatIdMap.get(phone);
-				accessHash = chatAccessMap.get(phone);
+			String key = phone + data.getSrcGroupUrl();
+			if (chatIdMap.containsKey(key)) {
+				chatId = chatIdMap.get(key);
+				accessHash = chatAccessMap.get(key);
 			} else {
 				// 加入群组
 				JSONObject json = bot.importInvite(data.getSrcGroupUrl());
@@ -55,22 +55,19 @@ public class DefaultWorkService implements WorkService {
 				if (success) {
 					chatId = json.getIntValue("chatid");
 					accessHash = json.getLongValue("accessHash");
-					chatIdMap.put(phone, chatId);
-					chatAccessMap.put(phone, accessHash);
+					chatIdMap.put(key, chatId);
+					chatAccessMap.put(key, accessHash);
 				} else {
 					chatId = 0;
 					// 加入群组失败
-					logger.warn("{},加入群组{}，失败,{}", phone,
-							data.getSrcGroupName(), json.getString("msg"));
+					logger.warn("{},加入群组{}，失败,{}", phone, data.getSrcGroupName(), json.getString("msg"));
 				}
 			}
 			if (chatId == 0) {
 				logger.warn("{},无群组信息，无法采集", phone);
 			} else {
-				TLVector<TLAbsUser> users = bot.collectUsers(chatId,
-						accessHash, data.getOffset(), data.getLimit());
-				logger.info("拉取群组用户结果：job={}，account={},size={}",
-						bot.getJobid(), phone, users.size());
+				TLVector<TLAbsUser> users = bot.collectUsers(chatId, accessHash, data.getOffset(), data.getLimit());
+				logger.info("拉取群组用户结果：job={}，account={},size={}", bot.getJobid(), phone, users.size());
 
 				int num = 0;
 				// 将数据存储到数据库
@@ -83,16 +80,18 @@ public class DefaultWorkService implements WorkService {
 
 					String firstName = XUtils.transChartset(u.getFirstName());
 					String lastName = XUtils.transChartset(u.getLastName());
-					if (firstName != null
-							&& ((firstName.length() > 100
-									|| lastName.length() > 100 || (firstName
-									.contains("拉人") || firstName
-									.contains("电报群"))))) {
+					if (firstName != null && ((firstName.length() > 100 || lastName.length() > 100
+							|| (firstName.contains("拉人") || firstName.contains("电报群"))))) {
 						logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 						continue;
 					}
-					
-					//FIXEM  能判断用户是否已经加过是最好了，数据有点大，用其它缓存才行
+
+					// FIXEM 能判断用户是否已经加过是最好了，数据有点大，用其它缓存才行
+					if (JobCacheUtils.existsJobUser(bot.getJobid(), "" + u.getId())) {
+						//
+						logger.info("用户{}已经存在~", u.getUserName());
+						continue;
+					}
 
 					JobUser ju = new JobUser();
 					ju.setUserid(u.getId() + "");
@@ -118,24 +117,43 @@ public class DefaultWorkService implements WorkService {
 		int updateNum = 0;
 		if (demo) {
 			updateNum = RandomUtils.nextInt(1, users.size());
-			System.err.println(bot.getPhone() + ",模拟拉人操作！~~~~~~~~~~~~~~~~~~~~"
-					+ updateNum);
+			System.err.println(bot.getPhone() + ",模拟拉人操作！~~~~~~~~~~~~~~~~~~~~" + updateNum);
 		} else {
 			// TODO
-			
+
 			String phone = bot.getPhone();
 			int chatId = 0;
 			long accessHash = 0;
-			if (chatIdMap.containsKey(phone)) {
-				chatId = chatIdMap.get(phone);
-				accessHash = chatAccessMap.get(phone);
-				updateNum = bot.addUsers(chatId, accessHash, users);
-				
-				logger.info("添加人數：{},成功 {}",users.size(),updateNum);
+			// 目标群组
+			String key = phone + data.getDestGroupUrl();
+			if (chatIdMap.containsKey(key)) {
+				chatId = chatIdMap.get(key);
+				accessHash = chatAccessMap.get(key);
 			} else {
-				logger.error("拉人时，竟然没有accessHash");
+				// 加入群组
+				JSONObject json = bot.importInvite(data.getDestGroupUrl());
+				Boolean success = json.getBoolean("success");
+				if (success) {
+					chatId = json.getIntValue("chatid");
+					accessHash = json.getLongValue("accessHash");
+					chatIdMap.put(key, chatId);
+					chatAccessMap.put(key, accessHash);
+				} else {
+					chatId = 0;
+					// 加入群组失败
+					logger.warn("{},加入群组{}，失败,{}", phone, data.getSrcGroupName(), json.getString("msg"));
+				}
 			}
+			if (chatId == 0) {
+				logger.warn("{},无目标群组信息，无法加人", phone);
+			} else {
+				chatId = chatIdMap.get(key);
+				accessHash = chatAccessMap.get(key);
+				updateNum = bot.addUsers(chatId, accessHash, users);
 
+				logger.info("添加人數：{},成功 {}，{}->{}", users.size(), updateNum, data.getSrcGroupUrl(),
+						data.getDestGroupUrl());
+			}
 		}
 		return updateNum;
 	}
@@ -157,8 +175,12 @@ public class DefaultWorkService implements WorkService {
 	}
 
 	@Override
-	public void destroy(XUserBot bot) {
-		chatIdMap.remove(bot.getPhone());
-		chatAccessMap.remove(bot.getPhone());
+	public void destroy(XUserBot bot, TaskData data) {
+		String key = bot.getPhone() + data.getDestGroupUrl();
+		chatIdMap.remove(key);
+		chatAccessMap.remove(key);
+		key = bot.getPhone() + data.getSrcGroupUrl();
+		chatIdMap.remove(key);
+		chatAccessMap.remove(key);
 	}
 }

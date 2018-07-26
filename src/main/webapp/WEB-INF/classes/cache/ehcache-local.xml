@@ -32,6 +32,6 @@
     	
     <!-- 配置缓存 -->
 	<cache name="configCache" maxEntriesLocalHeap="1000" eternal="true" overflowToDisk="true" statistics="true"/>
-    <!-- 设备管理缓存 -->
-	<cache name="emCache" maxEntriesLocalHeap="3000" eternal="true" overflowToDisk="true" statistics="true"/>
+    <!-- jobuser缓存 -->
+	<cache name="jobuserCache" maxEntriesLocalHeap="20000" eternal="true" overflowToDisk="true" diskPersistent="true" diskExpiryThreadIntervalSeconds="600" statistics="true"/>
 </ehcache>
