@@ -372,7 +372,7 @@ public class XUserBot implements IBot {
 			TLAbsUpdates result = api.doRpcCall(req);
 			if (result instanceof TLUpdates) {
 				TLUpdates re = (TLUpdates) result;
-				usernum = re.getUsers().size()-1;
+				usernum = re.getUsers().size();
 				logger.info("updateSize={},userSize={},chatSize={}", re.getUpdates().size(), usernum,
 						re.getChats().size());
 				logger.info("成功拉{}人", usernum);

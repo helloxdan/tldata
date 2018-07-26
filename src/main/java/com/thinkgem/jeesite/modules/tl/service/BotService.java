@@ -80,6 +80,7 @@ public class BotService implements BotManager {
 	private String adminAccount = Global.getConfig("tl.admin.account");// 管理员账号
 
 	private Map<String, IBot> bots = new HashMap<String, IBot>();
+	private Map<String, IBot> regbots = new HashMap<String, IBot>();
 	@Autowired
 	private BotFactory botFactory;
 
@@ -672,6 +673,37 @@ public class BotService implements BotManager {
 		}
 		return bot;
 	}
+	public IBot getRegBotByPhone(String phone, boolean start) {
+		IBot bot = regbots.get(phone);
+		if (bot == null) {
+			if (start) {
+				// 启动账号
+				RequestData data = new RequestData();
+				data.setPhone(phone);
+				start(data);
+				bot = regbots.get(phone);
+				if (bot == null) {
+					throw new RuntimeException(phone + "账号启动失败");
+				} else {
+					// 等待1s，便于检查isAuthCancel，auth cancel是异步回调方法回写
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
+				}
+			} else {
+				// throw new RuntimeException(phone + "账号实例不存在");
+				bot = null;
+			}
+		}
+		
+		if (bot != null && bot.isAuthCancel()) {
+			regbots.put(phone, null);
+			removeAccount(phone);
+			throw new UnvalidateAccountException(phone + "账号失效");
+		}
+		return bot;
+	}
 
 	/**
 	 * 查看group详细信息
@@ -813,16 +845,16 @@ public class BotService implements BotManager {
 				accountService.updateAccountHis(ac);
 				logger.warn("账号{}注册失败，try again", phone);
 				
-				bots.put(phone, null);
+				regbots.put(phone, null);
 			}
 
 		}
 
-		XUserBot bot = (XUserBot) bots.get(phone);
+		XUserBot bot = (XUserBot) regbots.get(phone);
 		if (bot == null) {
 			bot = botFactory.createBot();
 			bot.setBotDataService(botDataService);
-			bots.put(phone, bot);
+			regbots.put(phone, bot);
 		} else {
 			// 已经登陆过
 			throw new RuntimeException("账号" + phone + "实例已经创建，说明已经操作过了");
@@ -857,14 +889,14 @@ public class BotService implements BotManager {
 				deleteAuthFile(phone);
 			} else {
 				bot.stop();
-				bots.put(phone, null);
+				regbots.put(phone, null);
 				deleteAuthFile(phone);
 			}
 		} else {
 
 			bot.stop();
 			// 失败,移除map
-			bots.put(phone, null);
+			regbots.put(phone, null);
 			// FIXME 删除认证文件
 			status = "FAILURE";
 			logger.error("{}其他异常，注册失败,{}", phone, json.getString("status"));
@@ -913,7 +945,7 @@ public class BotService implements BotManager {
 
 	@Transactional(readOnly = false)
 	public JSONObject setRegAuthCode(String phone, String code) {
-		IBot bot = getBotByPhone(phone);
+		IBot bot = getRegBotByPhone(phone,false);
 		if (bot == null) {
 			JSONObject json = new JSONObject();
 			json.put("result", false);
@@ -942,7 +974,7 @@ public class BotService implements BotManager {
 					} else {
 						status = "FAILURE";
 						// 清除
-						bots.put(phone, null);
+						regbots.put(phone, null);
 						bot.stop();
 					}
 				}
@@ -951,7 +983,7 @@ public class BotService implements BotManager {
 				status = "FAILURE";
 				// 清除
 				bot.stop();
-				bots.put(phone, null);
+				regbots.put(phone, null);
 
 				// 删除auth文件
 				removeAccount(phone);
