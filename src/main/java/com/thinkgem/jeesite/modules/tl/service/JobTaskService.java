@@ -15,12 +15,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.telegram.plugins.xuser.XUserBot;
-import org.telegram.plugins.xuser.work.TaskData;
-import org.telegram.plugins.xuser.work.TaskQuery;
 
 import com.alibaba.fastjson.JSONObject;
-import com.thinkgem.jeesite.common.mapper.JsonMapper;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.dao.JobTaskDao;
@@ -38,8 +34,7 @@ import com.thinkgem.jeesite.modules.utils.Constants;
  */
 @Service
 @Transactional(readOnly = true)
-public class JobTaskService extends CrudService<JobTaskDao, JobTask> implements
-		TaskQuery {
+public class JobTaskService extends CrudService<JobTaskDao, JobTask>  {
 	@Autowired
 	private AccountService accountService;
 	@Autowired
@@ -348,31 +343,7 @@ public class JobTaskService extends CrudService<JobTaskDao, JobTask> implements
 		return this.dao.findJobTaskStatsData(jobTask);
 	}
 
-	@Override
-	public TaskData getTaskData(String jobid) {
-		JobTask jobtask = new JobTask();
-		jobtask.setJobId(jobid);
-		jobtask.setStatus(JobTask.STATUS_NONE);//
-		JobTask task = findOneOfJob(jobtask);
-		TaskData data = new TaskData();
-		data.setTaskid(task.getId());
-		data.setDestGroupUrl(task.getJobGroupUrl());
-		data.setSrcGroupUrl(task.getGroupUrl());
-		data.setOffset(task.getOffsetNum()==null ?0:task.getOffsetNum());
-		data.setLimit(task.getLimitNum()==null ?Constants.FETCH_TASK_USER_NUM:task.getLimitNum());
 
-		logger.info("任务数据，{}", JsonMapper.toJsonString(data));
-		return data;
 
-	}
 
-	private JobTask findOneOfJob(JobTask jobtask) {
-		return this.dao.findOneOfJob(jobtask);
-	}
-
-	@Override
-	public void deleteTaskData(XUserBot bot, TaskData data) {
-		JobTask jobTask = new JobTask(data.getTaskid());
-		delete(jobTask);
-	}
 }

@@ -1,14 +1,21 @@
 package org.telegram.plugins.xuser.work;
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.plugins.xuser.XUserBot;
+import org.telegram.plugins.xuser.ex.StopRuningException;
+
+import com.google.common.collect.Maps;
+import com.thinkgem.jeesite.common.config.Global;
 
 /**
  * 机器池，当有新的bot，就启动任务执行操作。
@@ -21,52 +28,89 @@ public class BotPool extends Observable {
 	BotManager botManager;
 	// 缓冲池
 	private Queue<BotWrapper> bots = new LinkedList<BotWrapper>();
-	Timer timer = new Timer();
+	boolean run = true;
+	int threadNum = Integer.parseInt(Global.getConfig("thread.work.num"));
+	// 线程池
+	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(threadNum);
+	ScheduledExecutorService scheduledThreadPool = Executors
+			.newScheduledThreadPool(threadNum);
 
 	public BotPool(BotManager botManager) {
 		super();
 		this.botManager = botManager;
-
-		startTimer();
 	}
 
-	private void startTimer() {
-		// 前一次程序执行开始 后 2000ms后开始执行下一次程序
-		timer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				// System.out.println("timer");
-				// poll();
-				pollAll();
-			}
+	public void stop() {
+		this.run = false;
+		botManager.stopReg();
+	}
 
-		}, 0, 2000);
+	public boolean isRun() {
+		return this.run;
 	}
 
 	/**
 	 * 从缓冲队列中取一个bot执行。
 	 */
-	private void poll() {
-		BotWrapper bot = bots.poll();
-		if (bot != null) {
-			setChanged(); // 有新的实例
-			this.notifyObservers(bot); // 通知观察者有新的bot可用
-		}
-	}
+	// private void poll() {
+	// BotWrapper bot = bots.poll();
+	// if (bot != null) {
+	// setChanged(); // 有新的实例
+	// this.notifyObservers(bot); // 通知观察者有新的bot可用
+	// }
+	// }
 
-	private void pollAll() {
-		int size = bots.size();
-		for (int i = 0; i < size; i++) {
-			poll();
-		}
-
-	}
+	// private void pollAll() {
+	// int size = bots.size();
+	// for (int i = 0; i < size; i++) {
+	// poll();
+	// }
+	//
+	// }
+	Map<String, Long> timeMap = Maps.newHashMap();
 
 	public void addBot(BotWrapper botw) {
+		if (!isRun())
+			return;
 		// check 检查bot是否正常
 		XUserBot bot = botw.getBot();
 		if (checkBot(bot)) {
-			bots.add(botw);
+			// bots.add(botw);
+			timeMap.put(bot.getPhone(), System.currentTimeMillis());
+			// 线程执行
+
+			// fixedThreadPool.execute(new Runnable() {
+			// public void run() {
+			// long diff = System.currentTimeMillis()
+			// - timeMap.get(bot.getPhone());
+			// System.err.println("线程执行时间差："+diff / 1000);
+			//
+			// setChanged();
+			// // 有新的实例
+			// notifyObservers(botw); // 通知观察者有新的bot可用
+			// }
+			// });
+
+			long delay = Long.parseLong(Global.getConfig("work.thread.delay"));
+			scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					// long diff = System.currentTimeMillis()
+					// - timeMap.get(bot.getPhone());
+					// System.err.println("线程执行时间差：" + diff / 1000);
+					try {
+						setChanged(); // 有新的实例
+						notifyObservers(botw); // 通知观察者有新的bot可用
+					} catch (StopRuningException e) {
+						System.err.println("程序停止执行~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+						logger.error("程序停止执行，{}",e.getMessage());
+						stop();
+					}
+				}
+			}, delay, 60 * 60 * 24 * 100, TimeUnit.SECONDS);
+			// 第二个参数，表示延迟多少秒执行，可以控制线程的执行频率
+			// 第三个参数，表示不要重复执行
+			// FIXME 修改拉人的执行频率
 		}
 	}
 

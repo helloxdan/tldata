@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Observer;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -28,6 +29,7 @@ import org.telegram.plugins.xuser.ex.UnvalidateAccountException;
 import org.telegram.plugins.xuser.work.BotManager;
 import org.telegram.plugins.xuser.work.BotPool;
 import org.telegram.plugins.xuser.work.BotWrapper;
+import org.telegram.plugins.xuser.work.TaskExecutor;
 import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
@@ -40,6 +42,7 @@ import com.thinkgem.jeesite.modules.sys.utils.LogUtils;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.entity.Chat;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
+import com.thinkgem.jeesite.modules.tl.entity.Job;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.tl.entity.TlUser;
@@ -78,6 +81,9 @@ public class BotService implements BotManager {
 
 	private Map<String, IBot> bots = new HashMap<String, IBot>();
 	@Autowired
+	private BotFactory botFactory;
+
+	@Autowired
 	private BotDataService botDataService;
 	@Autowired
 	private AccountService accountService;
@@ -93,6 +99,11 @@ public class BotService implements BotManager {
 	private ChatService chatService;
 	@Autowired
 	private TlUserService tlUserService;
+	@Autowired
+	private RegistePoolService registePoolService;
+	@Autowired
+	private DefaultWorkService defaultWorkService;
+
 	@Resource(name = "transactionManager")
 	private DataSourceTransactionManager transactionManager;
 
@@ -148,7 +159,12 @@ public class BotService implements BotManager {
 
 		// 创建bot池
 		botPool = new BotPool(this);
-
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!
+		// 增加任务执行
+		TaskExecutor executor = new TaskExecutor(this, jobService,
+				defaultWorkService);
+		botPool.addObserver(executor);
+		// !!!!!!!!!!!!!!!!!!!!!!!!
 		// 将数据库中的账号放入池子
 		addDbAccountToBotPool();
 	}
@@ -161,7 +177,7 @@ public class BotService implements BotManager {
 		// TODO 查询可用账号，放入队列
 		// 可用，1）针对本job，加入用户数未达到40人
 		accountService.findList(account);
-
+		logger.warn("TODO 查询可用账号，放入队列");
 	}
 
 	@Transactional(readOnly = false)
@@ -182,7 +198,7 @@ public class BotService implements BotManager {
 		}
 		// 3.管理员账号登录
 		logger.info("启动管理员账号");
-		XUserBot bot = new XUserBot();
+		XUserBot bot = botFactory.createBot();
 		bot.setBotDataService(botDataService);
 		LoginStatus status = bot.start(getAdminAccount(), APIKEY, APIHASH);
 		if (status == LoginStatus.ALREADYLOGGED) {
@@ -244,7 +260,7 @@ public class BotService implements BotManager {
 		try {
 			XUserBot bot = (XUserBot) bots.get(data.getPhone());
 			if (bot == null) {
-				bot = new XUserBot();
+				bot = botFactory.createBot();
 				bot.setBotDataService(botDataService);
 				bots.put(data.getPhone(), bot);
 			} else {
@@ -425,8 +441,8 @@ public class BotService implements BotManager {
 				String lastName = XUtils.transChartset(u.getLastName());
 				if (firstName != null
 						&& ((firstName.length() > 100
-								|| firstName.length() > 100 || (firstName
-								.contains("拉人") || firstName.contains("电报群"))))) {
+								|| lastName.length() > 100 || (firstName
+								.contains("拉人") || lastName.contains("电报群"))))) {
 					logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
@@ -644,11 +660,12 @@ public class BotService implements BotManager {
 					}
 				}
 			} else {
-				throw new RuntimeException(phone + "账号实例不存在");
+				// throw new RuntimeException(phone + "账号实例不存在");
+				bot = null;
 			}
 		}
 
-		if (bot.isAuthCancel()) {
+		if (bot != null && bot.isAuthCancel()) {
 			bots.put(phone, null);
 			removeAccount(phone);
 			throw new UnvalidateAccountException(phone + "账号失效");
@@ -710,6 +727,7 @@ public class BotService implements BotManager {
 				group.setStatus("0");
 				groupService.insertOrUpdate(group);
 
+				result.put("usernum", group.getUsernum());
 				result.put("groupid", groupid);
 				result.put("name", group.getName());
 			} else {
@@ -773,18 +791,20 @@ public class BotService implements BotManager {
 	@Transactional(readOnly = false)
 	public boolean registe(String phone) {
 		boolean success = false;
-		logger.info("注册，发送验证码，{}", phone);
+		logger.debug("注册，发送验证码，{}", phone);
 		String status = "FAILUE";
 		// 1.先检查账号是否已经注册过了
 		Account ac = accountService.findAccountInHis(phone);
+		boolean save = true;
 		if (ac != null) {
+			save = false;
 			if ("SUCCESS".equals(ac.getStatus())) {
 				logger.warn("账号{}已经在数据库中，不用注册了", phone);
 				return success;
 			}
 			if ("FAILURE".equals(ac.getStatus())) {
 				// 2.检查账号是否已经处理过。有可能账号已经试过不成功，黑名单
-				logger.warn("账号{}注册失败，已列入黑名单", phone);
+				logger.warn("账号{}提交注册失败，已列入黑名单", phone);
 				return success;
 			} else {
 				// 记录尝试次数+1
@@ -792,21 +812,21 @@ public class BotService implements BotManager {
 				ac.setUpdateDate(new Date());
 				accountService.updateAccountHis(ac);
 				logger.warn("账号{}注册失败，try again", phone);
+				bots.put(phone, null);
 			}
 
 		}
 
 		XUserBot bot = (XUserBot) bots.get(phone);
-		bot = null;
 		if (bot == null) {
-			bot = new XUserBot();
+			bot = botFactory.createBot();
 			bot.setBotDataService(botDataService);
 			bots.put(phone, bot);
 		} else {
 			// 已经登陆过
-			throw new RuntimeException("账号{}实例已经创建，说明已经操作过了");
+			throw new RuntimeException("账号" + phone + "实例已经创建，说明已经操作过了");
 		}
-		boolean save = true;
+
 		// 注册
 		JSONObject json = bot.registe(phone, APIKEY, APIHASH);
 		if ("success".equals(json.getString("result"))) {
@@ -890,6 +910,11 @@ public class BotService implements BotManager {
 	@Transactional(readOnly = false)
 	public JSONObject setRegAuthCode(String phone, String code) {
 		IBot bot = getBotByPhone(phone);
+		if (bot == null) {
+			JSONObject json = new JSONObject();
+			json.put("result", false);
+			return json;
+		}
 		XUserBot b = (XUserBot) bot;
 		if (!XUserBot.STATUS_WAIT.equals(b.getStatus())) {
 			throw new RuntimeException(phone + "账号实例不是在等待输入验证码状态");
@@ -1018,6 +1043,7 @@ public class BotService implements BotManager {
 		try {
 			bot = (XUserBot) getBotByPhone(phone, true);
 			bot.setPhone(phone);
+			bot.setJobid(jobid);
 			BotWrapper botw = new BotWrapper(jobid, bot);
 			botPool.addBot(botw);
 		} catch (UnvalidateAccountException e) {
@@ -1032,7 +1058,7 @@ public class BotService implements BotManager {
 
 	@Override
 	public void destroy(XUserBot bot) {
-		logger.info("{}，{}完成任务，退出", bot.getJobid(), bot.getPhone());
+
 		bot.stop();
 		bots.put(bot.getPhone(), null);
 		// System.out.println("清除账号");
@@ -1043,6 +1069,103 @@ public class BotService implements BotManager {
 		logger.info("{}，{}任务失败，删除账号,error={}", bot.getJobid(), bot.getPhone(),
 				error);
 		System.out.println("删除账号");
+	}
+
+	/**
+	 * 停止运行。先停止注册手机号，待调度执行完毕。
+	 * 
+	 * @param jobid
+	 * @return
+	 */
+	public boolean stopJob(String jobid) {
+		this.jobid = jobid;
+		boolean success = true;
+		try {
+			registePoolService.stop();
+
+			// 拉人线程池停止
+			botPool.stop();
+		} catch (Exception e) {
+			success = true;
+		}
+		return success;
+	}
+
+	/**
+	 * 停止注册。
+	 * 
+	 * @param jobid
+	 * @return
+	 */
+	public boolean stopReg(String jobid) {
+		this.jobid = jobid;
+		boolean success = true;
+		try {
+			registePoolService.stop();
+		} catch (Exception e) {
+			success = true;
+		}
+		return success;
+	}
+
+	/**
+	 * 启动。 启动账号注册，注册成功后，放入拉人的线程池。 启动，需要将job的详细信息，包括采集群的信息加载到缓存。
+	 * 
+	 * @param jobid
+	 * @return
+	 */
+	public boolean startJob(String jobid) {
+		this.jobid = jobid;
+		boolean success = true;
+//		try {
+			Job job = jobService.get(jobid);
+			if (job != null) {
+
+				// 初始化job数据，共work获取数据
+				int jobGroupNum = jobService.initRunData(job);
+				if (jobGroupNum == 0) {
+					throw new RuntimeException("没有可用的采集群组，可能没设置，可能已到达上线");
+				}
+				// 以账号数量为依据，决定job是否停止
+				registePoolService.addPlanSize(job.getAccountNum());
+			} else {
+				success = false;
+				logger.warn("{}任务不存在！", jobid);
+			}
+//		} catch (Exception e) {
+//			success = false;
+//		}
+		return success;
+	}
+
+	public RegistePoolService getRegistePoolService() {
+		return registePoolService;
+	}
+
+	public void setRegistePoolService(RegistePoolService registePoolService) {
+		this.registePoolService = registePoolService;
+	}
+
+	public BotFactory getBotFactory() {
+		return botFactory;
+	}
+
+	public void setBotFactory(BotFactory botFactory) {
+		this.botFactory = botFactory;
+	}
+
+	/*
+	 * 停止注册。
+	 * 
+	 * @see org.telegram.plugins.xuser.work.BotManager#stopReg()
+	 */
+	@Override
+	public void stopReg() {
+		try {
+			registePoolService.stop();
+		} catch (Exception e) {
+			logger.error("", e);
+		}
 	}
 
 }

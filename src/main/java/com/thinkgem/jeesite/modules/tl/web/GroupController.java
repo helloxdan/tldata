@@ -3,6 +3,9 @@
  */
 package com.thinkgem.jeesite.modules.tl.web;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +31,7 @@ import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
 import com.thinkgem.jeesite.modules.tl.service.GroupService;
 import com.thinkgem.jeesite.modules.tl.service.ScheduleService;
-import com.thinkgem.jeesite.modules.tl.vo.RequestData;
+import com.thinkgem.jeesite.modules.tl.vo.TreeNode;
 
 /**
  * 群组Controller
@@ -46,6 +50,40 @@ public class GroupController extends BaseController {
 	@Autowired
 	private ScheduleService scheduleService;
 
+	@GetMapping(value = "/tree")
+	@ResponseBody
+	public ReturnWrap getGroupTree(TreeNode node) {
+		List<TreeNode> list = null;
+		if (node.getIsTop()) {
+//			node.setpId(null);
+			// 查询设备类型
+			list = groupService.findTree(node);
+			if ("0".equals(node.getpId())) {
+				TreeNode topNode = new TreeNode();
+				topNode.setId("0");
+				topNode.setName("群组列表");
+				topNode.setpId("-1");
+				topNode.setNodeType(node.getNodeType());
+				list.add(0, topNode);
+			}
+		} else {
+			// 根据类型，查询设备列表
+			list = new ArrayList<TreeNode>();
+		}
+		ReturnWrap result = new ReturnWrap(true);
+		result.setList(list);
+		return result;
+	}
+	@RequestMapping(value = { "treeselect" })
+	public String treeselect(HttpServletRequest request, Model model) {
+		model.addAttribute("type", request.getParameter("type")); // 数据选择来源，所有，我的设备、关注设备
+		model.addAttribute("extId", request.getParameter("extId")); // 排除的编号ID
+		model.addAttribute("checked", request.getParameter("checked")); // 是否可复选
+		model.addAttribute("selectIds", request.getParameter("selectIds")); // 指定默认选中的ID
+		model.addAttribute("isAll", request.getParameter("isAll")); // 是否读取全部数据，不进行权限过滤
+		return "modules/tl/groupTreeselect";
+	}
+	
 	@RequestMapping(value = "/startSchedule")
 	@ResponseBody
 	public ReturnWrap startSchedule(HttpServletRequest request,

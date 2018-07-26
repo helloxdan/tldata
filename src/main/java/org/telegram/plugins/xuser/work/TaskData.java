@@ -14,6 +14,7 @@ public class TaskData {
 	String destGroupUrl;
 
 	String srcGroupUrl;
+	String srcGroupName;
 	int offset;
 	int limit;
 
@@ -55,6 +56,14 @@ public class TaskData {
 
 	public void setLimit(int limit) {
 		this.limit = limit;
+	}
+
+	public String getSrcGroupName() {
+		return srcGroupName;
+	}
+
+	public void setSrcGroupName(String srcGroupName) {
+		this.srcGroupName = srcGroupName;
 	}
 
 }

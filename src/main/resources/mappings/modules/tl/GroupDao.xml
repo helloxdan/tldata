@@ -177,4 +177,12 @@
 		WHERE id = #{id}
 	</update>
 	
+	
+		<select id="findTree" resultType="com.thinkgem.jeesite.modules.tl.vo.TreeNode">
+		SELECT id,name,a.url as "type", 0 as "pId",'group' nodeType,0 isParent
+		    FROM tl_group a
+		    WHERE a.del_flag =#{DEL_FLAG_NORMAL} and a.url is not null
+		ORDER BY a.upcate_date desc
+		 
+	</select>
 </mapper>

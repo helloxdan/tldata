@@ -67,10 +67,11 @@
 		function runjob(id,taskid) {
 			confirmx("确定数据已经准备就绪，开始执行任务吗？",function(){
 				loading('系统处理中，请稍候……');
-				$.post('${rctx}/api/tl/addUsers', {
-					jobid : id,taskid:taskid
+				$.post('${rctx}/api/tl/startJob', {
+					jobid : id 
 				}, function(result) {
 					if (result.success) { 
+						top.$.jBox.tip("程序启动成功", 'info');
 						//刷新页面
 						document.location.reload();
 					}else{
@@ -82,6 +83,29 @@
 			});
         	return false;
         }
+		
+		
+		function stopjob(id) {
+			confirmx("确定要停止任务吗？",function(){
+				loading('系统处理中，请稍候……');
+				$.post('${rctx}/api/tl/stopJob', {
+					jobid : id 
+				}, function(result) {
+					if (result.success) { 
+						top.$.jBox.tip("停止", 'info');
+						//刷新页面
+						document.location.reload();
+					}else{
+						top.$.jBox.tip(result.msg, 'warning');
+					}
+				});
+			},function(){
+				console.log('取消执行任务');
+			});
+        	return false;
+        }
+		
+		
 		function fetchUser(id) {
 			confirmx("确定开始执行收集用户任务吗？",function(){
 				loading('系统处理中，请稍候……');
@@ -203,13 +227,14 @@
 		<div class="box box-solid minHeight">
 			<div class="form-group cxtj_text">
 				<a href="${ctx}/tl/jobTask/form?jobId=${jobTask.jobId}&type=fetch&action=dispatch" class="btn btn-blue hide">新增单一任务</a>
-				<input id="btnAdds" class="btn btn-blue" type="button" value="批量新增" onclick="addTasks('${jobTask.jobId}')"/>
-				<input id="btnDel" class="btn btn-blue" type="button" value="删除任务" />
-			
-					|<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue hide"  >批量执行抽取用户</a>
+				<%-- <input id="btnAdds" class="btn btn-blue" type="button" value="批量新增" onclick="addTasks('${jobTask.jobId}')"/>
+				<input id="btnDel" class="btn btn-blue" type="button" value="删除任务" /> --%>
+			<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-success"  >开始拉人</a>
+			<a href="javascript:stopjob('${jobTask.jobId}')"  class="btn btn-warning"  >停止</a>
+					<%-- |<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue hide"  >批量执行抽取用户</a>
 					<a href="javascript:cleanJobUser('${jobTask.jobId}')"  class="btn btn-blue" title="删除重复数据，或者已经抽取的数据" >清洗用户数据</a>
-				<a href="${ctx}/tl/jobUser/list?jobId=${jobTask.jobId}" class="btn btn-blue">用户列表</a>
-					<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-blue"  >开始拉人</a>
+				 --%><a href="${ctx}/tl/jobUser/list?jobId=${jobTask.jobId}" class="btn btn-blue">用户列表</a>
+					
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
 			</div>	
 			<div class="form-group cxtj_text pull-right">
@@ -236,7 +261,7 @@
 				<td><input type="checkbox" id="select-${jobTask.id}"
 								class="list_checkbox" value="${jobTask.id}" />
 				</td>
-				<td><a href="${ctx}/tl/jobTask/form?id=${jobTask.id}&action=dispatch">
+				<td><a href="${ctx}/tl/job/form?id=${jobTask.jobId}&action=dispatch">
 					${jobTask.jobId}
 				</a></td>
 				<td>
@@ -261,8 +286,8 @@
 					${fns:getDictLabel(jobTask.status, 'jobtask_status', jobTask.status)}
 				</td> 
 				<td>
-					<%-- <a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">抽取用户</a> --%>
-					<a href="javascript:runjob('','${jobTask.id}')">开始拉人</a> 
+					<%-- <a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">抽取用户</a> 
+					<a href="javascript:runjob('','${jobTask.id}')">开始拉人</a> --%>
 				</td>
 			</tr>
 		</c:forEach>

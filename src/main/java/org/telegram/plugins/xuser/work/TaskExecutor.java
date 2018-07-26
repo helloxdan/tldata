@@ -7,6 +7,7 @@ import java.util.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.plugins.xuser.XUserBot;
+import org.telegram.plugins.xuser.ex.StopRuningException;
 
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 
@@ -33,6 +34,8 @@ public class TaskExecutor implements Observer {
 				// 开始执行任务
 				start(botw);
 			}
+		} catch (StopRuningException e) {
+			throw e;
 		} catch (Exception e) {
 			// e.printStackTrace();
 			logger.error("{},{},执行异常，{}", botw.getJobid(), botw.getBot()
@@ -59,10 +62,13 @@ public class TaskExecutor implements Observer {
 		// TODO Auto-generated method stub
 		XUserBot bot = botw.getBot();
 		// 1.先获取一份任务数据
-		TaskData data = getTaskData(botw.getJobid());
+		TaskData data = getTaskData(botw.getJobid(), bot.getPhone());
 		if (data == null) {
+			// 没有操作数据，应该直接退出
+			throw new StopRuningException("群组已采集完毕");
 			// 没有数据，放回bot池子
-			botpool.put(botw, 2);
+			// botpool.put(botw, 2);
+
 		} else {
 			// 2.执行采集和加人操作
 			work(botw, data);
@@ -84,23 +90,36 @@ public class TaskExecutor implements Observer {
 			// 把bot放回pool
 			botpool.put(botw, 2);
 		} else {
-			getWorkService().inviteUsers(bot, data, users);
+			int updateNum = getWorkService().inviteUsers(bot, data, users);
+			if (updateNum == 0) {
+				// 累计一次更新为0的操作
+				// 如果超过5次，说明该账号，可能已经用满额度了
+				botw.setEmptyCount(botw.getEmptyCount() + 1);
+			}
 			// 标记bot拉的人数
-			botw.setUsernum(botw.getUsernum() + users.size());
+			botw.setUsernum(botw.getUsernum() + updateNum);
 
-			// 删除任务数据
-			getTaskQuery().deleteTaskData(bot, data);
+			if (botw.getEmptyCount() <= 5 && botw.getUsernum() < 40) {
+				// 如果拉的人数不够40，继续放入线程池
+				// FIXME 如果拉的人数不够40，继续放入线程池
+				botpool.put(botw, 2);
+			} else {
+				logger.info("{}，{}，{},完成任务，退出", bot.getJobid(), bot.getPhone(),
+						botw.getUsernum());
+				// 删除任务数据
+				// getTaskQuery().deleteTaskData(bot, data);
 
-			// bot用完，注销
-			getBotManager().destroy(bot);
+				// bot用完，注销
+				getBotManager().destroy(bot);
 
-			//
-			botw.setBot(null);
+				//
+				botw.setBot(null);
+			}
 		}
 	}
 
-	public TaskData getTaskData(String jobid) {
-		return getTaskQuery().getTaskData(jobid);
+	public TaskData getTaskData(String jobid, String phone) {
+		return getTaskQuery().getTaskData(jobid, phone);
 	}
 
 	public TaskQuery getTaskQuery() {

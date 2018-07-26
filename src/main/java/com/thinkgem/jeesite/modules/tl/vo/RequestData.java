@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class RequestData implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private String id;
 	private String jobid;
 	private String taskid;
 	private String phone;
@@ -187,6 +188,14 @@ public class RequestData implements Serializable {
 
 	public void setTags(String tags) {
 		this.tags = tags;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

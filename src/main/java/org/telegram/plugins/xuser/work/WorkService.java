@@ -10,6 +10,6 @@ public interface WorkService {
 
 	List<JobUser> collectUsers(XUserBot bot, TaskData data);
 
-	void inviteUsers(XUserBot bot, TaskData data, List<JobUser> users);
+	int inviteUsers(XUserBot bot, TaskData data, List<JobUser> users);
 
 }

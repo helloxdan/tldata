@@ -23,7 +23,7 @@ public interface IBot {
 	TLVector<TLAbsUser> collectUsers(int chatId, long accessHash, int offset,
 			int limit);
 
-	void addUsers(int chatId, long accessHash, List<JobUser> users);
+	int addUsers(int chatId, long accessHash, List<JobUser> users);
 
 	JSONObject getState();
 	public boolean isAuthCancel();

@@ -19,7 +19,7 @@ public class Constants {
 	public static final String VERIFY_STATUS_NOTPASS = "notpass";// 审核不通过
 	public static final String VERIFY_STATUS_EXPIRED = "expired";// 已过期
 	
-	public static final int USER_LIMIT_SIZE=50;//tl 每天最多拉40人，但很多时候给的用户加不上，只能给的值比40大
+	public static final int USER_LIMIT_SIZE=40;//tl 每天最多拉40人，但很多时候给的用户加不上，只能给的值比40大
 	public static final int FETCH_PAGE_SIZE = Integer.parseInt(Global.getConfig("tl.fetch.pagesize"));//150;
 
 	public static final int FETCH_TASK_USER_NUM=60;//根据url采集用户，最低采集数量

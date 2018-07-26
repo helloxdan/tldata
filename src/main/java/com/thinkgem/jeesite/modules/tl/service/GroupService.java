@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
+import com.thinkgem.jeesite.modules.tl.vo.TreeNode;
 import com.thinkgem.jeesite.modules.tl.dao.GroupDao;
 
 /**
@@ -109,6 +110,10 @@ public class GroupService extends CrudService<GroupDao, Group> {
 	public Group getOneGroupForFetch() {
 		Group group = new Group();
 		return this.dao.getOneGroupForFetch(group);
+	}
+
+	public List<TreeNode> findTree(TreeNode node) {
+		return dao.findTree(node);
 	}
 
 }

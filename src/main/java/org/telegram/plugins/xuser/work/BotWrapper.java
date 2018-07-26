@@ -12,6 +12,7 @@ public class BotWrapper {
 	String jobid;
 	XUserBot bot;
 	int usernum = 0;
+	int emptyCount=0;
 
 	public BotWrapper(String jobid,XUserBot bot) {
 		super();
@@ -41,6 +42,14 @@ public class BotWrapper {
 
 	public void setJobid(String jobid) {
 		this.jobid = jobid;
+	}
+
+	public int getEmptyCount() {
+		return emptyCount;
+	}
+
+	public void setEmptyCount(int emptyCount) {
+		this.emptyCount = emptyCount;
 	}
 
 }

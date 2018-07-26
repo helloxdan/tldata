@@ -44,6 +44,7 @@ import org.telegram.api.input.user.TLAbsInputUser;
 import org.telegram.api.input.user.TLInputUser;
 import org.telegram.api.messages.TLMessagesChatFull;
 import org.telegram.api.updates.TLAbsUpdates;
+import org.telegram.api.updates.TLUpdates;
 import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
 import org.telegram.bot.handlers.interfaces.IChatsHandler;
@@ -124,7 +125,7 @@ public class XUserBot implements IBot {
 
 	@Override
 	public LoginStatus start(String phone, int apikey, String apihash) {
-		this.phone=phone;
+		this.phone = phone;
 		LoginStatus status = null;
 		try {
 			final BotConfig botConfig = new BotConfigImpl(phone);
@@ -244,9 +245,11 @@ public class XUserBot implements IBot {
 			} catch (TimeoutException e) {
 				success = false;
 				logger.error("入群操作超时,失败~~~~~~~~");
+				json.put("msg", "入群操作超时,失败~~~~~~~~" + e.getMessage());
 			} catch (Exception e) {
 				success = false;
-				logger.error("入群失败", e);
+				logger.error("入群失败{}", e.getMessage());
+				json.put("msg", "入群失败" + e.getMessage());
 			}
 		} else if (url.contains("t.me/")) {
 			String username = url.split("/")[(url.split("/").length) - 1];
@@ -269,9 +272,11 @@ public class XUserBot implements IBot {
 			} catch (TimeoutException e) {
 				success = false;
 				logger.error("入群操作超时,失败~~~~~~~~");
+				json.put("msg", "入群操作超时,失败~~~~~~~~");
 			} catch (Exception e) {
 				success = false;
-				logger.error("入群失败", e);
+				logger.error("入群失败{}", e.getMessage());
+				json.put("msg", "入群失败" + e.getMessage());
 			}
 		}
 		json.put("success", success);
@@ -350,9 +355,11 @@ public class XUserBot implements IBot {
 	 * @see org.telegram.plugins.xuser.IBot#addUsers(java.lang.String)
 	 */
 	@Override
-	public void addUsers(int chatId, long accessHash, List<JobUser> jobUsers) {
+	public int addUsers(int chatId, long accessHash, List<JobUser> jobUsers) {
 		// TODO Auto-generated method stub
-		logger.info("{},addUsers to group {}", getAccount(), chatId);
+		logger.info("{},addUsers to group {},{}", getAccount(), chatId,
+				jobUsers.size());
+		int usernum = jobUsers.size();
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
 			TLRequestChannelsInviteToChannel req = new TLRequestChannelsInviteToChannel();
@@ -370,18 +377,27 @@ public class XUserBot implements IBot {
 			}
 			req.setUsers(users);
 			TLAbsUpdates result = api.doRpcCall(req);
+			if (result instanceof TLUpdates) {
+				TLUpdates re = (TLUpdates) result;
+				
+				logger.info("updateSize={},userSize={},chatSize={}", re
+						.getUpdates().size(), re.getUsers().size(), re
+						.getChats().size());
+			}
 			logger.info("拉人结果：" + result);
 		} catch (IOException e) {
 			logger.error("拉取群用户失败", e);
 		} catch (TimeoutException e) {
 			logger.error("拉取群用户失败，超时", e);
 		}
+
+		return usernum;
 	}
 
 	@Override
 	public boolean stop() {
-		if(kernel!=null)
-		kernel.stopBot();
+		if (kernel != null)
+			kernel.stopBot();
 		// TODO 停止
 		return true;
 	}

@@ -10,6 +10,7 @@ import com.thinkgem.jeesite.common.persistence.CrudDao;
 import com.thinkgem.jeesite.common.persistence.annotation.MyBatisDao;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
+import com.thinkgem.jeesite.modules.tl.vo.TreeNode;
 
 /**
  * 群组DAO接口
@@ -24,4 +25,5 @@ public interface GroupDao extends CrudDao<Group> {
 	List<Group> findListWithoutUsernum(Group group);
 
 	Group getOneGroupForFetch(Group group);
+	List<TreeNode> findTree(TreeNode node);
 }

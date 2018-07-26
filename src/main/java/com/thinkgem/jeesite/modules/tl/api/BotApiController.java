@@ -41,6 +41,60 @@ public class BotApiController extends BaseController {
 	@Autowired
 	private ScheduleService scheduleService;
 
+	/**
+	 * @param data
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/startJob")
+	public ReturnWrap startJob(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			String jobid = data.getJobid();
+			boolean success = botService.startJob(jobid);
+			if (success) {
+				result.success("OK");
+			} else {
+				result.fail("启动失败");
+			}
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+			logger.error("start", e);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/stopJob")
+	public ReturnWrap stopJob(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			String jobid = data.getJobid();
+			boolean success = botService.stopJob(jobid);
+			result.setData(success);
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+			logger.error("start", e);
+		}
+		return result;
+	}
+	@RequestMapping(value = "/stopReg")
+	public ReturnWrap stopReg(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			String jobid = data.getJobid();
+			boolean success = botService.stopReg(jobid);
+			result.setData(success);
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+			logger.error("start", e);
+		}
+		return result;
+	}
+
 	@RequestMapping(value = "/reg/addPhone")
 	public ReturnWrap addRegPhone(RequestData data, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -162,8 +216,8 @@ public class BotApiController extends BaseController {
 	}
 
 	@RequestMapping(value = "/start")
-	public ReturnWrap start(RequestData data,
-			HttpServletRequest request, HttpServletResponse response) {
+	public ReturnWrap start(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			LoginStatus status = botService.start(data);

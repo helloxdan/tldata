@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,9 @@ public class RegisteService {
 	private BotService botService;
 	@Autowired
 	private SmsCardService smsCardService;
+	// 累计从卡商获取的手机号数量
 	private int phoneNum = 0;
+	// 计划注册号码数，成功数量
 	private int planSize = 0;// 计划获取号码数
 
 	private Map<String, String> phoneMaps = new HashMap<String, String>();
@@ -40,9 +44,11 @@ public class RegisteService {
 	// 手机队列
 	private Queue<String> phoneQueue = new LinkedList<String>();
 	private Queue<String[]> codeQueue = new LinkedList<String[]>();
-
 	// 启动自动获取手机账号的功能
 	private boolean start = false;
+
+	// 线程池
+	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(31);
 
 	public int getPlanSize() {
 		return planSize;
@@ -50,6 +56,17 @@ public class RegisteService {
 
 	public void addPlanSize(int num) {
 		this.planSize = this.planSize + num;
+
+		// 直接所有任务放入线程池
+		for (int i = 0; i < num; i++) {
+			fixedThreadPool.execute(new Runnable() {
+				public void run() {
+					 //执行任务
+					
+				}
+			});
+		}
+
 		start();
 	}
 

@@ -39,9 +39,11 @@ public class WorkTests {
 	public void testStartNormal() throws Exception {
 		init();
 		for (int i = 0; i < 100; i++) {
-			BotWrapper botw = createBot(i, RandomUtils.nextInt(1, 100) % 2 == 0);
+			boolean cancel = RandomUtils.nextInt(1, 100) % 2 == 0;
+			cancel = false;
+			BotWrapper botw = createBot(i, cancel);
 			this.botPool.addBot(botw);
-			Thread.sleep(RandomUtils.nextLong(1, 5) * 1000);
+			// Thread.sleep(RandomUtils.nextLong(1, 5) * 1000);
 		}
 
 		Thread.sleep(1000000);
@@ -72,25 +74,34 @@ public class WorkTests {
 		return new WorkService() {
 
 			@Override
-			public void inviteUsers(XUserBot bot, TaskData data,
+			public int inviteUsers(XUserBot bot, TaskData data,
 					List<JobUser> users) {
 				// TODO Auto-generated method stub
 				// System.out.println("加人……");
-
+				try {
+					int se = RandomUtils.nextInt(1, 10);
+					System.out.println("sleep " + se);
+					Thread.sleep(se * 1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				if (RandomUtils.nextInt(1, 100) % 2 == 0) {
 					// 随机抛出异常
-					throw new RuntimeException("加人，测试异常");
+					// throw new RuntimeException("加人，测试异常");
 				}
 				for (JobUser u : users) {
 					System.out.println("加人," + u.getUsername());
 				}
+				int updateNum=users.size();
+				return updateNum;
 			}
 
 			@Override
 			public List<JobUser> collectUsers(XUserBot bot, TaskData data) {
 				if (RandomUtils.nextInt(1, 100) % 2 == 0) {
 					// 随机抛出异常
-					throw new RuntimeException("加人，测试异常");
+					// throw new RuntimeException("加人，测试异常");
 				}
 				List<JobUser> users = new ArrayList<JobUser>();
 				JobUser u = new JobUser("1");
@@ -106,7 +117,7 @@ public class WorkTests {
 		return new TaskQuery() {
 
 			@Override
-			public TaskData getTaskData(String jobid) {
+			public TaskData getTaskData(String jobid,String phone) {
 				TaskData data = new TaskData();
 				data.setTaskid("task-" + RandomUtils.nextLong(1000, 100000));
 				data.setDestGroupUrl("http://t.me/destUrl");
