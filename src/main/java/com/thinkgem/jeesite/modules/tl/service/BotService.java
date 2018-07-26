@@ -166,19 +166,6 @@ public class BotService implements BotManager {
 				defaultWorkService);
 		botPool.addObserver(executor);
 		// !!!!!!!!!!!!!!!!!!!!!!!!
-		// 将数据库中的账号放入池子
-		addDbAccountToBotPool();
-	}
-
-	/**
-	 * 
-	 */
-	private void addDbAccountToBotPool() {
-		Account account = new Account();
-		// TODO 查询可用账号，放入队列
-		// 可用，1）针对本job，加入用户数未达到40人
-		accountService.findList(account);
-		logger.warn("TODO 查询可用账号，放入队列");
 	}
 
 	@Transactional(readOnly = false)
@@ -673,6 +660,7 @@ public class BotService implements BotManager {
 		}
 		return bot;
 	}
+
 	public IBot getRegBotByPhone(String phone, boolean start) {
 		IBot bot = regbots.get(phone);
 		if (bot == null) {
@@ -696,7 +684,7 @@ public class BotService implements BotManager {
 				bot = null;
 			}
 		}
-		
+
 		if (bot != null && bot.isAuthCancel()) {
 			regbots.put(phone, null);
 			removeAccount(phone);
@@ -844,7 +832,7 @@ public class BotService implements BotManager {
 				ac.setUpdateDate(new Date());
 				accountService.updateAccountHis(ac);
 				logger.warn("账号{}注册失败，try again", phone);
-				
+
 				regbots.put(phone, null);
 			}
 
@@ -945,7 +933,7 @@ public class BotService implements BotManager {
 
 	@Transactional(readOnly = false)
 	public JSONObject setRegAuthCode(String phone, String code) {
-		IBot bot = getRegBotByPhone(phone,false);
+		IBot bot = getRegBotByPhone(phone, false);
 		if (bot == null) {
 			JSONObject json = new JSONObject();
 			json.put("result", false);
@@ -1155,25 +1143,44 @@ public class BotService implements BotManager {
 	public boolean startJob(String jobid) {
 		this.jobid = jobid;
 		boolean success = true;
-//		try {
-			Job job = jobService.get(jobid);
-			if (job != null) {
+		// try {
+		Job job = jobService.get(jobid);
+		if (job != null) {
 
-				// 初始化job数据，共work获取数据
-				int jobGroupNum = jobService.initRunData(job);
-				if (jobGroupNum == 0) {
-					throw new RuntimeException("没有可用的采集群组，可能没设置，可能已到达上线");
-				}
-				// 以账号数量为依据，决定job是否停止
-				registePoolService.addPlanSize(job.getAccountNum());
-			} else {
-				success = false;
-				logger.warn("{}任务不存在！", jobid);
+			// 初始化job数据，共work获取数据
+			int jobGroupNum = jobService.initRunData(job);
+			if (jobGroupNum == 0) {
+				throw new RuntimeException("没有可用的采集群组，可能没设置，可能已到达上线");
 			}
-//		} catch (Exception e) {
-//			success = false;
-//		}
+
+			// 将数据库中的账号放入池子
+			addDbAccountToBotPool(jobid);
+
+			// 以账号数量为依据，决定job是否停止
+			registePoolService.addPlanSize(job.getAccountNum());
+		} else {
+			success = false;
+			logger.warn("{}任务不存在！", jobid);
+		}
+		// } catch (Exception e) {
+		// success = false;
+		// }
 		return success;
+	}
+
+	/**
+ * 
+ */
+	private void addDbAccountToBotPool(String jobid) {
+		Account account = new Account();
+		// TODO 查询可用账号，放入队列
+		// 可用，1）针对本job，加入用户数未达到40人
+		account.setRole("0");
+		List<Account> list = accountService.findList(account);
+		logger.warn(" 查询可用账号，放入队列,size={}",list.size());
+		for (Account ac : list) {
+			addBot(jobid, ac.getId());
+		}
 	}
 
 	public RegistePoolService getRegistePoolService() {
