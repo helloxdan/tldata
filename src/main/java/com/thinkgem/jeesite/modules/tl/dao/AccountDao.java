@@ -41,4 +41,6 @@ public interface AccountDao extends CrudDao<Account> {
 	void updateSuccess(Account account);
 
 	void clearAdmin();
+
+	List<Account> findAvalidList(Account account);
 }

@@ -121,8 +121,8 @@
 			<div class="form-group cxtj_text">
 				<a href="${ctx}/tl/group/form" class="btn btn-blue">新增</a>
 				<input id="btnDel" class="btn btn-blue" type="button" value="删除" />
-				|<a href="javascript:runJob(true)" class="btn btn-blue">启动采集用户调度</a>
-				<a href="javascript:runJob(false)" class="btn btn-blue">关闭调度</a>
+				 <a href="javascript:runJob(true)" class="btn btn-blue hide">启动采集用户调度</a>
+				<a href="javascript:runJob(false)" class="btn btn-blue hide">关闭调度</a>
 			</div>	
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>

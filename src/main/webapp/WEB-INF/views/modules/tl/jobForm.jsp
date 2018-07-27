@@ -102,6 +102,11 @@
 		//导入设备
 		function importAsset() {
 			var id=$('#id').val();
+			var isnew=$('#isNewRecord').val();
+			if(isnew=='true'){
+				alert(isnew+'先保存后再导入群组');
+				return;
+			}
 			// 正常打开	
 			var url = "iframe:${ctx}/tl/group/treeselect?type=&module=&checked=true&extId=&isAll=";
 			top.$.jBox.open(url, "选择群组", 750, 500, {
@@ -210,7 +215,7 @@
 				</h3>
 				<div class="box-tools pull-right">
 					<shiro:hasPermission name="tl:job:edit"><input id="btnSubmit" class="btn btn-blue" type="submit" value="保 存"/>&nbsp;</shiro:hasPermission>
-					<input id="btnCancel" class="btn btn-blue" type="button" value="返 回" onclick="history.go(-1)"/>
+					<a id="btnCancel" class="btn btn-blue"   href="${ctx}/tl/job/list" >返回</a>
 				</div>
 			</div>
 			<!-- /.box-header -->
@@ -313,7 +318,7 @@
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">需要账号数：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="accountNum" htmlEscape="false" maxlength="11" class="form-control  digits" value="-1" />
+				<form:input path="accountNum" htmlEscape="false" maxlength="11" class="form-control  number" value="-1" />
 			<span class="help-inline"> 可指定需要注册的账号数，-1表示自动计算，0-表示不需要，其它正数-需要注册账号数 </span>
 			</div>
 			</div>

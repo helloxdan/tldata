@@ -293,7 +293,8 @@
 		<input type="text" class="empty" id="key" name="key" maxlength="50"
 			style="width: 110px;">
 		<button class="btn" id="btn" onclick="searchNode()">搜索</button>
-	</div>
+	</div><br>
+	<span class="help-inline text-warn">以下群组，要在群组管理中设置邀请链接之后才会出现。</span>
 	<!-- 树 -->
 	<div id="tree" class="ztree" style="padding: 15px 20px;"></div>
 	

@@ -136,4 +136,8 @@ public class AccountService extends CrudService<AccountDao, Account> {
 		save(ac);
 	}
 
+	public List<Account> findAvalidList(Account account) {
+		return this.dao.findAvalidList(account);
+	}
+
 }

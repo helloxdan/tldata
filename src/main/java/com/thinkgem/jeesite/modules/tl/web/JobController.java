@@ -174,9 +174,15 @@ public class JobController extends BaseController {
 		// }
 		// }
 
+		boolean isNew=job.getIsNewRecord();
 		jobService.save(job);
 		addMessage(redirectAttributes, "保存工作任务成功");
+		if(isNew){
+			job.setIsNewRecord(false);
+			return form(job, model);	
+		}else{
 		return "redirect:" + Global.getAdminPath() + "/tl/job/?repage";
+		}
 	}
 
 	@RequiresPermissions("tl:job:edit")

@@ -81,13 +81,17 @@ public class JobServiceTests extends BaseServiceTests {
 		// 初始化，注入mock service
 		initRunJob();
 
+		String jobid = "20180726110703";
 		try {
-			String jobid = "20180726110703";
 			botService.startJob(jobid);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		Thread.sleep(10000);
+		// 停止注册
+		// botService.stopJob(jobid);
 
 		Thread.sleep(30000000);
 	}
@@ -124,10 +128,12 @@ public class JobServiceTests extends BaseServiceTests {
 						// 模拟注册方法
 						return json;
 					}
+
 					public boolean isAuthCancel() {
 						boolean iscancel = false;
 						return iscancel;
 					}
+
 					@Override
 					public LoginStatus start(String phone, int apikey,
 							String apihash) {
@@ -182,6 +188,12 @@ public class JobServiceTests extends BaseServiceTests {
 			@Override
 			public void setForbidden(String phone) {
 				System.out.println("----------------拉黑---------");
+			}
+
+			@Override
+			public void freePhone(String phone) {
+				// TODO Auto-generated method stub
+
 			}
 		};
 	}

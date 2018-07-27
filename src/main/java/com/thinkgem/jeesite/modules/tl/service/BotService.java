@@ -1152,7 +1152,7 @@ public class BotService implements BotManager {
 		// try {
 		Job job = jobService.get(jobid);
 		if (job != null) {
-
+			logger.info("{}任务开始，需要拉人数{}，约需要账号{},{}",job.getId(),job.getUsernum(),job.getAccountNum(),job.getGroupUrl());
 			// 初始化job数据，共work获取数据
 			int jobGroupNum = jobService.initRunData(job);
 			if (jobGroupNum == 0) {
@@ -1181,8 +1181,8 @@ public class BotService implements BotManager {
 		Account account = new Account();
 		// TODO 查询可用账号，放入队列
 		// 可用，1）针对本job，加入用户数未达到40人
-		account.setRole("0");
-		List<Account> list = accountService.findList(account);
+//		account.setRole("0");
+		List<Account> list = accountService.findAvalidList(account);
 		logger.warn(" 查询可用账号，放入队列,size={}",list.size());
 		for (Account ac : list) {
 			addBot(jobid, ac.getId());
@@ -1226,6 +1226,7 @@ public class BotService implements BotManager {
 		// 标记账号已成功完成任务
 		Account ac=new Account();
 		ac.setId(phone);
+		ac.setStatus("success");
 		ac.setRole("8");
 		ac.setUsernum(usernum);
 		accountService.updateSuccess(ac);

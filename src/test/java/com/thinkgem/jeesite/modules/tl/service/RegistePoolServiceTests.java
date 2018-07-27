@@ -105,6 +105,12 @@ public class RegistePoolServiceTests {
 			public void setForbidden(String phone) {
 				System.out.println("----------------拉黑---------");
 			}
+
+			@Override
+			public void freePhone(String phone) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 

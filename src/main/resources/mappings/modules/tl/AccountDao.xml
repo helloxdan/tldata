@@ -66,6 +66,7 @@
 		</choose>
 	</select>
 	
+	
 	<select id="findAllList" resultType="Account">
 		SELECT 
 			<include refid="accountColumns"/>
@@ -246,8 +247,21 @@
 	
 	 <update id="updateSuccess">
 		UPDATE tl_account  SET  
+			status = #{status}, 
 			usernum = #{usernum}, 
 			role_ = #{role}
 		WHERE id = #{id}
 	</update>
+	
+	<select id="findAvalidList" resultType="Account">
+		SELECT 
+			<include refid="accountColumns"/>
+		FROM tl_account a
+		<include refid="accountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND (a.status = 'ready' or a.status='run') 
+		</where>
+ 
+	</select>
 </mapper>
