@@ -42,7 +42,7 @@ public class Account extends DataEntity<Account> {
 	private int trynum = 1;
 
 	public Account() {
-		super();
+		super(); 
 	}
 
 	public Account(String id) {

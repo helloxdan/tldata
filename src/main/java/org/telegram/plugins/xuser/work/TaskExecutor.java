@@ -90,12 +90,14 @@ public class TaskExecutor implements Observer {
 			// 把bot放回pool
 			botpool.put(botw, 2);
 		} else {
-			int updateNum = getWorkService().inviteUsers(bot, data, users);
+			int updateNum = getWorkService().inviteUsers(bot, data, users)-1;//有时候比总人数还多一个，可能是加上自己的
 			if (updateNum <= 0) {
+				updateNum=0;
 				// 累计一次更新为0的操作
 				// 如果超过5次，说明该账号，可能已经用满额度了
 				botw.setEmptyCount(botw.getEmptyCount() + 1);
 			}else {
+				botw.setEmptyCount(0);//计数清零
 				logger.info("{},本次成功{}人,总完成{}人",bot.getPhone(),updateNum,botw.getUsernum()+updateNum);
 			}
 			// 标记bot拉的人数
@@ -106,15 +108,24 @@ public class TaskExecutor implements Observer {
 				// FIXME 如果拉的人数不够40，继续放入线程池
 				botpool.put(botw, 2);
 			} else {
+				//累计总完成次数
+				int total=BotWrapper.addSuccess(updateNum);
+				
 				if (botw.getEmptyCount() >5) {
 					logger.info("{}，{}， 已完成{}，账号失效，退出", bot.getJobid(), bot.getPhone(),
 							botw.getUsernum());
+					//如果5次，一个都没拉到，说明可能账号已经拉满人数了
+					if(botw.getUsernum()==0)
+					{
+						//FIXME 标记账号已完成任务
+						botManager.updateAccountRunResult(bot.getPhone(),botw.getUsernum(),total,"error","5次都拉不到人，可能已经拉过人");
+					}
 				}else {
-					logger.info("{}，{}，{},完成任务，退出", bot.getJobid(), bot.getPhone(),
-						botw.getUsernum());
+					logger.info("{}，{}，{},total={},完成任务，退出", bot.getJobid(), bot.getPhone(),
+						botw.getUsernum(),total);
 					
 					//FIXME 标记账号已完成任务
-					botManager.updateAccountSuccess(bot.getPhone(),botw.getUsernum());
+					botManager.updateAccountRunResult(bot.getPhone(),botw.getUsernum(),total,"success","成功");
 				}
 				// 删除任务数据
 				// getTaskQuery().deleteTaskData(bot, data);
@@ -124,7 +135,8 @@ public class TaskExecutor implements Observer {
 				
 				getWorkService().destroy(bot,data);
 				//
-				botw.setBot(null);
+				botw.setBot(null); 
+			 
 			}
 		}
 	}

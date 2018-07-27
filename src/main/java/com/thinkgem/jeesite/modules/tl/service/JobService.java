@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.plugins.xuser.XUserBot;
 import org.telegram.plugins.xuser.work.TaskData;
@@ -182,13 +183,13 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		jobTaskService.save(jobtask);
 	}
 
-	@Transactional(readOnly = false)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public void updateJobGroup() {
 		if (jobGroupList.size() > 0)
 			logger.info("开始更新jobGroup数据");
 		// 主要更新offset的值，便于重启的时候，能从正确的位置开始
 		for (JobGroup jobGroup : jobGroupList) {
-			jobGroupService.save(jobGroup);
+			jobGroupService.updateOffset(jobGroup);
 		}
 	}
 

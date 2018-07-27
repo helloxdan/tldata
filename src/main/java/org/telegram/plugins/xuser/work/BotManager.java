@@ -11,6 +11,6 @@ public interface BotManager {
 
 	public void stopReg();
 
-	public void updateAccountSuccess(String phone, int usernum);
+	public void updateAccountRunResult(String phone, int usernum,int total,String status,String remark);
 
 }

@@ -6,6 +6,7 @@ package com.thinkgem.jeesite.modules.tl.service;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.thinkgem.jeesite.common.persistence.Page;
@@ -59,5 +60,10 @@ public class JobGroupService extends CrudService<JobGroupDao, JobGroup> {
 
 	public List<JobGroup> findValidList(JobGroup jobGroup) {
 		return this.dao.findValidList(jobGroup);
+	}
+
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+	public void updateOffset(JobGroup jobGroup) {
+		save(jobGroup);
 	}
 }

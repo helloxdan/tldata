@@ -15,7 +15,8 @@
 		a.update_by AS "updateBy.id",
 		a.update_date AS "updateDate",
 		a.del_flag AS "delFlag",
-		a.pwd_lock as "pwdLock"
+		a.pwd_lock as "pwdLock",
+		a.remarks
 	</sql>
 	
 	<sql id="accountJoins">
@@ -249,7 +250,7 @@
 		UPDATE tl_account  SET  
 			status = #{status}, 
 			usernum = #{usernum}, 
-			role_ = #{role}
+			remarks = #{remarks}
 		WHERE id = #{id}
 	</update>
 	

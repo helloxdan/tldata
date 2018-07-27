@@ -67,7 +67,7 @@ public class DefaultWorkService implements WorkService {
 				logger.warn("{},无群组信息，无法采集", phone);
 			} else {
 				TLVector<TLAbsUser> users = bot.collectUsers(chatId, accessHash, data.getOffset(), data.getLimit());
-				logger.info("拉取群组用户结果：job={}，account={},size={}", bot.getJobid(), phone, users.size());
+				logger.info("采集结果：job={}，account={},size={},{}", bot.getJobid(), phone, users.size(),data.getSrcGroupName());
 
 				int num = 0;
 				// 将数据存储到数据库
