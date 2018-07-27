@@ -17,10 +17,20 @@ public class BotWrapper {
 	int emptyCount = 0;
 	// 计划完成数
 	static int planTotal = 0;
-	static AtomicInteger successTotal = new AtomicInteger(0);
+//	static AtomicInteger successTotal = new AtomicInteger(0);
+	static int successTotal=0;
 
+	
+	
+	public static void main(String[] args) {
+		System.out.println(addSuccess(1));
+		System.out.println(addSuccess(1));
+		System.out.println(addSuccess(1));
+	}
 	public static int addSuccess(int num) {
-		return successTotal.addAndGet(num);
+//		return successTotal.addAndGet(num);
+		successTotal=successTotal+num;
+		return successTotal;
 	}
 
 	public static void setPlanTotal(int num) {
