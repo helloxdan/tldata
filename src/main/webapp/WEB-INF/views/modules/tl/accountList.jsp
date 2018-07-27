@@ -117,6 +117,18 @@
 			 });
 		}
 		
+		function setAdmin(account){
+			var url="${ctx}/tl/account/setAdmin";
+			 
+			 $.post(url,{phone:account},function(res){
+				 if(res.success){
+					 showTip("操作完成");
+					// document.location.reload();
+				 }else{
+					 alert(res.msg);
+				 }
+			 });
+		}
 		//加入群组
 		function joinGroup(account){
 			var url="${rctx}/api/tl/importInvite";
@@ -241,7 +253,7 @@
 					<a onclick="addBatch()"class="btn btn-blue">新增注册</a>
 				<input id="btnDel" class="btn btn-blue" type="button" value="删除" />
 				
-					<a onclick="initAccount()"class="btn btn-blue">账号初始狀態</a>
+					<a onclick="initAccount()"class="btn btn-blue">账号初始状态</a>
 						<a onclick="startBatch()" class="btn btn-blue ">批量启动</a>
 			</div>	
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
@@ -254,6 +266,7 @@
 				<th class="sort-column a.status">账号状态</th>
 				<th class="sort-column a.usernum">储备用户数量</th>
 				<th class="sort-column a.groupnum">群组数量</th>
+				<th class="sort-column a.role_">管理员</th>
 				<th class="sort-column a.update_date">更新时间</th>
 				<th >操作</th>
 			</tr>
@@ -283,6 +296,9 @@
 					${account.groupnum}
 				</td>
 				<td>
+					${account.role}
+				</td>
+				<td>
 					<fmt:formatDate value="${account.updateDate}" pattern="yyyy-MM-dd HH:mm:ss"/>
 				</td>
 				<td> <c:if test="${account.status=='none' }">
@@ -295,6 +311,7 @@
 					 <a href="javascript:joinGroup('${account.id}')">入群</a>
 					 <a href="javascript:stop('${account.id}')">停止</a>
 					 </c:if>
+					 <a href="javascript:setAdmin('${account.id}')">管理员</a>
 				</td>
 			</tr>
 		</c:forEach>

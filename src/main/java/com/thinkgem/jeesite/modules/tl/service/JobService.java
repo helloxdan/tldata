@@ -62,11 +62,11 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	@Transactional(readOnly = false)
 	public void save(Job job) {
 		// super.save(job);
-
-		// 根据所需要拉的人数，推算出需要的账号
-		Integer accountNum = (int) (job.getUsernum() / Constants.USER_LIMIT_SIZE);
-		job.setAccountNum(accountNum);
-
+		if (job.getAccountNum() == -1) {
+			// 根据所需要拉的人数，推算出需要的账号
+			Integer accountNum = (int) (job.getUsernum() / Constants.USER_LIMIT_SIZE);
+			job.setAccountNum(accountNum);
+		}
 		if (job.getIsNewRecord()) {
 			job.preInsert();
 			dao.insert(job);
@@ -202,7 +202,8 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	// 保存jobtask数据线程
 	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1);
 	// 用于定期更新JobGroupList中的数据到数据库中
-	ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1);
+	ScheduledExecutorService scheduledThreadPool = Executors
+			.newScheduledThreadPool(1);
 	// 存放所有采集的群组
 	List<JobGroup> jobGroupList = new ArrayList<JobGroup>();
 	Job job = null;
@@ -219,7 +220,8 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		jobGroupList = jobGroupService.findValidList(jobGroup);
 		int jobGroupNum = jobGroupList.size();
 
-		long period = Long.parseLong(Global.getConfig("job.updategroup.period"));
+		long period = Long
+				.parseLong(Global.getConfig("job.updategroup.period"));
 		// 两分钟执行一次
 		scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
 			@Override

@@ -128,4 +128,12 @@ public class AccountService extends CrudService<AccountDao, Account> {
 		this.dao.updateSuccess(account);
 	}
 
+	@Transactional(readOnly = false)
+	public void setAdmin(String phone) {
+		this.dao.clearAdmin();
+		Account ac = get(phone);
+		ac.setRole("1");
+		save(ac);
+	}
+
 }

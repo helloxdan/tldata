@@ -185,6 +185,15 @@
 				}
 			},{buttonsFocus:1});
 		}
+		
+		function calAccountNum(){
+			var usernum=$('#usernum').val();
+			var num=usernum/40;
+			if(num<0)
+				num=-1;
+			 $('#accountNum').val(Math.ceil(num));
+			
+		}
 	</script>
 </head>
 <body>
@@ -294,7 +303,18 @@
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">用户数：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="usernum" htmlEscape="false" maxlength="11" class="form-control  digits"  />
+				<form:input path="usernum" htmlEscape="false" maxlength="11" onkeyup="calAccountNum()" class="form-control  digits"  />
+			</div>
+			</div>
+		</div>
+	 	</div><!-- /.row col -->
+		<div class="row">
+		<div class="col-md-12">
+			<div class="form-group">
+			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">需要账号数：</label>
+			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
+				<form:input path="accountNum" htmlEscape="false" maxlength="11" class="form-control  digits" value="-1" />
+			<span class="help-inline"> 可指定需要注册的账号数，-1表示自动计算，0-表示不需要，其它正数-需要注册账号数 </span>
 			</div>
 			</div>
 		</div>

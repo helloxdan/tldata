@@ -185,7 +185,7 @@ public class BotService implements BotManager {
 			iterator.remove();
 		}
 		// 3.管理员账号登录
-		logger.info("启动管理员账号");
+		/*logger.info("启动管理员账号");
 		XUserBot bot = botFactory.createBot();
 		bot.setBotDataService(botDataService);
 		LoginStatus status = bot.start(getAdminAccount(), APIKEY, APIHASH);
@@ -199,7 +199,7 @@ public class BotService implements BotManager {
 			String title = getAdminAccount() + "管理员登录失败，status" + status;
 			logger.error(title);
 			LogUtils.saveLog(new Log("tl", title), null);
-		}
+		}*/
 		return null;
 	}
 
@@ -211,6 +211,10 @@ public class BotService implements BotManager {
 	public String getAdminAccount() {
 		// TODO Auto-generated method stub
 		return adminAccount;
+	}
+
+	public void setAdminAccount(String adminAccount) {
+		this.adminAccount = adminAccount;
 	}
 
 	/**

@@ -45,6 +45,23 @@ public class AccountController extends BaseController {
 	@Autowired
 	private RegisteService registeService;
 
+	@RequestMapping(value = "/setAdmin")
+	@ResponseBody
+	public ReturnWrap setAdmin(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			botService.setAdminAccount(data.getPhone());
+			
+			accountService.setAdmin(data.getPhone());
+			
+			result.setData("设置管理员账号成功" );
+		} catch (Exception e) {
+			result.fail("设置管理员失败，" + e.getMessage());
+		}
+		return result;
+	}
+	
 	@RequestMapping(value = "/setPwd")
 	@ResponseBody
 	public ReturnWrap setPwd(RequestData data, HttpServletRequest request,

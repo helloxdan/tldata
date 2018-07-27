@@ -236,11 +236,15 @@
 			remarks = #{remarks}
 		WHERE id = #{id}
 	</update>
+	 
 	
+	 <update id="clearAdmin">
+		UPDATE tl_account  SET   
+			role_ = '0'
+		WHERE role_ = '1'
+	</update>
 	
-
-	
-		<update id="updateSuccess">
+	 <update id="updateSuccess">
 		UPDATE tl_account  SET  
 			usernum = #{usernum}, 
 			role_ = #{role}

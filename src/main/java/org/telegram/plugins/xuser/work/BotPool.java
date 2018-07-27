@@ -28,7 +28,7 @@ public class BotPool extends Observable {
 	BotManager botManager;
 	// 缓冲池
 	private Queue<BotWrapper> bots = new LinkedList<BotWrapper>();
-	boolean run = true;
+	static boolean run = true;
 	int threadNum = Integer.parseInt(Global.getConfig("thread.work.num"));
 	// 线程池
 	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(threadNum);
@@ -104,8 +104,9 @@ public class BotPool extends Observable {
 						setChanged(); // 有新的实例
 						notifyObservers(botw); // 通知观察者有新的bot可用
 					} catch (StopRuningException e) {
-						System.err.println("程序停止执行~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-						logger.error("程序停止执行，{}",e.getMessage());
+						System.err
+								.println("程序停止执行~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+						logger.error("程序停止执行，{}", e.getMessage());
 						stop();
 					}
 				}

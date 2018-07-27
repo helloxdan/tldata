@@ -41,13 +41,16 @@ public class RegistePoolService {
 	private AtomicInteger successSize = new AtomicInteger(0);// 成功数
 	// 启动、停止标识位
 	private static boolean start = false;
-	private int phoneNumFactor = Integer.parseInt(Global.getConfig("reg.phonenum.factor"));
+	private int phoneNumFactor = Integer.parseInt(Global
+			.getConfig("reg.phonenum.factor"));
 	int phoneThreadNum = Integer.parseInt(Global.getConfig("thread.phone.num"));
-	int codeThreadNum = Integer.parseInt(Global.getConfig("thread.regcode.num"));
+	int codeThreadNum = Integer
+			.parseInt(Global.getConfig("thread.regcode.num"));
 	// 获取手机号的线程池
 	ExecutorService regPool = Executors.newFixedThreadPool(phoneThreadNum);
 	// 查询短信验证码的线程池
 	ExecutorService queryCodePool = Executors.newFixedThreadPool(codeThreadNum);
+
 	// 查询短信验证码的线程池,定期执行，每5秒运行一次
 	// ScheduledExecutorService queryCodePool = Executors
 	// .newScheduledThreadPool(1);
@@ -57,7 +60,8 @@ public class RegistePoolService {
 	 *            需要的成功记录数
 	 */
 	public void addPlanSize(int num) {
-		addPlanSize(num, false);
+		if (num > 0)
+			addPlanSize(num, false);
 	}
 
 	public void addPlanSize(int num, boolean delay) {
@@ -130,6 +134,8 @@ public class RegistePoolService {
 					// 放入线程池，等待调度
 					queryCodePool.execute(new Runnable() {
 						public void run() {
+							if (!start)
+								return;
 							// 执行查询验证码的程序
 							i[0] = i[0] + 1;
 							queryCode(new RegPhone(phone, i[0]));
@@ -179,7 +185,8 @@ public class RegistePoolService {
 			try {
 				list = getSmsCardService().getPhoneCode(phone);
 			} catch (Exception e) {
-				if ("ignore".equals(e.getMessage()) || e.getMessage().contains("ignore")) {
+				if ("ignore".equals(e.getMessage())
+						|| e.getMessage().contains("ignore")) {
 
 					// 加入黑名单
 					smsCardService.setForbidden(phone);
@@ -224,8 +231,8 @@ public class RegistePoolService {
 			// 成功累计数
 			int size = successSize.incrementAndGet();
 			// 完成账号注册
-			logger.info("{}-{}注册成功，{}/{}，{} {}", index, phone, size, planSize, json.getString("firstName"),
-					json.getString("lastName"));
+			logger.info("{}-{}注册成功，{}/{}，{} {}", index, phone, size, planSize,
+					json.getString("firstName"), json.getString("lastName"));
 
 			if (size >= planSize) {
 				// 到达指定数量
