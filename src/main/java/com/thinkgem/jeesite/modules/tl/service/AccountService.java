@@ -135,7 +135,7 @@ public class AccountService extends CrudService<AccountDao, Account> {
 		ac.setRole("1");
 		save(ac);
 	}
-	@Transactional(readOnly = true)
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 	public List<Account> findAvalidList(Account account) {
 		return this.dao.findAvalidList(account);
 	}
