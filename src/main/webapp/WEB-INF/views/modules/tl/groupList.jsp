@@ -133,9 +133,7 @@
 				<th class="sort-column a.url">邀请link</th>
 				<th class="sort-column a.is_channel">是否频道</th>
 				<th class="sort-column a.usernum">用户数(0表示没法采集用户数据)</th>
-				<th class="sort-column a.update_num">更新次数</th>
-				<th class="sort-column a.offset_">offset</th>
-				<th class="">是否被剔除</th>
+				<th class="sort-column a.offset_">查询位置</th>
 				<th >操作</th>
 			</tr>
 		</thead>
@@ -161,15 +159,8 @@
 					${group.usernum}
 				</td>
 				<td>
-					${group.updateNum}
-				</td>
-				<td>
 					${group.offset}
 				</td>
-				<td>
-					${fns:getDictLabel(group.out, 'yes_no', '否')}
-				</td>
-				 
 				<td> 
 					<%--  <a href="${ctx}/tl/job/form?groupId=${group.id}">新建任务</a>
 					  <a href="${rctx}/api/tl/grepUsers?phone=8618566104318&chatId=${group.id}">拉取现有用户</a>

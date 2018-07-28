@@ -27,6 +27,7 @@ import com.thinkgem.jeesite.modules.utils.JobCacheUtils;
 @Service
 public class DefaultWorkService implements WorkService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
+	protected Logger slog = LoggerFactory.getLogger("com.telegram.success");
 	@Autowired
 	private JobTaskService jobTaskService;
 	// 模拟运行的开关
@@ -151,7 +152,7 @@ public class DefaultWorkService implements WorkService {
 				accessHash = chatAccessMap.get(key);
 				updateNum = bot.addUsers(chatId, accessHash, users);
 
-				logger.info("添加人數：{},成功 {}，{}->{}", users.size(), updateNum, data.getSrcGroupUrl(),
+				slog.info("添加人數：{},成功 {}，{}->{}", users.size(), updateNum, data.getSrcGroupUrl(),
 						data.getDestGroupUrl());
 			}
 		}

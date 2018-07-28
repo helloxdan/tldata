@@ -14,6 +14,7 @@ import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 
 public class TaskExecutor implements Observer {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
+	protected Logger slog = LoggerFactory.getLogger("com.telegram.success");
 	BotPool botpool = null;
 	TaskQuery taskQuery;
 	WorkService workService;
@@ -111,7 +112,7 @@ public class TaskExecutor implements Observer {
 				botw.setEmptyCount(botw.getEmptyCount() + 1);
 			} else {
 				botw.setEmptyCount(0);// 计数清零
-				logger.info("{},本次成功{}人,总完成{}人", bot.getPhone(), updateNum, botw.getUsernum() + updateNum);
+				slog.info("{},本次成功{}人,总完成{}人", bot.getPhone(), updateNum, botw.getUsernum() + updateNum);
 			}
 			// 标记bot拉的人数
 			botw.setUsernum(botw.getUsernum() + updateNum);
@@ -125,7 +126,7 @@ public class TaskExecutor implements Observer {
 				int total = BotWrapper.addSuccess(updateNum);
 
 				if (botw.getEmptyCount() > 5) {
-					logger.info("{}，{}， 已完成{}，账号失效，退出", bot.getJobid(), bot.getPhone(), botw.getUsernum());
+					slog.info("{}，{}， 已完成{}，账号失效，退出", bot.getJobid(), bot.getPhone(), botw.getUsernum());
 					// 如果5次，一个都没拉到，说明可能账号已经拉满人数了
 					if (botw.getUsernum() == 0) {
 						// FIXME 标记账号已完成任务
@@ -133,7 +134,7 @@ public class TaskExecutor implements Observer {
 								"5次都拉不到人，可能已经拉过人");
 					}
 				} else {
-					logger.info("{}，{}，{},total={},完成任务，退出", bot.getJobid(), bot.getPhone(), botw.getUsernum(), total);
+					slog.info("{}，{}，{},total={},完成任务，退出", bot.getJobid(), bot.getPhone(), botw.getUsernum(), total);
 
 					// FIXME 标记账号已完成任务
 					botManager.updateAccountRunResult(bot.getPhone(), botw.getUsernum(), total, "success", "成功");
