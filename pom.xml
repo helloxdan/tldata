@@ -618,12 +618,20 @@
 			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/UserAgentUtils-1.13.jar</systemPath>
 		</dependency>
 
- 
+ <!--
  	<dependency>
             <groupId>org.telegram</groupId>
             <artifactId>telegramapi</artifactId>
             <version>${telegramapi.version}</version>
         </dependency>  
+-->
+		<dependency>
+			 <groupId>org.telegram</groupId>
+            <artifactId>telegramapi</artifactId>
+            <version>${telegramapi.version}</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/telegramapi-66.1.jar</systemPath>
+		</dependency>
        
          <dependency>
             <groupId>org.jetbrains</groupId>
