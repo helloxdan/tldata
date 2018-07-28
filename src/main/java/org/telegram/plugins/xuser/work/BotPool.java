@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.plugins.xuser.XUserBot;
@@ -90,8 +91,9 @@ public class BotPool extends Observable {
 			// notifyObservers(botw); // 通知观察者有新的bot可用
 			// }
 			// });
-
-			long delay = Long.parseLong(Global.getConfig("work.thread.delay"));
+			
+			//尽量把时间岔开
+			long delay = Long.parseLong(Global.getConfig("work.thread.delay"))+RandomUtils.nextInt(1, 3);
 			scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
