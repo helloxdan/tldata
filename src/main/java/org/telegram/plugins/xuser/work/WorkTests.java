@@ -135,7 +135,7 @@ public class WorkTests {
 			}
 
 			@Override
-			public void deleteTaskData(XUserBot bot, TaskData data) {
+			public void deleteTaskGroup(XUserBot bot, TaskData data) {
 				System.out.println("删除任务数据," + data.getTaskid());
 			}
 		};

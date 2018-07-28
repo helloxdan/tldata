@@ -5,6 +5,7 @@ package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -195,16 +196,26 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void deleteTaskData(XUserBot bot, TaskData data) {
+	public void deleteTaskGroup(XUserBot bot, TaskData data) {
 		// JobTask jobTask = new JobTask(data.getTaskid());
 		// delete(jobTask);
+		synchronized (jobGroupList) {
+			String groupLink = data.getSrcGroupUrl();
+			Iterator<JobGroup> iter = jobGroupList.iterator();
+			for (Iterator iterator = jobGroupList.iterator(); iterator.hasNext();) {
+				JobGroup jobGroup = (JobGroup) iterator.next();
+				if (jobGroup.getGroupUrl().equals(groupLink)) {
+					iterator.remove();
+				}
+			}
+
+		}
 	}
 
 	// 保存jobtask数据线程
 	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1);
 	// 用于定期更新JobGroupList中的数据到数据库中
-	ScheduledExecutorService scheduledThreadPool = Executors
-			.newScheduledThreadPool(1);
+	ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1);
 	// 存放所有采集的群组
 	List<JobGroup> jobGroupList = new ArrayList<JobGroup>();
 	Job job = null;
@@ -221,8 +232,7 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		jobGroupList = jobGroupService.findValidList(jobGroup);
 		int jobGroupNum = jobGroupList.size();
 
-		long period = Long
-				.parseLong(Global.getConfig("job.updategroup.period"));
+		long period = Long.parseLong(Global.getConfig("job.updategroup.period"));
 		// 两分钟执行一次
 		scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
 			@Override

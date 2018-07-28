@@ -132,7 +132,7 @@
 				<th class="sort-column a.name">群组名称</th>
 				<th class="sort-column a.url">邀请link</th>
 				<th class="sort-column a.is_channel">是否频道</th>
-				<th class="sort-column a.usernum">用户数</th>
+				<th class="sort-column a.usernum">用户数(0表示没法采集用户数据)</th>
 				<th class="sort-column a.update_num">更新次数</th>
 				<th class="sort-column a.offset_">offset</th>
 				<th class="">是否被剔除</th>

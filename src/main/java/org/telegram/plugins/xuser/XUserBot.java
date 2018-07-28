@@ -54,6 +54,7 @@ import org.telegram.bot.kernel.TelegramBot;
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.LoginStatus;
+import org.telegram.plugins.xuser.ex.ForbiddenGroupException;
 import org.telegram.plugins.xuser.handler.ChatsHandler;
 import org.telegram.plugins.xuser.handler.MessageHandler;
 import org.telegram.plugins.xuser.handler.TLMessageHandler;
@@ -336,9 +337,12 @@ public class XUserBot implements IBot {
 			users = result.getUsers();
 
 		} catch (IOException e) {
-			logger.error("拉取群用户失败", e);
+			logger.error("采集群用户失败", e);
+			if(e.getMessage()!=null && e.getMessage().contains("CHAT_ADMIN_REQUIRED")) {
+				throw new ForbiddenGroupException("CHAT_ADMIN_REQUIRED 群组需要管理员权限才能采集用户");
+			}
 		} catch (TimeoutException e) {
-			logger.error("拉取群用户失败，超时,超时,超时,超时");
+			logger.error("采集群用户失败，超时,超时,超时,超时");
 		}
 		return users;
 	}
