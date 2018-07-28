@@ -250,7 +250,8 @@
 		UPDATE tl_account  SET  
 			status = #{status}, 
 			usernum = #{usernum}, 
-			remarks = #{remarks}
+			remarks = #{remarks}, 
+			update_date = #{updateDate}
 		WHERE id = #{id}
 	</update>
 	

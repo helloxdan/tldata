@@ -3,6 +3,7 @@
  */
 package com.thinkgem.jeesite.modules.tl.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,9 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
+import com.thinkgem.jeesite.modules.tl.dao.AccountDao;
 import com.thinkgem.jeesite.modules.tl.entity.Account;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
-import com.thinkgem.jeesite.modules.tl.dao.AccountDao;
 
 /**
  * 登录账号Service
@@ -133,6 +134,7 @@ public class AccountService extends CrudService<AccountDao, Account> {
 		this.dao.clearAdmin();
 		Account ac = get(phone);
 		ac.setRole("1");
+		ac.setUpdateDate(new Date());
 		save(ac);
 	}
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)

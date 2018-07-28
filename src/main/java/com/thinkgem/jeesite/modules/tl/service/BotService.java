@@ -77,7 +77,8 @@ public class BotService implements BotManager {
 	// your
 	// private String adminAccount="8618566104318";
 
-	private static final int APIKEY = Integer.parseInt(Global.getConfig("tl.apikey")); // your api key
+	private static final int APIKEY = Integer.parseInt(Global
+			.getConfig("tl.apikey")); // your api key
 	private static final String APIHASH = Global.getConfig("tl.apihash"); // your
 	private String adminAccount = Global.getConfig("tl.admin.account");// 管理员账号
 
@@ -164,7 +165,8 @@ public class BotService implements BotManager {
 		botPool = new BotPool(this);
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!
 		// 增加任务执行
-		TaskExecutor executor = new TaskExecutor(this, jobService, defaultWorkService);
+		TaskExecutor executor = new TaskExecutor(this, jobService,
+				defaultWorkService);
 		botPool.addObserver(executor);
 		// !!!!!!!!!!!!!!!!!!!!!!!!
 	}
@@ -193,9 +195,10 @@ public class BotService implements BotManager {
 		 * LoginStatus.ALREADYLOGGED) { bots.put(getAdminAccount(), bot);
 		 * bot.setStatus(XUserBot.STATUS_OK);
 		 * 
-		 * // 更改帐号状态为run updateAccountState(getAdminAccount(), Account.STATUS_RUN); }
-		 * else { String title = getAdminAccount() + "管理员登录失败，status" + status;
-		 * logger.error(title); LogUtils.saveLog(new Log("tl", title), null); }
+		 * // 更改帐号状态为run updateAccountState(getAdminAccount(),
+		 * Account.STATUS_RUN); } else { String title = getAdminAccount() +
+		 * "管理员登录失败，status" + status; logger.error(title); LogUtils.saveLog(new
+		 * Log("tl", title), null); }
 		 */
 		return null;
 	}
@@ -388,7 +391,8 @@ public class BotService implements BotManager {
 
 				// 来源群id
 				if (json.getLong("accessHash") == null) {
-					logger.info("{}加入群组{} failure ", data.getPhone(), data.getUrl());
+					logger.info("{}加入群组{} failure ", data.getPhone(),
+							data.getUrl());
 				} else {
 					data.setChatAccessHash(json.getLong("accessHash"));
 					data.setChatId(json.getIntValue("chatid"));
@@ -398,16 +402,19 @@ public class BotService implements BotManager {
 			Group g = groupService.get(data.getChatId() + "");
 			if (g == null) {
 				//
-				throw new RuntimeException("群组id=" + data.getChatId() + "在表tl_group 中不存在！");
+				throw new RuntimeException("群组id=" + data.getChatId()
+						+ "在表tl_group 中不存在！");
 			}
 			int offset = g.getOffset() == null ? 0 : g.getOffset();
 			int limitNum = data.getLimit() == 0 ? 50 : data.getLimit();
 
-			TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(), data.getChatAccessHash(), offset, limitNum);
+			TLVector<TLAbsUser> users = bot.collectUsers(data.getChatId(),
+					data.getChatAccessHash(), offset, limitNum);
 
 			if (users == null)
 				users = new TLVector<TLAbsUser>();
-			logger.info("拉取群组用户结果：job={}，account={},size={}", task.getString("jobId"), task.getString("account"),
+			logger.info("拉取群组用户结果：job={}，account={},size={}",
+					task.getString("jobId"), task.getString("account"),
 					users != null ? users.size() : 0);
 
 			// 更新群组的offset
@@ -424,8 +431,10 @@ public class BotService implements BotManager {
 				}
 				String firstName = XUtils.transChartset(u.getFirstName());
 				String lastName = XUtils.transChartset(u.getLastName());
-				if (firstName != null && ((firstName.length() > 100 || lastName.length() > 100
-						|| (firstName.contains("拉人") || lastName.contains("电报群"))))) {
+				if (firstName != null
+						&& ((firstName.length() > 100
+								|| lastName.length() > 100 || (firstName
+								.contains("拉人") || lastName.contains("电报群"))))) {
 					logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
 					continue;
 				}
@@ -456,7 +465,8 @@ public class BotService implements BotManager {
 				tlu.setLangcode(u.getLangCode());
 				tlu.setUpdateDate(new Date());
 				tlu.setMsgNum(0);
-				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus().toString());
+				tlu.setUserstate(u.getStatus() == null ? null : u.getStatus()
+						.toString());
 				// 同时写入tl_user表
 				tlUserService.insertOrUpdate(tlu);
 				num++;
@@ -472,10 +482,12 @@ public class BotService implements BotManager {
 
 			// 超过10000个账号限制
 			if (offset + limitNum > 10000) {
-				logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。", task.getString("jobId"), data.getPhone());
+				logger.warn("job={},account={},拉取群组{}达到上限10000，停止抽取。",
+						task.getString("jobId"), data.getPhone());
 			}
 		} catch (Exception e) {
-			logger.error("采集任务失败,phone={},error={}", data.getPhone(), e.getMessage());
+			logger.error("采集任务失败,phone={},error={}", data.getPhone(),
+					e.getMessage());
 
 		} finally {
 			//
@@ -576,7 +588,8 @@ public class BotService implements BotManager {
 			jobUser.setStatus("1");
 			jobUserService.updateStatus(jobUser);
 		} else {
-			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone() + " ，job= " + data.getJobid());
+			throw new RuntimeException("在账号下没找到用户， account=" + data.getPhone()
+					+ " ，job= " + data.getJobid());
 		}
 	}
 
@@ -704,8 +717,8 @@ public class BotService implements BotManager {
 		List<Chat> list = chatService.findList(chat);
 		if (list.size() > 0) {
 			Chat c = list.get(0);
-			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()), c.getAccesshash(),
-					c.getIsChannel() == 1 ? true : false);
+			json = bot.getGroupInfo(Integer.parseInt(c.getChatid()),
+					c.getAccesshash(), c.getIsChannel() == 1 ? true : false);
 		}
 		return json;
 	}
@@ -905,8 +918,10 @@ public class BotService implements BotManager {
 			// File auth = new File("auth/" + phone + ".auth");
 			// auth.deleteOnExit();
 			String path = Global.getConfig("tl.auth.path") + phone + ".auth";
-			String bakpath = Global.getConfig("tl.auth.path") + "authdel" + File.separator + phone + ".auth";
-			File bakauth = new File(Global.getConfig("tl.auth.path") + "authdel");
+			String bakpath = Global.getConfig("tl.auth.path") + "authdel"
+					+ File.separator + phone + ".auth";
+			File bakauth = new File(Global.getConfig("tl.auth.path")
+					+ "authdel");
 			if (!bakauth.exists())
 				bakauth.mkdir();
 
@@ -983,7 +998,8 @@ public class BotService implements BotManager {
 			ac.setIsNewRecord(true);
 			ac.preInsert();
 			ac.setId(phone);
-			ac.setName(json.getString("firstName") + " " + json.getString("lastName"));
+			ac.setName(json.getString("firstName") + " "
+					+ json.getString("lastName"));
 			ac.setStatus("ready");
 			ac.setRole("0");
 			ac.setUsernum(0);
@@ -1080,7 +1096,8 @@ public class BotService implements BotManager {
 
 	@Override
 	public void deleteBot(XUserBot bot, String error) {
-		logger.info("{}，{}任务失败，删除账号,error={}", bot.getJobid(), bot.getPhone(), error);
+		logger.info("{}，{}任务失败，删除账号,error={}", bot.getJobid(), bot.getPhone(),
+				error);
 		System.out.println("删除账号");
 	}
 
@@ -1135,8 +1152,8 @@ public class BotService implements BotManager {
 		// try {
 		Job job = jobService.get(jobid);
 		if (job != null) {
-			logger.info("{}任务开始，需要拉人数{}，约需要账号{},{}", job.getId(), job.getUsernum(), job.getAccountNum(),
-					job.getGroupUrl());
+			logger.info("{}任务开始，需要拉人数{}，约需要账号{},{}", job.getId(),
+					job.getUsernum(), job.getAccountNum(), job.getGroupUrl());
 			// 设置总人数
 			BotWrapper.setPlanTotal(job.getUsernum());
 
@@ -1146,11 +1163,17 @@ public class BotService implements BotManager {
 				throw new RuntimeException("没有可用的采集群组，可能没设置，可能已到达上线");
 			}
 
-			// 将数据库中的账号放入池子
-			addDbAccountToBotPool(jobid);
+			// 新线程处理，当数据库中存在很多账号时，不能全部一次放进去
+			Thread thread = new Thread() {
+				public void run() {
+					// 将数据库中的账号放入池子
+					addDbAccountToBotPool(jobid);
+					// 以账号数量为依据，决定job是否停止
+					registePoolService.addPlanSize(job.getAccountNum());
+				};
+			};
+			thread.start();
 
-			// 以账号数量为依据，决定job是否停止
-			registePoolService.addPlanSize(job.getAccountNum());
 		} else {
 			success = false;
 			logger.warn("{}任务不存在！", jobid);
@@ -1171,7 +1194,13 @@ public class BotService implements BotManager {
 		// account.setRole("0");
 		List<Account> list = accountService.findAvalidList(account);
 		logger.warn(" 查询可用账号，放入队列,size={}", list.size());
+		int i = 0;
 		for (Account ac : list) {
+			try {
+				Thread.sleep(i * 3 * 1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			addBot(jobid, ac.getId());
 			System.out.println(ac.getId() + "账号放入池子");
 		}
@@ -1209,7 +1238,8 @@ public class BotService implements BotManager {
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-	public void updateAccountRunResult(String phone, int usernum, int total, String acstatus, String remark) {
+	public void updateAccountRunResult(String phone, int usernum, int total,
+			String acstatus, String remark) {
 		DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 		def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		// def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -1224,6 +1254,7 @@ public class BotService implements BotManager {
 			// ac.setRole("0");
 			ac.setUsernum(usernum);
 			ac.setRemarks(remark);
+			ac.setUpdateDate(new Date());
 			accountService.updateSuccess(ac);
 
 			// 事务提交
@@ -1236,9 +1267,12 @@ public class BotService implements BotManager {
 		if (total > BotWrapper.getPlanTotal()) {
 			logger.error("已完成拉人任务，总拉人人数{}~~~~~~~~~~~~~~~~~~~~~~~~~~", total);
 			stopJob(jobid);
-			System.out.println("=========================================================================================================");
-			System.out.println("=========================================================================================================");
-			System.out.println("=========================================================================================================");
+			System.out
+					.println("=========================================================================================================");
+			System.out
+					.println("=========================================================================================================");
+			System.out
+					.println("=========================================================================================================");
 		}
 	}
 

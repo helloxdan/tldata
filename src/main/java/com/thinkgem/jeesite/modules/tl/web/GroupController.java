@@ -170,7 +170,8 @@ public class GroupController extends BaseController {
 
 			}
 		} catch (Exception e) {
-			addMessage(redirectAttributes, e.getMessage());
+			String msg="操作失败，还没设置管理员账号或者管理员账号已经失效！<br/>异常信息："+e.getMessage();
+			addMessage(redirectAttributes, msg);
 			logger.error("新增或更新group失败", e);
 		}
 		return "redirect:" + Global.getAdminPath() + "/tl/group/?repage";

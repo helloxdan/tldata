@@ -85,7 +85,7 @@ public class TaskExecutor implements Observer {
 		// 1.采集数据
 		List<JobUser> users = null;
 		try {
-			getWorkService().collectUsers(bot, data);
+			users =getWorkService().collectUsers(bot, data);
 		} catch (ForbiddenGroupException e) {
 			logger.error("删除群组，{}",e.getMessage());
 			// 群组不允许拉人，删除群组
@@ -103,7 +103,7 @@ public class TaskExecutor implements Observer {
 			// 把bot放回pool
 			botpool.put(botw, 2);
 		} else {
-			int updateNum = getWorkService().inviteUsers(bot, data, users) - 1;// 有时候比总人数还多一个，可能是加上自己的
+			int updateNum = getWorkService().inviteUsers(bot, data, users) ;//- 1;// 有时候比总人数还多一个，可能是加上自己的
 			if (updateNum <= 0) {
 				updateNum = 0;
 				// 累计一次更新为0的操作

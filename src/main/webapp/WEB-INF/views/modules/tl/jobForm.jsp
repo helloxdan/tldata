@@ -246,9 +246,10 @@
 		<div class="row">
 		<div class="col-md-12">
 			<div class="form-group">
-			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">群组邀请Link：</label>
+			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">目标群组Link：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
 				<form:input path="groupUrl" htmlEscape="false" maxlength="200" class="form-control "/>
+				<span class="help-inline">需要拉人的群组 </span>
 			</div>
 			</div>
 		</div>
@@ -319,7 +320,7 @@
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">需要账号数：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
 				<form:input path="accountNum" htmlEscape="false" maxlength="11" class="form-control  number"  />
-			<span class="help-inline"> 可指定需要注册的账号数，-1表示自动计算，0-表示不需要，其它正数-需要注册账号数 </span>
+				<span class="help-inline"> 可指定需要注册的账号数，-1表示自动计算，0-表示不需要，其它正数-需要注册账号数 </span>
 			</div>
 			</div>
 		</div>
