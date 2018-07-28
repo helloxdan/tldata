@@ -6,6 +6,6 @@ public interface TaskQuery {
 
 	TaskData getTaskData(String jobid,String phone);
 
-	void deleteTaskData(XUserBot bot, TaskData data);
+	void deleteTaskGroup(XUserBot bot, TaskData data);
 
 }
