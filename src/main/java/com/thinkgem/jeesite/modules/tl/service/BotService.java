@@ -60,6 +60,8 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 public class BotService implements BotManager {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	protected Logger slog = LoggerFactory.getLogger("com.telegram.success");
+	protected Logger phonelog = LoggerFactory
+			.getLogger("com.telegram.reg.phone");
 	// 客户
 	// private static final int APIKEY = 314699; // your api key
 	// private static final String APIHASH = "870567202befc11fee16aa1fdea1bc37";
@@ -938,6 +940,12 @@ public class BotService implements BotManager {
 
 	@Transactional(readOnly = false)
 	public JSONObject setRegAuthCode(String phone, String code) {
+		return setRegAuthCode(phone, code, false);
+	}
+
+	@Transactional(readOnly = false)
+	public JSONObject setRegAuthCode(String phone, String code,
+			boolean startWork) {
 		IBot bot = getRegBotByPhone(phone, false);
 		if (bot == null) {
 			JSONObject json = new JSONObject();
@@ -1007,12 +1015,17 @@ public class BotService implements BotManager {
 			ac.setGroupnum(0);
 			accountService.save(ac);
 
+			// 写入日志文件
+			phonelog.info("{},成功",phone);
+
 			// 设置用户密码，防止被占用
 			// TODO 设置用户密码，防止被占用
-			// setAccountPassword(phone);
+			setAccountPassword(phone);
 
-			// 加入任务队列
-			addBot(getJobid(), phone);
+			if (startWork) {
+				// 加入任务队列
+				addBot(getJobid(), phone);
+			}
 		}
 		return json;
 	}
@@ -1141,6 +1154,25 @@ public class BotService implements BotManager {
 	}
 
 	/**
+	 * 开始注册。
+	 * 
+	 * @param num
+	 *            注册数量
+	 * 
+	 * @param jobid
+	 * @return
+	 */
+	public boolean startReg(int num) {
+		boolean success = true;
+		try {
+			registePoolService.startWork(num, false);
+		} catch (Exception e) {
+			success = true;
+		}
+		return success;
+	}
+
+	/**
 	 * 启动。 启动账号注册，注册成功后，放入拉人的线程池。 启动，需要将job的详细信息，包括采集群的信息加载到缓存。
 	 * 
 	 * @param jobid
@@ -1170,7 +1202,7 @@ public class BotService implements BotManager {
 					// 将数据库中的账号放入池子
 					addDbAccountToBotPool(jobid);
 					// 以账号数量为依据，决定job是否停止
-					registePoolService.startWork(job.getAccountNum());
+					registePoolService.startWork(job.getAccountNum(), true);
 				};
 			};
 			thread.setDaemon(true);

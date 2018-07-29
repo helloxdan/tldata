@@ -80,6 +80,30 @@ public class BotApiController extends BaseController {
 		}
 		return result;
 	}
+	
+	/**
+	 * @param data
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/startReg")
+	public ReturnWrap startReg(RequestData data, HttpServletRequest request,
+			HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			boolean success = botService.startReg(data.getNum());
+			if (success) {
+				result.success("OK");
+			} else {
+				result.fail("启动注册失败");
+			}
+		} catch (Exception e) {
+			result.fail("启动注册异常，" + e.getMessage());
+			logger.error("startReg", e);
+		}
+		return result;
+	}
 	@RequestMapping(value = "/stopReg")
 	public ReturnWrap stopReg(RequestData data, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -90,7 +114,7 @@ public class BotApiController extends BaseController {
 			result.setData(success);
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
-			logger.error("start", e);
+			logger.error("stopReg", e);
 		}
 		return result;
 	}

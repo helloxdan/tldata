@@ -42,6 +42,8 @@ public class RegistePoolService {
 	private AtomicInteger successSize = new AtomicInteger(0);// 成功数
 	// 启动、停止标识位
 	private static boolean start = false;
+	//注册成功后，是否自动运行工单
+	private  boolean autoRunWork = false;
 	private double phoneNumFactor = Double.parseDouble(Global
 			.getConfig("reg.phonenum.factor"));
 	int phoneThreadNum = 1;// Integer.parseInt(Global.getConfig("thread.phone.num"));
@@ -66,10 +68,12 @@ public class RegistePoolService {
 	}
 
 	/**
-	 * @param num
-	 *            需要的成功记录数
+	 * @param num 需要的成功记录数
+	 * @param autoRunWork 注册成功之后，改账号是否自动执行任务
+	 *            
 	 */
-	public void startWork(int num) {
+	public void startWork(int num,boolean autoRunWork ) {
+		this.autoRunWork=  autoRunWork ;
 		if (num > 0) {
 			logger.error("注册程序启动~~~~~~~~~~~~~~~~~~~~");
 			addPlanSize(num, false);
@@ -162,6 +166,12 @@ public class RegistePoolService {
 		}
 	}
 
+	/**注册成功后是否自动进入工作模式，false-只是注册，不做其它操作
+	 * @param auto
+	 */
+	public void setAutoRunWork(boolean auto){
+		this.autoRunWork=auto;
+	}
 	/**
 	 * 开始获取手机号列表。
 	 */
@@ -301,7 +311,7 @@ public class RegistePoolService {
 	}
 
 	private void sendRegCode(int index, String phone, String code) {
-		JSONObject json = botService.setRegAuthCode(phone, code);
+		JSONObject json = botService.setRegAuthCode(phone, code,autoRunWork);
 		// 检查返回结果，如果成功，则清除记录；
 		if (json.getBooleanValue("result")) {
 			// 成功累计数
