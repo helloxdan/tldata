@@ -393,7 +393,7 @@ public class XUserBot implements IBot {
 					if (uu instanceof TLUser) {
 						TLUser uuu = (TLUser) uu;
 						if (StringUtils.isNotBlank(uuu.getUserName())) {
-							slog.info("{},id={},username={},from=", ajobUser.getJobId(), uuu.getId(), uuu.getUserName(),
+							slog.info("{},id={},username={},from={}", ajobUser.getJobId(), uuu.getId(), uuu.getUserName(),
 									ajobUser.getFromGroupName());
 						}
 					} else {

@@ -1,14 +1,23 @@
 package com.thinkgem.jeesite.modules.sys.listener;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
-import org.springframework.web.context.ContextCleanupListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.thinkgem.jeesite.modules.sys.service.SystemService;
 
 public class WebContextListener extends org.springframework.web.context.ContextLoaderListener {
+	
+	static List<ExecutorService> executorServiceList=new ArrayList<ExecutorService>();
+	
+	public static void addExecutorService(ExecutorService es){
+		executorServiceList.add(es);
+	}
 	
 	@Override
 	public WebApplicationContext initWebApplicationContext(ServletContext servletContext) {
@@ -24,6 +33,15 @@ public class WebContextListener extends org.springframework.web.context.ContextL
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		super.contextDestroyed(event);
+		
+		for (ExecutorService es : executorServiceList) {
+			try {
+				es.shutdown();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		System.out.println("==================================================");
 		System.out.println("==================================================");
 		System.out.println("=====================程序已关闭========================");

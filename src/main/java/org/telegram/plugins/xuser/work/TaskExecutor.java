@@ -107,9 +107,7 @@ public class TaskExecutor implements Observer {
 			botpool.put(botw, 2);
 		} else {
 			int total = 0;
-			int updateNum = getWorkService().inviteUsers(bot, data, users);// -
-																			// 1;//
-																			// 有时候比总人数还多一个，可能是加上自己的
+			int updateNum = getWorkService().inviteUsers(bot, data, users); 
 
 			if (updateNum <= 0) {
 				updateNum = 0;
@@ -122,6 +120,12 @@ public class TaskExecutor implements Observer {
 				botw.setEmptyCount(0);// 计数清零
 				slog.info("{},本次成功{}人,已完成{}人,总{}人", bot.getPhone(), updateNum,
 						botw.getUsernum() + updateNum, total);
+				
+				//总任务完成
+				if(total>BotWrapper.getPlanTotal()){
+					botManager.updateAccountRunResult(bot.getPhone(),
+							botw.getUsernum(), total, "success", "成功");
+				}
 			}
 			// 标记bot拉的人数
 			botw.setUsernum(botw.getUsernum() + updateNum);

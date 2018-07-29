@@ -17,6 +17,7 @@ import org.telegram.plugins.xuser.ex.StopRuningException;
 
 import com.google.common.collect.Maps;
 import com.thinkgem.jeesite.common.config.Global;
+import com.thinkgem.jeesite.modules.sys.listener.WebContextListener;
 import com.thinkgem.jeesite.modules.tl.support.DaemonThreadFactory;
 
 /**
@@ -40,6 +41,9 @@ public class BotPool extends Observable {
 	public BotPool(BotManager botManager) {
 		super();
 		this.botManager = botManager;
+		
+		WebContextListener.addExecutorService(fixedThreadPool);
+		WebContextListener.addExecutorService(scheduledThreadPool);
 	}
 
 	public void stop() {
@@ -95,6 +99,7 @@ public class BotPool extends Observable {
 			
 			//尽量把时间岔开
 			long delay = Long.parseLong(Global.getConfig("work.thread.delay"))+RandomUtils.nextInt(1, 3);
+			
 			scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {

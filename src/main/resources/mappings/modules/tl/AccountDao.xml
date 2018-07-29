@@ -187,7 +187,7 @@
 		UPDATE tl_account SET
 			status = 'ready',
 			update_date = CURRENT_TIMESTAMP
-		WHERE status = 'run'
+		WHERE (status = 'run' or status='success' or status='error')
 	</update>
 	<update id="updateUsernum">
 		update tl_account t set usernum=(select count(distinct userid) from tl_job_user c where c.account=t.id  and job_id='auto')

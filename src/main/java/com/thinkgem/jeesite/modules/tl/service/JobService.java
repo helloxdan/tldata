@@ -26,6 +26,7 @@ import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.mapper.JsonMapper;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
+import com.thinkgem.jeesite.modules.sys.listener.WebContextListener;
 import com.thinkgem.jeesite.modules.tl.dao.JobDao;
 import com.thinkgem.jeesite.modules.tl.entity.Job;
 import com.thinkgem.jeesite.modules.tl.entity.JobGroup;
@@ -49,6 +50,11 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	@Autowired
 	private JobTaskService jobTaskService;
 	private static int[] lock = new int[] { 1 };
+
+	public JobService() {
+		WebContextListener.addExecutorService(jobTaskThreadPool);
+		WebContextListener.addExecutorService(scheduledThreadPool);
+	}
 
 	public Job get(String id) {
 		return super.get(id);
@@ -203,7 +209,8 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		synchronized (jobGroupList) {
 			String groupLink = data.getSrcGroupUrl();
 			Iterator<JobGroup> iter = jobGroupList.iterator();
-			for (Iterator iterator = jobGroupList.iterator(); iterator.hasNext();) {
+			for (Iterator iterator = jobGroupList.iterator(); iterator
+					.hasNext();) {
 				JobGroup jobGroup = (JobGroup) iterator.next();
 				if (jobGroup.getGroupUrl().equals(groupLink)) {
 					iterator.remove();
@@ -214,9 +221,11 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	}
 
 	// 保存jobtask数据线程
-	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1,new DaemonThreadFactory());
+	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1,
+			new DaemonThreadFactory());
 	// 用于定期更新JobGroupList中的数据到数据库中
-	ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1,new DaemonThreadFactory());
+	ScheduledExecutorService scheduledThreadPool = Executors
+			.newScheduledThreadPool(1, new DaemonThreadFactory());
 	// 存放所有采集的群组
 	List<JobGroup> jobGroupList = new ArrayList<JobGroup>();
 	Job job = null;
@@ -233,7 +242,8 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		jobGroupList = jobGroupService.findValidList(jobGroup);
 		int jobGroupNum = jobGroupList.size();
 
-		long period = Long.parseLong(Global.getConfig("job.updategroup.period"));
+		long period = Long
+				.parseLong(Global.getConfig("job.updategroup.period"));
 		// 两分钟执行一次
 		scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
 			@Override

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.thinkgem.jeesite.common.config.Global;
+import com.thinkgem.jeesite.modules.sys.listener.WebContextListener;
 import com.thinkgem.jeesite.modules.tl.support.DaemonThreadFactory;
 
 /**
@@ -59,6 +60,10 @@ public class RegistePoolService {
 	// 查询短信验证码的线程池,定期执行，每5秒运行一次
 	// ScheduledExecutorService queryCodePool = Executors
 	// .newScheduledThreadPool(1);
+	public RegistePoolService() {
+		WebContextListener.addExecutorService(regPool);
+		WebContextListener.addExecutorService(queryCodePool);
+	}
 
 	/**
 	 * @param num
@@ -70,8 +75,7 @@ public class RegistePoolService {
 			addPlanSize(num, false);
 		}
 		start();
-		
-		
+
 		regScheduledThreadPool.scheduleWithFixedDelay(new Runnable() {
 			public void run() {
 				//
