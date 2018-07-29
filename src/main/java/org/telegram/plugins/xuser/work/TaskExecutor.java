@@ -114,7 +114,7 @@ public class TaskExecutor implements Observer {
 				botw.setEmptyCount(botw.getEmptyCount() + 1);
 			} else {
 				botw.setEmptyCount(0);// 计数清零
-				slog.info("{},本次成功{}人,总完成{}人", bot.getPhone(), updateNum, botw.getUsernum() + updateNum);
+				slog.info("{},本次成功{}人,已完成{}人,总{}人", bot.getPhone(), updateNum, botw.getUsernum() + updateNum,BotWrapper.getTotal()+updateNum);
 			}
 			// 标记bot拉的人数
 			botw.setUsernum(botw.getUsernum() + updateNum);

@@ -158,6 +158,7 @@ public class BotService implements BotManager {
 					}
 				}
 			};
+			thread.setDaemon(true);
 			thread.start();
 		}
 
@@ -1172,6 +1173,7 @@ public class BotService implements BotManager {
 					registePoolService.addPlanSize(job.getAccountNum());
 				};
 			};
+			thread.setDaemon(true);
 			thread.start();
 
 		} else {

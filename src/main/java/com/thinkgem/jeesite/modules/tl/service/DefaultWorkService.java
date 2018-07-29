@@ -152,7 +152,7 @@ public class DefaultWorkService implements WorkService {
 				accessHash = chatAccessMap.get(key);
 				updateNum = bot.addUsers(chatId, accessHash, users);
 
-				slog.info("添加人數：{},成功 {}，{}->{}", users.size(), updateNum, data.getSrcGroupUrl(),
+				slog.info("{}，拉人：{},成功 {}，{}->{}",phone, users.size(), updateNum, data.getSrcGroupUrl(),
 						data.getDestGroupUrl());
 			}
 		}
