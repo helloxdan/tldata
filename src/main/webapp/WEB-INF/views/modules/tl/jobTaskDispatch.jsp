@@ -277,12 +277,15 @@
 					<input id="btnAdds" class="btn btn-blue" type="button" value="批量新增" onclick="addTasks('${jobTask.jobId}')"/>
 			  <input id="btnDel" class="btn btn-blue" type="button" value="删除任务" /> 
 			<a href="javascript:addUser('${jobTask.jobId}')"  class="btn btn-success"  >开始拉人-old</a>--%>
-			 <a href="${ctx}/tl/jobUser/list?jobId=${jobTask.jobId}" class="btn btn-blue">用户列表</a>
+			 <a href="${ctx}/tl/jobUser/list?jobId=${jobTask.jobId}" class="btn btn-blue hide">用户列表</a>
 					
 					<a href="${ctx}/tl/jobTask/dispatch?jobId=${jobTask.jobId}"  class="btn  btn-blue"  >刷新</a>
 			</div>	
+			<div class="form-group cxtj_text pull-left">
+				<div style="display:inline;margin:0px 10px;">目标群：${job.groupUrl}</div><div style="display:inline;margin:0px 10px;">人数：${successTotal}/${job.usernum}</div><div style="display:inline;margin:0px 10px;">账号数量：${phoneSuccessNum}/${phonePlanNum}</div> 
+			</div>
 			<div class="form-group cxtj_text pull-right">
-				<div style="display:inline;margin:0px 10px;">任务数：${jobTaskStats.taskNum}</div><div style="display:inline;margin:0px 10px;">待添加用户数：${jobTaskStats.userNum}</div><div style="display:inline;margin:0px 10px;">已添加用户数：${jobTaskStats.invitedUserNum}</div>
+				<div style="display:inline;margin:0px 10px;">任务数：${jobTaskStats.taskNum}</div> 
 			</div>
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.telegram.bot.structure.LoginStatus;
+import org.telegram.plugins.xuser.work.BotWrapper;
 
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
@@ -24,10 +24,12 @@ import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
+import com.thinkgem.jeesite.modules.tl.entity.Job;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
 import com.thinkgem.jeesite.modules.tl.service.JobService;
 import com.thinkgem.jeesite.modules.tl.service.JobTaskService;
+import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
@@ -42,7 +44,9 @@ public class JobTaskController extends BaseController {
 
 	@Autowired
 	private JobTaskService jobTaskService;
-
+	@Autowired
+	private RegistePoolService registePoolService;
+	
 	@Autowired
 	private JobService jobService;
 	@Autowired
@@ -101,7 +105,8 @@ public class JobTaskController extends BaseController {
 	public String dispatch(JobTask jobTask, HttpServletRequest request,
 			HttpServletResponse response, Model model) {
 		// 任务信息
-		jobTask.setJob(jobService.get(jobTask.getJobId()));
+		Job job=jobService.get(jobTask.getJobId());
+		jobTask.setJob(job);
 
 		Page<JobTask> page = jobTaskService.findPage(new Page<JobTask>(request,
 				response), jobTask);
@@ -109,6 +114,12 @@ public class JobTaskController extends BaseController {
 		// 查询共任务数和有效用户数
 		JSONObject data=jobTaskService.findJobTaskStatsData(jobTask.getJobId());
 		model.addAttribute("jobTaskStats", data);
+		model.addAttribute("job", job);
+		model.addAttribute("successTotal", BotWrapper.getTotal());
+		model.addAttribute("phonePlanNum", registePoolService.getPlanSize());
+		model.addAttribute("phoneSuccessNum", registePoolService.getSuccessSize());
+		
+	 
 		
 		
 		model.addAttribute("page", page);

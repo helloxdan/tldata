@@ -338,6 +338,15 @@ public class RegistePoolService {
 	public void setBotService(BotService botService) {
 		this.botService = botService;
 	}
+
+	public int getPlanSize() {
+		return planSize;
+	}
+
+	public AtomicInteger getSuccessSize() {
+		return successSize;
+	}
+	
 }
 
 class RegPhone {

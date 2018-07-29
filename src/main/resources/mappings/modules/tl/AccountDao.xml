@@ -185,7 +185,7 @@
 	<!-- 将所有运行状态的账号改为ready -->
 	<update id="resetAccountStatus">
 		UPDATE tl_account SET
-			status = 'ready',
+			status = 'ready',usernum=0,
 			update_date = CURRENT_TIMESTAMP
 		WHERE (status = 'run' or status='success' or status='error')
 	</update>
