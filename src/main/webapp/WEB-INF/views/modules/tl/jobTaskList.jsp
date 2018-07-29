@@ -105,16 +105,14 @@
 			</div>	
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>
-			<tr>
+			<tr> 
 				<th><input type="checkbox" id="checkAll" /></th>
 				<th class="sort-column a.job_id">任务ID</th>
 				<th class="sort-column j.name">任务名称</th>
 				<th class="sort-column a.account">登录账号</th>
-				<th class="sort-column a.type">任务类型</th>
-				<th class="sort-column a.from_group_link">来源群组链接</th>
-				<th class="sort-column a.limit">记录数</th>
-				<th class="sort-column a.usernum">有效用户数</th>
-				<th class="sort-column a.status">任务状态</th>
+				<th class="sort-column a.from_group_url">来源群组URL</th>
+				<th class="sort-column a.offset"_>采集位置</th>
+				<th class="sort-column a.limit_">采集用户数</th> 
 			</tr>
 		</thead>
 		<tbody>
@@ -123,7 +121,7 @@
 				<td><input type="checkbox" id="select-${jobTask.id}"
 								class="list_checkbox" value="${jobTask.id}" />
 				</td>
-				<td><a href="${ctx}/tl/jobTask/form?id=${jobTask.id}">
+				<td><a href="${ctx}/tl/job/form?id=${jobTask.jobId}&action=dispatch">
 					${jobTask.jobId}
 				</a></td>
 				<td>
@@ -132,22 +130,17 @@
 				<td>
 					${jobTask.account}
 				</td>
-				<td>
-					${fns:getDictLabel(jobTask.type, 'jobtask_type', '采集')}
-				</td>
-				<td>
+				 <td>
 					${jobTask.groupUrl}
 				</td>
+				 
+				<td>
+					${jobTask.offsetNum}
 				</td>
 				<td>
 					${jobTask.limitNum}
 				</td>
-				<td>
-					${jobTask.usernum}
-				</td>
-				<td>
-					${fns:getDictLabel(jobTask.status, 'jobtask_status', jobTask.status)}
-				</td>
+				 
 			</tr>
 		</c:forEach>
 		</tbody>

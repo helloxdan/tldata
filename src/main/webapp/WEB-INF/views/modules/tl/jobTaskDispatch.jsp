@@ -294,11 +294,9 @@
 				<th class="sort-column a.job_id">任务ID</th>
 				<th class="sort-column j.name">任务名称</th>
 				<th class="sort-column a.account">登录账号</th>
-				<th class="sort-column a.type">任务类型</th>
-				<th class="sort-column a.from_group_id">来源群组ID</th>
 				<th class="sort-column a.from_group_url">来源群组URL</th>
-				<th class="sort-column a.usernum">有效用户数</th>
-				<th class="sort-column a.status">任务状态</th>
+				<th class="sort-column a.offset"_>采集位置</th>
+				<th class="sort-column a.limit_">采集用户数</th>
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -317,21 +315,16 @@
 				<td>
 					${jobTask.account}
 				</td>
-				<td>
-					${jobTask.type}
-				</td>
-				<td>
-					${jobTask.groupId}
-				</td><td>
+				 <td>
 					${jobTask.groupUrl}
 				</td>
 				 
 				<td>
-					${jobTask.usernum}
+					${jobTask.offsetNum}
 				</td>
 				<td>
-					${fns:getDictLabel(jobTask.status, 'jobtask_status', jobTask.status)}
-				</td> 
+					${jobTask.limitNum}
+				</td>
 				<td>
 					<%-- <a href="${rctx}/api/tl/collectUsers?taskid=${jobTask.id}">抽取用户</a> 
 					<a href="javascript:runjob('','${jobTask.id}')">开始拉人</a> --%>
