@@ -1197,7 +1197,7 @@ public class BotService implements BotManager {
 		int i = 0;
 		for (Account ac : list) {
 			try {
-				Thread.sleep(i * 5 * 1000);
+				Thread.sleep((i++) * 5 * 1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

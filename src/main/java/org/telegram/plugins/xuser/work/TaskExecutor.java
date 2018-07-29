@@ -104,7 +104,9 @@ public class TaskExecutor implements Observer {
 			// 把bot放回pool
 			botpool.put(botw, 2);
 		} else {
+			
 			int updateNum = getWorkService().inviteUsers(bot, data, users) ;//- 1;// 有时候比总人数还多一个，可能是加上自己的
+			
 			if (updateNum <= 0) {
 				updateNum = 0;
 				// 累计一次更新为0的操作

@@ -43,7 +43,7 @@ public class RegistePoolService {
 	private static boolean start = false;
 	private double phoneNumFactor = Double.parseDouble(Global
 			.getConfig("reg.phonenum.factor"));
-	int phoneThreadNum = Integer.parseInt(Global.getConfig("thread.phone.num"));
+	int phoneThreadNum = 1;// Integer.parseInt(Global.getConfig("thread.phone.num"));
 	int codeThreadNum = Integer
 			.parseInt(Global.getConfig("thread.regcode.num"));
 	// 获取手机号的线程池
@@ -60,8 +60,10 @@ public class RegistePoolService {
 	 *            需要的成功记录数
 	 */
 	public void addPlanSize(int num) {
-		if (num > 0)
+		if (num > 0) {
+			logger.error("注册程序启动~~~~~~~~~~~~~~~~~~~~");
 			addPlanSize(num, false);
+		}
 	}
 
 	public void returnPool(int num, boolean delay) {
@@ -79,15 +81,21 @@ public class RegistePoolService {
 		int tryNum = (int) (num * phoneNumFactor);// 3倍成功记录数
 		// 直接所有任务放入线程池
 		for (int i = 0; i < tryNum; i++) {
+			int delayTime = (i++) * 3000;
 			regPool.execute(new Runnable() {
 				public void run() {
-					if (delay) {
-						try {
-							Thread.sleep(5000);
-						} catch (InterruptedException e) {
+					// 每个隔开2-3秒,连续执行太快，引发接口报警
+					try {
+						Thread.sleep(delayTime);
+					} catch (InterruptedException e) {
 
-						}
 					}
+					/*
+					 * if (delay) { try { Thread.sleep(5000); } catch
+					 * (InterruptedException e) {
+					 * 
+					 * } }
+					 */
 					// 执行任务
 					getPhoneList();
 
@@ -100,7 +108,6 @@ public class RegistePoolService {
 	 * 开始获取手机号列表。
 	 */
 	public void start() {
-		logger.error("注册程序启动~~~~~~~~~~~~~~~~~~~~");
 		start = true;
 	}
 
@@ -135,6 +142,7 @@ public class RegistePoolService {
 					continue;
 
 				// 执行电报的注册接口，发送验证码
+				// 控制频率，不能执行太密
 				boolean success = botService.registe(phone);
 				if (success) {
 					// 放入线程池，等待调度
