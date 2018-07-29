@@ -86,8 +86,8 @@ public class DefaultWorkService implements WorkService {
 					String firstName = XUtils.transChartset(u.getFirstName());
 					String lastName = XUtils.transChartset(u.getLastName());
 					if (firstName != null && ((firstName.length() > 100 || lastName.length() > 100
-							|| (firstName.contains("拉人") || firstName.contains("电报群"))))) {
-						logger.debug("用户名长度大于100，存在  拉人  电报群 字样，忽略");
+							|| (firstName.contains("拉人") || firstName.contains("电报群") || firstName.contains("用户"))))) {
+						logger.debug("用户名长度大于100，存在  拉人  电报群、用户 字样，忽略");
 						continue;
 					}
 
