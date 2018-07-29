@@ -30,6 +30,7 @@ import com.thinkgem.jeesite.modules.tl.dao.JobDao;
 import com.thinkgem.jeesite.modules.tl.entity.Job;
 import com.thinkgem.jeesite.modules.tl.entity.JobGroup;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
+import com.thinkgem.jeesite.modules.tl.support.DaemonThreadFactory;
 import com.thinkgem.jeesite.modules.utils.Constants;
 
 /**
@@ -213,9 +214,9 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	}
 
 	// 保存jobtask数据线程
-	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1);
+	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1,new DaemonThreadFactory());
 	// 用于定期更新JobGroupList中的数据到数据库中
-	ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1);
+	ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1,new DaemonThreadFactory());
 	// 存放所有采集的群组
 	List<JobGroup> jobGroupList = new ArrayList<JobGroup>();
 	Job job = null;

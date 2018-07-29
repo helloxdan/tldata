@@ -31,7 +31,7 @@ public class RegistePoolServiceTests {
 	public void testRun() throws Exception {
 		initRun();
 		// 注册100个账号
-		service.addPlanSize(200);
+		service.startWork(200);
 
 		Thread.sleep(1000000);
 	}

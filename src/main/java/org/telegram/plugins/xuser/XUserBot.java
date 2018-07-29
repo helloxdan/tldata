@@ -80,6 +80,7 @@ import com.thinkgem.jeesite.modules.utils.Constants;
 
 public class XUserBot implements IBot {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
+	protected Logger slog = LoggerFactory.getLogger("com.telegram.username");
 
 	public static final String STATUS_READY = "READY";
 	public static final String STATUS_WAIT = "WAIT";
@@ -169,8 +170,9 @@ public class XUserBot implements IBot {
 				setStatus(STATUS_OK);
 			} else {
 				setStatus(STATUS_FAIL);
-				Log log = new Log("tl", getAccount() + "，错误的登录状态");
-				LogUtils.saveLog(log, null);
+				logger.warn(phone + "账号，错误的登录状态");
+				// Log log = new Log("tl", getAccount() + "，错误的登录状态");
+				// LogUtils.saveLog(log, null);
 				throw new Exception("Failed to log in: " + status);
 			}
 
@@ -216,7 +218,7 @@ public class XUserBot implements IBot {
 
 	@Override
 	public boolean setAuthCode(String phone, String code) {
-		logger.info("setAuthCode，" + getAccount() + ",code=" + code);
+		logger.debug("setAuthCode，" + getAccount() + ",code=" + code);
 		boolean success = kernel.getKernelAuth().setAuthCode(code);
 		if (!success) {
 			logger.error("{}，验证码{}校验失败", phone, code);
@@ -231,7 +233,7 @@ public class XUserBot implements IBot {
 	 */
 	@Override
 	public JSONObject importInvite(String url) {
-		logger.info("{}，join group {}", getAccount(), url);
+		logger.debug("{}，join group {}", getAccount(), url);
 		// kernel.getKernelComm().getApi().getState().isAuthenticated();
 		boolean success = true;
 		JSONObject json = new JSONObject();
@@ -273,7 +275,7 @@ public class XUserBot implements IBot {
 				json.put("chatid", ch.getChannelId());
 				json.put("accessHash", ch.getAccessHash());
 
-				logger.info("join channel result:{}", r);
+				logger.debug("join channel result:{}", r);
 			} catch (TimeoutException e) {
 				success = false;
 				logger.error("入群操作超时,失败~~~~~~~~");
@@ -290,7 +292,7 @@ public class XUserBot implements IBot {
 	}
 
 	public boolean importInvite2(String hash) {
-		logger.info("{}，join group {}", getAccount(), hash);
+		logger.debug("{}，join group {}", getAccount(), hash);
 		// kernel.getKernelComm().getApi().getState().isAuthenticated();
 		boolean success = true;
 
@@ -300,7 +302,7 @@ public class XUserBot implements IBot {
 			req.setHash(hash);
 			TLAbsUpdates result = kernel.getKernelComm().getApi()
 					.doRpcCall(req);
-			logger.info("入群结果：" + result);
+			logger.debug("入群结果：" + result);
 		} catch (IOException e) {
 			success = false;
 			logger.error("入群失败", e);
@@ -330,7 +332,7 @@ public class XUserBot implements IBot {
 	public TLVector<TLAbsUser> collectUsers(int chatId, long accessHash,
 			int offset, int limit) {
 		TLVector<TLAbsUser> users = new TLVector<TLAbsUser>();
-		logger.info("collectUsers from group ，" + chatId);
+		logger.debug("collectUsers from group ，" + chatId);
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
 			TLRequestChannelsGetParticipants req = new TLRequestChannelsGetParticipants();
@@ -378,21 +380,35 @@ public class XUserBot implements IBot {
 			ch.setAccessHash(accessHash);
 			req.setChannel(ch);
 
+			JobUser ajobUser=null;
 			TLVector<TLAbsInputUser> users = new TLVector<TLAbsInputUser>();
 			for (JobUser jobUser : jobUsers) {
 				TLInputUser user = new TLInputUser();
 				user.setUserId(Integer.parseInt(jobUser.getUserid()));
 				user.setAccessHash(jobUser.getUserHash());
 				users.add(user);
+				
+				ajobUser=jobUser;
 			}
 			req.setUsers(users);
 			TLAbsUpdates result = api.doRpcCall(req);
 			if (result instanceof TLUpdates) {
 				TLUpdates re = (TLUpdates) result;
-				usernum = re.getUsers().size();
+				TLVector<TLAbsUser> rusers = re.getUsers();
+				usernum = rusers.size();
 				logger.debug("updateSize={},userSize={},chatSize={}", re
 						.getUpdates().size(), usernum, re.getChats().size());
-				logger.debug("成功拉{}人", usernum);
+
+				// 记录到日志文件
+				for (TLAbsUser uu : rusers) {
+					if (uu instanceof TLUser) {
+						TLUser uuu = (TLUser) uu;
+						slog.info("{},{},{}",ajobUser.getJobId(), uuu.getUserName(),ajobUser.getFromGroupName());
+					} else {
+						logger.info("拉空用户！！");
+					}
+				}
+				// logger.debug("成功拉{}人", usernum);
 			}
 		} catch (IOException e) {
 			logger.error("拉取群用户失败", e);
@@ -433,7 +449,7 @@ public class XUserBot implements IBot {
 	@Override
 	public JSONObject getGroupInfo(int chatId, long chatAccessHash,
 			boolean ischannel) {
-		logger.info("{}，getGroupInfo ，{},accesshash={}", getAccount(), chatId,
+		logger.debug("{}，getGroupInfo ，{},accesshash={}", getAccount(), chatId,
 				chatAccessHash);
 		JSONObject json = new JSONObject();
 		if (chatAccessHash == 0)
@@ -508,7 +524,7 @@ public class XUserBot implements IBot {
 
 	@Override
 	public JSONObject searchUser(String username) {
-		logger.info("searchUser {} in contact", username);
+		logger.debug("searchUser {} in contact", username);
 		JSONObject json = new JSONObject();
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
@@ -570,7 +586,7 @@ public class XUserBot implements IBot {
 			startRegBot(phone, apikey, apihash);
 		}
 		data = registe();
-		logger.info("send registe code result:{},status={}",
+		logger.debug("send registe code result:{},status={}",
 				data.getString("result"), data.getString("status"));
 		/*
 		 * final BotConfig config = kernel.getConfig();
@@ -636,7 +652,7 @@ public class XUserBot implements IBot {
 					.setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
-			logger.info("创建实例，" + phone);
+			logger.info("创建注册实例，" + phone);
 			kernel = new RegTelegramBot(botConfig, builder, apikey, apihash);
 			// 覆盖默认的DifferenceParametersService
 			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
@@ -711,7 +727,7 @@ public class XUserBot implements IBot {
 					result = LoginStatus.CODESENT;
 					// if send sms
 					if (sentCode.getType() instanceof TLSentCodeTypeSms) {
-						logger.info("success send sms code");
+						logger.debug("success send sms code");
 						json.put("result", "success");
 						json.put("status", result.toString());
 					} else {
@@ -759,7 +775,7 @@ public class XUserBot implements IBot {
 
 	@Override
 	public JSONObject setRegAuthCode(String phone, String code) {
-		logger.info("setRegAuthCode，" + getAccount() + ",code=" + code);
+		logger.debug("setRegAuthCode，" + getAccount() + ",code=" + code);
 		RegKernelAuth kernelAuth = (RegKernelAuth) kernel.getKernelAuth();
 		JSONObject json = kernelAuth.setRegAuthCode(code);
 		if (!json.getBooleanValue("result")) {
@@ -786,7 +802,7 @@ public class XUserBot implements IBot {
 
 			if (res instanceof TLAccountNoPassword) {
 				// 当前为空密码
-				logger.info("账号{}，当前没有设置密码！", phone);
+				logger.debug("{}，当前没有设置密码！", phone);
 
 				TLRequestAccountUpdatePasswordSettings req2 = new TLRequestAccountUpdatePasswordSettings();
 				req2.setCurrentPasswordHash(new TLBytes(new byte[0]));// 新设置密码时，设置空的byte
@@ -828,14 +844,14 @@ public class XUserBot implements IBot {
 				req2.setNewSettings(newSettings);
 				TLBool res2 = kernel.getKernelComm().getApi().doRpcCall(req2);
 				if (res2 instanceof TLBoolTrue) {
-					logger.info("账号{}， 设置密码操作 成功！成功！", phone);
+					logger.debug("账号{}， 设置密码操作 成功！成功！", phone);
 				} else {
-					logger.info("账号{}， 设置密码操作 失败！失败！", phone);
+					logger.warn("账号{}， 设置密码操作 失败！失败！", phone);
 					success = false;
 				}
 
 			} else {
-				logger.info("账号{}，当前已设置密码！已经！已经！忽略~~~", phone);
+				logger.debug("账号{}，当前已设置密码！已经！已经！忽略~~~", phone);
 				success = false;
 			}
 

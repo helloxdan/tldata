@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.thinkgem.jeesite.common.config.Global;
+import com.thinkgem.jeesite.modules.tl.support.DaemonThreadFactory;
 
 /**
  * 多线程，账号注册服务。
@@ -46,10 +46,15 @@ public class RegistePoolService {
 	int phoneThreadNum = 1;// Integer.parseInt(Global.getConfig("thread.phone.num"));
 	int codeThreadNum = Integer
 			.parseInt(Global.getConfig("thread.regcode.num"));
+	long period = Long.parseLong(Global.getConfig("reg.getphone.period"));
 	// 获取手机号的线程池
-	ExecutorService regPool = Executors.newFixedThreadPool(phoneThreadNum);
+	ExecutorService regPool = Executors.newFixedThreadPool(phoneThreadNum,
+			new DaemonThreadFactory());
+	ScheduledExecutorService regScheduledThreadPool = Executors
+			.newScheduledThreadPool(1, new DaemonThreadFactory());
 	// 查询短信验证码的线程池
-	ExecutorService queryCodePool = Executors.newFixedThreadPool(codeThreadNum);
+	ExecutorService queryCodePool = Executors.newFixedThreadPool(codeThreadNum,
+			new DaemonThreadFactory());
 
 	// 查询短信验证码的线程池,定期执行，每5秒运行一次
 	// ScheduledExecutorService queryCodePool = Executors
@@ -59,19 +64,34 @@ public class RegistePoolService {
 	 * @param num
 	 *            需要的成功记录数
 	 */
-	public void addPlanSize(int num) {
+	public void startWork(int num) {
 		if (num > 0) {
 			logger.error("注册程序启动~~~~~~~~~~~~~~~~~~~~");
 			addPlanSize(num, false);
 		}
+		start();
+		
+		
+		regScheduledThreadPool.scheduleWithFixedDelay(new Runnable() {
+			public void run() {
+				//
+				if (start && planSize > 0) {
+					getPhoneList();
+					planSize--;
+				}
+			}
+		}, 1, period, TimeUnit.SECONDS);
+		// 每三秒执行一次
 	}
 
 	public void returnPool(int num, boolean delay) {
 		if (!start)
 			return;
-		addPlanSize(num, delay);
+		// addPlanSize(num, delay);
+		this.planSize = this.planSize + num;
 	}
 
+	@Deprecated
 	public void addPlanSize(int num, boolean delay) {
 		this.planSize = this.planSize + num;
 
@@ -81,7 +101,41 @@ public class RegistePoolService {
 		int tryNum = (int) (num * phoneNumFactor);// 3倍成功记录数
 		// 直接所有任务放入线程池
 		for (int i = 0; i < tryNum; i++) {
-			int delayTime = (i++) * 3000;
+			int delayTime = (i + 1) * 3000;
+			i++;
+			regPool.execute(new Runnable() {
+				public void run() {
+					// 每个隔开2-3秒,连续执行太快，引发接口报警
+					try {
+						Thread.sleep(delayTime);
+					} catch (InterruptedException e) {
+
+					}
+					/*
+					 * if (delay) { try { Thread.sleep(5000); } catch
+					 * (InterruptedException e) {
+					 * 
+					 * } }
+					 */
+					// 执行任务
+					getPhoneList();
+
+				}
+			});
+		}
+	}
+
+	public void addPlanSizeBak(int num, boolean delay) {
+		this.planSize = this.planSize + num;
+
+		start();
+
+		// 所需账号数，再乘以一个倍数，很多时候，拉人失败
+		int tryNum = (int) (num * phoneNumFactor);// 3倍成功记录数
+		// 直接所有任务放入线程池
+		for (int i = 0; i < tryNum; i++) {
+			int delayTime = (i + 1) * 3000;
+			i++;
 			regPool.execute(new Runnable() {
 				public void run() {
 					// 每个隔开2-3秒,连续执行太快，引发接口报警
@@ -133,7 +187,7 @@ public class RegistePoolService {
 			List<String> list = getSmsCardService().getPhoneList();
 			if (list != null) {
 				int total = phoneNum.addAndGet(list.size());
-				logger.info("本次从卡商获取手机号数={},共{}个", list.size(), total);
+				logger.info("取手机号数={},共{}个", list.size(), total);
 			}
 			for (String phone : list) {
 				phone1 = phone;
@@ -160,6 +214,7 @@ public class RegistePoolService {
 				} else {
 					logger.warn("{}-{}注册，发验证码失败,不列入取码队列", i[0], phone);
 					// addPlanSize(1, true);
+					smsCardService.freePhone(phone);
 					returnPool(1, true);
 				}
 			}

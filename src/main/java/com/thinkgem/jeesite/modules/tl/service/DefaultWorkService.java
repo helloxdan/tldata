@@ -14,12 +14,14 @@ import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
 import org.telegram.plugins.xuser.XUserBot;
 import org.telegram.plugins.xuser.XUtils;
+import org.telegram.plugins.xuser.work.BotWrapper;
 import org.telegram.plugins.xuser.work.TaskData;
 import org.telegram.plugins.xuser.work.WorkService;
 import org.telegram.tl.TLVector;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.modules.tl.entity.JobUser;
 import com.thinkgem.jeesite.modules.utils.Constants;
 import com.thinkgem.jeesite.modules.utils.JobCacheUtils;
@@ -31,7 +33,9 @@ public class DefaultWorkService implements WorkService {
 	@Autowired
 	private JobTaskService jobTaskService;
 	// 模拟运行的开关
-	boolean demo = false;
+//	boolean demo = false;
+	boolean demo =  Boolean.getBoolean(Global
+			.getConfig("tl.work.demo"));;
 	Map<String, Integer> chatIdMap = Maps.newHashMap();
 	Map<String, Long> chatAccessMap = Maps.newHashMap();
 
@@ -118,7 +122,7 @@ public class DefaultWorkService implements WorkService {
 		int updateNum = 0;
 		if (demo) {
 			updateNum = RandomUtils.nextInt(1, users.size());
-			System.err.println(bot.getPhone() + ",模拟拉人操作！~~~~~~~~~~~~~~~~~~~~" + updateNum);
+			System.err.println(bot.getPhone() + ",模拟拉人操作！~~~~~~~~~~~~~~~~~~~~" + updateNum+",total="+BotWrapper.getTotal());
 		} else {
 			// TODO
 

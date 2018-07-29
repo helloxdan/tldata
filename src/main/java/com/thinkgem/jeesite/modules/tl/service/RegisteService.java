@@ -48,7 +48,7 @@ public class RegisteService {
 	private boolean start = false;
 
 	// 线程池
-	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(31);
+	// ExecutorService fixedThreadPool = Executors.newFixedThreadPool(31);
 
 	public int getPlanSize() {
 		return planSize;
@@ -58,14 +58,14 @@ public class RegisteService {
 		this.planSize = this.planSize + num;
 
 		// 直接所有任务放入线程池
-//		for (int i = 0; i < num; i++) {
-//			fixedThreadPool.execute(new Runnable() {
-//				public void run() {
-//					 //执行任务
-//					
-//				}
-//			});
-//		}
+		// for (int i = 0; i < num; i++) {
+		// fixedThreadPool.execute(new Runnable() {
+		// public void run() {
+		// //执行任务
+		//
+		// }
+		// });
+		// }
 
 		start();
 	}

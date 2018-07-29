@@ -1170,7 +1170,7 @@ public class BotService implements BotManager {
 					// 将数据库中的账号放入池子
 					addDbAccountToBotPool(jobid);
 					// 以账号数量为依据，决定job是否停止
-					registePoolService.addPlanSize(job.getAccountNum());
+					registePoolService.startWork(job.getAccountNum());
 				};
 			};
 			thread.setDaemon(true);

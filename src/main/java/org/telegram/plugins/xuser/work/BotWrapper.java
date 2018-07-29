@@ -18,8 +18,9 @@ public class BotWrapper {
 	int emptyCount = 0;
 	// 计划完成数
 	static int planTotal = 0;
-	 static AtomicInteger successTotal = new AtomicInteger(0);
-//	static int successTotal = 0;
+	static AtomicInteger successTotal = new AtomicInteger(0);
+
+	// static int successTotal = 0;
 
 	public static void main(String[] args) {
 		for (int i = 0; i < 100; i++) {
@@ -35,6 +36,7 @@ public class BotWrapper {
 					System.out.println(addSuccess(1));
 				}
 			};
+			t.setDaemon(true);
 			t.start();
 		}
 
@@ -46,26 +48,27 @@ public class BotWrapper {
 			e.printStackTrace();
 		}
 
-//		System.out.println("最后结果：" + successTotal);
-		 System.out.println("最后结果："+successTotal.get());
+		// System.out.println("最后结果：" + successTotal);
+		System.out.println("最后结果：" + successTotal.get());
 		// System.out.println(addSuccess(1));
 		// System.out.println(addSuccess(1));
 	}
 
 	public static int getTotal() {
-//		return successTotal;
-		 return successTotal.get();
+		// return successTotal;
+		return successTotal.intValue();
+		// return successTotal.addAndGet(0);
 	}
 
 	public static int addSuccess(int num) {
-		 int btotal=successTotal.get();
-		 int total = successTotal.addAndGet(num);
-		 System.out.println(btotal+"+"+num+"="+total);
-		 return total ;
-//		int btotal = successTotal;
-//		successTotal = successTotal + num;
-//		System.out.println(btotal + "+" + num + "=" + successTotal);
-//		return successTotal;
+		int btotal = successTotal.get();
+		int total = successTotal.addAndGet(num);
+//		System.out.println(btotal + "+" + num + "=" + total);
+		return total;
+		// int btotal = successTotal;
+		// successTotal = successTotal + num;
+		// System.out.println(btotal + "+" + num + "=" + successTotal);
+		// return successTotal;
 	}
 
 	public static void setPlanTotal(int num) {
