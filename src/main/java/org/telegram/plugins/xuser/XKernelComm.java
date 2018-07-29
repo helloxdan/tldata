@@ -63,6 +63,8 @@ import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
 import org.telegram.tl.TLVector;
 
+import com.thinkgem.jeesite.modules.tl.support.DaemonThreadFactory;
+
 /**
  * @author Hendrik Hofstadt
  * @author Ruben Bermudez
@@ -81,7 +83,7 @@ public class XKernelComm implements IKernelComm {
     private static final Pattern italicMarkdownRegex =  Pattern.compile("\\_.+?\\_");
     private static final Pattern codeMarkdownRegex = Pattern.compile("\\`.+?\\`");
 
-    private final ExecutorService exe = Executors.newCachedThreadPool();
+    private final ExecutorService exe = Executors.newCachedThreadPool( new DaemonThreadFactory());
     private final SecureRandom random = new SecureRandom();
     private final AbsApiState apiState;
     private final int apiKey;

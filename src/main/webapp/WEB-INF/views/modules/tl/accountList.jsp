@@ -262,11 +262,9 @@
 				<th><input type="checkbox" id="checkAll" /></th>
 				<th class="sort-column a.id">手机号</th>
 				<th class="sort-column a.name">账号名</th>
-				<th class="sort-column a.login_date">最近登录时间</th>
-				<th class="sort-column a.status">账号状态</th>
 				<th class="sort-column a.usernum">完成用户数量</th>
-				<th class="sort-column a.groupnum">群组数量</th>
-				<th class="sort-column a.role_">管理员</th>
+				<th class="sort-column a.status">账号状态</th>
+				<th class="sort-column a.role_">是否管理员</th>
 				<th class="sort-column a.update_date">更新时间</th>
 				<th >操作</th>
 			</tr>
@@ -284,16 +282,10 @@
 					${account.name}
 				</td>
 				<td>
-					<fmt:formatDate value="${account.loginDate}" pattern="yyyy-MM-dd HH:mm:ss"/>
-				</td>
-				<td>
-					${fns:getDictLabel(account.status, 'account_status', '')}
-				</td>
-				<td>
 					${account.usernum}
 				</td>
 				<td>
-					${account.groupnum}
+					${fns:getDictLabel(account.status, 'account_status', '')}
 				</td>
 				<td>
 					${account.role}

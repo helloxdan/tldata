@@ -17,6 +17,7 @@ import org.telegram.plugins.xuser.ex.StopRuningException;
 
 import com.google.common.collect.Maps;
 import com.thinkgem.jeesite.common.config.Global;
+import com.thinkgem.jeesite.modules.tl.support.DaemonThreadFactory;
 
 /**
  * 机器池，当有新的bot，就启动任务执行操作。
@@ -32,9 +33,9 @@ public class BotPool extends Observable {
 	static boolean run = true;
 	int threadNum = Integer.parseInt(Global.getConfig("thread.work.num"));
 	// 线程池
-	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(threadNum);
+	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(threadNum,new DaemonThreadFactory());
 	ScheduledExecutorService scheduledThreadPool = Executors
-			.newScheduledThreadPool(threadNum);
+			.newScheduledThreadPool(threadNum,new DaemonThreadFactory());
 
 	public BotPool(BotManager botManager) {
 		super();

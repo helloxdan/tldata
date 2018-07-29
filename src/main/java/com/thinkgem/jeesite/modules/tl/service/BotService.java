@@ -59,7 +59,7 @@ import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 @Transactional(readOnly = true)
 public class BotService implements BotManager {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
-
+	protected Logger slog = LoggerFactory.getLogger("com.telegram.success");
 	// 客户
 	// private static final int APIKEY = 314699; // your api key
 	// private static final String APIHASH = "870567202befc11fee16aa1fdea1bc37";
@@ -158,6 +158,7 @@ public class BotService implements BotManager {
 					}
 				}
 			};
+			thread.setDaemon(true);
 			thread.start();
 		}
 
@@ -1152,7 +1153,7 @@ public class BotService implements BotManager {
 		// try {
 		Job job = jobService.get(jobid);
 		if (job != null) {
-			logger.info("{}任务开始，需要拉人数{}，约需要账号{},{}", job.getId(),
+			slog.info("{}任务开始，需要拉人数{}，约需要账号{},{}", job.getId(),
 					job.getUsernum(), job.getAccountNum(), job.getGroupUrl());
 			// 设置总人数
 			BotWrapper.setPlanTotal(job.getUsernum());
@@ -1169,14 +1170,15 @@ public class BotService implements BotManager {
 					// 将数据库中的账号放入池子
 					addDbAccountToBotPool(jobid);
 					// 以账号数量为依据，决定job是否停止
-					registePoolService.addPlanSize(job.getAccountNum());
+					registePoolService.startWork(job.getAccountNum());
 				};
 			};
+			thread.setDaemon(true);
 			thread.start();
 
 		} else {
 			success = false;
-			logger.warn("{}任务不存在！", jobid);
+			slog.warn("{}任务不存在！", jobid);
 		}
 		// } catch (Exception e) {
 		// success = false;
@@ -1193,11 +1195,11 @@ public class BotService implements BotManager {
 		// 可用，1）针对本job，加入用户数未达到40人
 		// account.setRole("0");
 		List<Account> list = accountService.findAvalidList(account);
-		logger.warn(" 查询可用账号，放入队列,size={}", list.size());
+		slog.warn(" 查询可用账号，放入队列,size={}", list.size());
 		int i = 0;
 		for (Account ac : list) {
 			try {
-				Thread.sleep(i * 3 * 1000);
+				Thread.sleep((i++) * 5 * 1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -1265,7 +1267,7 @@ public class BotService implements BotManager {
 
 		// 判断总任务是否完成
 		if (total > BotWrapper.getPlanTotal()) {
-			logger.error("已完成拉人任务，总拉人人数{}~~~~~~~~~~~~~~~~~~~~~~~~~~", total);
+			slog.error("已完成拉人任务，总拉人人数{}~~~~~~~~~~~~~~~~~~~~~~~~~~", total);
 			stopJob(jobid);
 			System.out
 					.println("=========================================================================================================");
