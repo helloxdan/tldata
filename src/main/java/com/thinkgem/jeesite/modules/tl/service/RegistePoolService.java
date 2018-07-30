@@ -76,7 +76,9 @@ public class RegistePoolService {
 		this.autoRunWork=  autoRunWork ;
 		if (num > 0) {
 			logger.error("注册程序启动~~~~~~~~~~~~~~~~~~~~");
-			addPlanSize(num, false);
+			//addPlanSize(num, false);
+			this.planSize=num;
+			this.successSize.set(0);;
 		}
 		start();
 

@@ -1020,7 +1020,7 @@ public class BotService implements BotManager {
 
 			// 设置用户密码，防止被占用
 			// TODO 设置用户密码，防止被占用
-			setAccountPassword(phone);
+//			setAccountPassword(phone);
 
 			if (startWork) {
 				// 加入任务队列

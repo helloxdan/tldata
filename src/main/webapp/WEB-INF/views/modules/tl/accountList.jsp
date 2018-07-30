@@ -249,7 +249,7 @@
 	<div class=" addData">
 		<div class="box box-solid minHeight">
 			<div class="form-group cxtj_text">
-				<a href="${ctx}/tl/account/form" class="btn btn-blue hide">新增</a>
+				<a href="${ctx}/tl/account/form" class="btn btn-blue  ">新增</a>
 					<a onclick="addBatch()"class="btn btn-blue">新增注册</a>
 				<input id="btnDel" class="btn btn-blue" type="button" value="删除" />
 				
