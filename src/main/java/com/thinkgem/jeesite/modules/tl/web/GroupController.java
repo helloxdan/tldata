@@ -157,21 +157,20 @@ public class GroupController extends BaseController {
 				if (group.getUsernum() == 0)
 					group.setUsernum(1);
 				//先保存到数据库
-				groupService.save(group);
+//				groupService.save(group);
 				
 				
 				// get group info by link
 				// 获取目标群组信息,
 				if (group.getIsNewRecord()) {
-					// botService.getGroupidByUrl(group.getUrl());
 					try {
-//						JSONObject json = botService.updateGroupInfoByLink(group
-//								.getUrl());
+						JSONObject json = botService.updateGroupInfoByLink(group
+								.getUrl());
 					} catch (Exception e) {
 						logger.error("通过url更新群组信息失败");
 					}
 				} else {
-					// groupService.save(group);
+					 groupService.save(group);
 				}
 				addMessage(redirectAttributes, "保存群组成功");
 
