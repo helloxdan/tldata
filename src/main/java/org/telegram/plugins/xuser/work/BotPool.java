@@ -46,6 +46,9 @@ public class BotPool extends Observable {
 		WebContextListener.addExecutorService(scheduledThreadPool);
 	}
 
+	public void start() {
+		this.run = true;
+	}
 	public void stop() {
 		this.run = false;
 		botManager.stopReg();

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Observer;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -1016,11 +1015,11 @@ public class BotService implements BotManager {
 			accountService.save(ac);
 
 			// 写入日志文件
-			phonelog.info("{},成功",phone);
+			phonelog.info("{},成功", phone);
 
 			// 设置用户密码，防止被占用
 			// TODO 设置用户密码，防止被占用
-//			setAccountPassword(phone);
+			// setAccountPassword(phone);
 
 			if (startWork) {
 				// 加入任务队列
@@ -1189,7 +1188,8 @@ public class BotService implements BotManager {
 					job.getUsernum(), job.getAccountNum(), job.getGroupUrl());
 			// 设置总人数
 			BotWrapper.setPlanTotal(job.getUsernum());
-
+			// BotWrapper.setSuccessTotal(new AtomicInteger(0));
+			botPool.start();// 设置标识位
 			// 初始化job数据，共获取数据
 			int jobGroupNum = jobService.initRunData(job);
 			if (jobGroupNum == 0) {
