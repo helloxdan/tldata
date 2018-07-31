@@ -79,6 +79,14 @@ public class BotWrapper {
 		return planTotal;
 	}
 
+	public static AtomicInteger getSuccessTotal() {
+		return successTotal;
+	}
+
+	public static void setSuccessTotal(AtomicInteger successTotal) {
+		BotWrapper.successTotal = successTotal;
+	}
+
 	public BotWrapper(String jobid, XUserBot bot) {
 		super();
 		this.jobid = jobid;

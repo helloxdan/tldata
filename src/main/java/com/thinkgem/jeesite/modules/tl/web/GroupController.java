@@ -55,7 +55,7 @@ public class GroupController extends BaseController {
 	public ReturnWrap getGroupTree(TreeNode node) {
 		List<TreeNode> list = null;
 		if (node.getIsTop()) {
-//			node.setpId(null);
+			// node.setpId(null);
 			// 查询设备类型
 			list = groupService.findTree(node);
 			if ("0".equals(node.getpId())) {
@@ -74,6 +74,7 @@ public class GroupController extends BaseController {
 		result.setList(list);
 		return result;
 	}
+
 	@RequestMapping(value = { "treeselect" })
 	public String treeselect(HttpServletRequest request, Model model) {
 		model.addAttribute("type", request.getParameter("type")); // 数据选择来源，所有，我的设备、关注设备
@@ -83,7 +84,7 @@ public class GroupController extends BaseController {
 		model.addAttribute("isAll", request.getParameter("isAll")); // 是否读取全部数据，不进行权限过滤
 		return "modules/tl/groupTreeselect";
 	}
-	
+
 	@RequestMapping(value = "/startSchedule")
 	@ResponseBody
 	public ReturnWrap startSchedule(HttpServletRequest request,
@@ -153,15 +154,24 @@ public class GroupController extends BaseController {
 
 		try {
 			if (StringUtils.isNotBlank(group.getUrl())) {
-
+				if (group.getUsernum() == 0)
+					group.setUsernum(1);
+				//先保存到数据库
+				groupService.save(group);
+				
+				
 				// get group info by link
 				// 获取目标群组信息,
 				if (group.getIsNewRecord()) {
 					// botService.getGroupidByUrl(group.getUrl());
-					JSONObject json = botService.updateGroupInfoByLink(group
-							.getUrl());
+					try {
+//						JSONObject json = botService.updateGroupInfoByLink(group
+//								.getUrl());
+					} catch (Exception e) {
+						logger.error("通过url更新群组信息失败");
+					}
 				} else {
-					groupService.save(group);
+					// groupService.save(group);
 				}
 				addMessage(redirectAttributes, "保存群组成功");
 
@@ -170,7 +180,8 @@ public class GroupController extends BaseController {
 
 			}
 		} catch (Exception e) {
-			String msg="操作失败，还没设置管理员账号或者管理员账号已经失效！<br/>异常信息："+e.getMessage();
+			String msg = "操作失败，还没设置管理员账号或者管理员账号已经失效！<br/>异常信息："
+					+ e.getMessage();
 			addMessage(redirectAttributes, msg);
 			logger.error("新增或更新group失败", e);
 		}

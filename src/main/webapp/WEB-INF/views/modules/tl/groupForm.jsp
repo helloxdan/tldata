@@ -62,12 +62,12 @@
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">群组ID：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="id" htmlEscape="false" maxlength="200" class="form-control required"/>
+				<form:input path="id" htmlEscape="false" maxlength="200" class="form-control "/>
 			</div>
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
-		<div class="row f-update">
+		<div class="row  ">
 		<div class="col-md-12">
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">群组名称：</label>
@@ -82,7 +82,7 @@
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">邀请link：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="url" htmlEscape="false" maxlength="100" class="form-control  "/>
+				<form:input path="url" htmlEscape="false" maxlength="100" class="form-control  required"/>
 				<span class="help-inline">一般htts://t.me/xxxx </span>
 			</div>
 			</div>
@@ -101,12 +101,12 @@
 			</div>
 		</div>
 	 	</div><!-- /.row col -->
-		<div class="row f-update">
+		<div class="row  ">
 		<div class="col-md-12">
 			<div class="form-group">
 			<label class="control-label col-md-2 col-sm-2 col-ls-2 col-xs-2">用户数：</label>
 			<div class="col-md-8 col-sm-8 col-ls-8 col-xs-8">
-				<form:input path="usernum" htmlEscape="false" maxlength="100" class="form-control  digits"/>
+				<form:input path="usernum" htmlEscape="false" maxlength="100" class="form-control required digits"/>
 			</div>
 			</div>
 		</div>
