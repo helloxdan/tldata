@@ -29,6 +29,8 @@ public class M60SmsCardService implements SmsCardService {
 	@Autowired
 	private RestTemplate restTemplate;
 
+	//telegram
+	String project="B3244DD57208B76";
 	String username;
 	String password;
 
@@ -59,7 +61,7 @@ public class M60SmsCardService implements SmsCardService {
 		JSONObject result = null;
 		try {
 			String url = "http://sms.60ma.net/newsmssrv?cmd=addblacktelnum&encode=utf-8&userid=" + getUserid()
-					+ "&userkey=" + getToken() + "&telnum=" + phone + "&docks=B3244DD57208B76&dtype=json";
+					+ "&userkey=" + getToken() + "&telnum=" + phone + "&docks="+getProject()+"&dtype=json";
 			logger.debug("拉黑url={}", url);
 			result = restTemplate.getForObject(url, JSONObject.class);
 			if (logger.isInfoEnabled()) {
@@ -89,7 +91,7 @@ public class M60SmsCardService implements SmsCardService {
 		try {
 			String token = getToken();
 			String url = "http://sms.60ma.net/newsmssrv?cmd=gettelnum&encode=utf-8&userid=" + getUserid() + "&userkey="
-					+ token + "&docks=B3244DD57208B76&dtype=json";
+					+ token + "&docks="+getProject()+"&dtype=json";
 			result = restTemplate.getForObject(url, JSONObject.class);
 
 			// 返回示例：{"Return":{"Staus":"0","Telnum":"17011134058","ErrorInfo":"获取成功！}}
@@ -191,7 +193,7 @@ public class M60SmsCardService implements SmsCardService {
 		JSONObject result = null;
 		try {
 			String url = "http://sms.60ma.net/newsmssrv?cmd=getsms&encode=utf-8&userid=" + getUserid() + "&userkey="
-					+ getToken() + "&telnum=" + phone + "&dockcode=B3244DD57208B76&dtype=json";
+					+ getToken() + "&telnum=" + phone + "&dockcode="+getProject()+"&dtype=json";
 			// logger.info("取验证码url={}",url);
 			result = restTemplate.getForObject(url, JSONObject.class);
 			if (logger.isDebugEnabled())
@@ -341,7 +343,7 @@ public class M60SmsCardService implements SmsCardService {
 					+ "&userkey="
 					+ getToken()
 					+ "&telnum="
-					+ phone + "&docks=B3244DD57208B76&dtype=json";
+					+ phone + "&docks="+getProject()+"&dtype=json";
 			logger.debug("釋放url={}", url);
 			result = restTemplate.getForObject(url, JSONObject.class);
 			if (logger.isInfoEnabled()) {
@@ -363,4 +365,13 @@ public class M60SmsCardService implements SmsCardService {
 		}
 	}
 
+	public String getProject() {
+		return project;
+	}
+
+	public void setProject(String project) {
+		this.project = project;
+	}
+
+	
 }
