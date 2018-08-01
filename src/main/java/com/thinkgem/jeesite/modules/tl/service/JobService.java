@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -226,9 +227,12 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	// 用于定期更新JobGroupList中的数据到数据库中
 	ScheduledExecutorService scheduledThreadPool = Executors
 			.newScheduledThreadPool(1, new DaemonThreadFactory());
+	ScheduledFuture<?> scheduledFuture = null;
 	// 存放所有采集的群组
 	List<JobGroup> jobGroupList = new ArrayList<JobGroup>();
 	Job job = null;
+
+	private boolean run = true;
 
 	/**
 	 * 将采集的群组列表放入内容，供work获取任务数据。
@@ -236,6 +240,7 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	 * @param job
 	 */
 	public int initRunData(Job job) {
+		this.run = true;
 		this.job = job;
 		JobGroup jobGroup = new JobGroup();
 		jobGroup.setJobId(job.getId());
@@ -245,14 +250,29 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		long period = Long
 				.parseLong(Global.getConfig("job.updategroup.period"));
 		// 两分钟执行一次
-		scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				updateJobGroup();
-			}
-		}, 1, period, TimeUnit.SECONDS);
-		// FIXME 修改更新jobGroup数据的频率
+		if (scheduledFuture == null) {
+			scheduledFuture = scheduledThreadPool.scheduleAtFixedRate(
+					new Runnable() {
+						@Override
+						public void run() {
+							if (run) {
+								updateJobGroup();
+							}else{
+								scheduledFuture.cancel(true);
+								scheduledFuture=null;
+							}
+						}
+					}, 1, period, TimeUnit.SECONDS);
+			// FIXME 修改更新jobGroup数据的频率
+		}
 
 		return jobGroupNum;
+	}
+
+	public void stop() {
+		this.run = false;
+		
+		//停止后，执行一次更新操作
+		updateJobGroup();
 	}
 }

@@ -33,9 +33,10 @@ public class DefaultWorkService implements WorkService {
 	@Autowired
 	private JobTaskService jobTaskService;
 	// 模拟运行的开关
-//	boolean demo = false;
+//	boolean demo = true;
 	boolean demo =  Boolean.getBoolean(Global
-			.getConfig("tl.work.demo"));;
+			.getConfig("tl.work.demo"));
+	
 	Map<String, Integer> chatIdMap = Maps.newHashMap();
 	Map<String, Long> chatAccessMap = Maps.newHashMap();
 

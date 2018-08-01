@@ -1126,7 +1126,7 @@ public class BotService implements BotManager {
 		boolean success = true;
 		try {
 			registePoolService.stop();
-
+			jobService.stop();
 			// 拉人线程池停止
 			botPool.stop();
 		} catch (Exception e) {

@@ -29,12 +29,40 @@ public class WebContextListener extends
 		return super.initWebApplicationContext(servletContext);
 	}
 
+	public static Thread[] findAllThreads() {
+		ThreadGroup group = Thread.currentThread().getThreadGroup();
+		ThreadGroup topGroup = group;
+		// traverse the ThreadGroup tree to the top
+		while (group != null) {
+			topGroup = group;
+			group = group.getParent();
+		}
+		// Create a destination array that is about
+		// twice as big as needed to be very confident
+		// that none are clipped.
+		int estimatedSize = topGroup.activeCount() * 2;
+		Thread[] slackList = new Thread[estimatedSize];
+		// Load the thread references into the oversized
+		// array. The actual number of threads loaded
+		// is returned.
+		int actualSize = topGroup.enumerate(slackList);
+		// copy into a list that is the exact size
+		Thread[] list = new Thread[actualSize];
+		System.arraycopy(slackList, 0, list, 0, actualSize);
+		return list;
+	}
+
 	/**
 	 * Close the root web application context.
 	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		super.contextDestroyed(event);
+
+		Thread[] threads = findAllThreads();
+		for (Thread thread : threads) {
+			thread.interrupt();
+		}
 
 		for (ExecutorService es : executorServiceList) {
 			try {
@@ -56,6 +84,6 @@ public class WebContextListener extends
 		System.out
 				.println("==================================================");
 		// 退出所有线程，本程序使用了多线程，经常有线程没退出的情况
-		System.exit(0);
+		System.exit(1);
 	}
 }
