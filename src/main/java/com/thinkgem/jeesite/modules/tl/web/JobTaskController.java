@@ -115,6 +115,7 @@ public class JobTaskController extends BaseController {
 		JSONObject data=jobTaskService.findJobTaskStatsData(jobTask.getJobId());
 		model.addAttribute("jobTaskStats", data);
 		model.addAttribute("job", job);
+		model.addAttribute("regRunStatus", registePoolService.isStart());
 		model.addAttribute("successTotal", BotWrapper.getTotal());
 		model.addAttribute("phonePlanNum", registePoolService.getPlanSize());
 		model.addAttribute("phoneSuccessNum", registePoolService.getSuccessSize());

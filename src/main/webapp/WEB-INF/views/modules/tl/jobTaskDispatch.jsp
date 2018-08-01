@@ -146,6 +146,26 @@
         	return false;
         }
 		
+		function startReg(num) {
+			confirmx("确定要启动注册吗？",function(){
+				loading('系统处理中，请稍候……');
+				$.post('${rctx}/api/tl/startReg', {
+					num : num 
+				}, function(result) {
+					if (result.success) { 
+						top.$.jBox.tip("操作成功", 'info');
+						//刷新页面
+						document.location.reload();
+					}else{
+						top.$.jBox.tip(result.msg, 'warning');
+					}
+				});
+			},function(){
+				console.log('取消执行任务');
+			});
+        	return false;
+        }
+		
 		
 		function fetchUser(id) {
 			confirmx("确定开始执行收集用户任务吗？",function(){
@@ -270,7 +290,8 @@
 				<a href="${ctx}/tl/jobTask/form?jobId=${jobTask.jobId}&type=fetch&action=dispatch" class="btn btn-blue hide">新增单一任务</a>
 			<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-success"  >开始拉人</a>
 			<a href="javascript:stopjob('${jobTask.jobId}')"  class="btn btn-warning"  >停止</a>
-			<a href="javascript:stopReg('${jobTask.jobId}')"  class="btn btn-warning"  >停止注册</a>
+			<a href="javascript:stopReg('${jobTask.jobId}')"  class="btn btn-warning ${regRunStatus ? '':'hide' }"  >停止注册</a>
+			<a href="javascript:startReg('${job.accountNum}')"  class="btn btn-warning ${regRunStatus ? 'hide':''}"  >启动注册</a>
 					<%-- |<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue hide"
 					<%-- |<a href="javascript:fetchUser('${jobTask.jobId}')"  class="btn btn-blue hide"  >批量执行抽取用户</a>
 					<a href="javascript:cleanJobUser('${jobTask.jobId}')"  class="btn btn-blue" title="删除重复数据，或者已经抽取的数据" >清洗用户数据</a>

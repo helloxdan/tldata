@@ -180,6 +180,9 @@ public class RegistePoolService {
 	public void start() {
 		start = true;
 	}
+	public boolean isStart() {
+		return start  ;
+	}
 
 	/**
 	 * 停止获取手机号列表。
