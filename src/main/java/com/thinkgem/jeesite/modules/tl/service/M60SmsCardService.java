@@ -24,6 +24,9 @@ import com.thinkgem.jeesite.common.security.Digests;
  *
  */
 public class M60SmsCardService implements SmsCardService {
+	private static final String GJDM = "86";
+//	private static final String GJDM = "95";
+
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
@@ -54,7 +57,7 @@ public class M60SmsCardService implements SmsCardService {
 			return;
 		}
 
-		if (phone.startsWith("86")) {
+		if (phone.startsWith(GJDM)) {
 			phone = phone.substring(2);
 		}
 
@@ -107,7 +110,7 @@ public class M60SmsCardService implements SmsCardService {
 				throw new RuntimeException(result.getString("ErrorInfo"));
 			} else {
 				String phone = result.getString("Telnum");
-				list.add("86" + phone);
+				list.add(GJDM + phone);
 			}
 
 		} catch (Exception e) {
@@ -186,7 +189,7 @@ public class M60SmsCardService implements SmsCardService {
 			logger.warn("取验证码的手机号为空");
 			return list;
 		}
-		if (phone.startsWith("86")) {
+		if (phone.startsWith(GJDM)) {
 			phone = phone.substring(2);
 		}
 
@@ -227,7 +230,7 @@ public class M60SmsCardService implements SmsCardService {
 
 				// 将输入的字符串中非数字部分用空格取代并存入一个字符串
 				String code = m.replaceAll(" ").trim();
-				list.add(new String[] { "86" + phone, code });
+				list.add(new String[] { GJDM + phone, code });
 
 			}
 
@@ -332,7 +335,7 @@ public class M60SmsCardService implements SmsCardService {
 			return;
 		}
 
-		if (phone.startsWith("86")) {
+		if (phone.startsWith(GJDM)) {
 			phone = phone.substring(2);
 		}
 
