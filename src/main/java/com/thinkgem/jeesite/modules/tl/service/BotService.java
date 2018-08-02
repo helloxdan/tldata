@@ -1181,6 +1181,11 @@ public class BotService implements BotManager {
 	public boolean startJob(String jobid) {
 		this.jobid = jobid;
 		boolean success = true;
+		if (botPool.isRun()) {
+			logger.error("程序正在运行，不能重复执行");
+//			throw new RuntimeException("程序正在运行，不能重复执行");
+			// return false;
+		}
 		// try {
 		Job job = jobService.get(jobid);
 		if (job != null) {
@@ -1197,16 +1202,17 @@ public class BotService implements BotManager {
 			}
 
 			// 新线程处理，当数据库中存在很多账号时，不能全部一次放进去
-			Thread thread = new Thread() {
-				public void run() {
-					// 将数据库中的账号放入池子
-					addDbAccountToBotPool(jobid);
-					// 以账号数量为依据，决定job是否停止
-					registePoolService.startWork(job.getAccountNum(), true);
-				};
-			};
-			thread.setDaemon(true);
-			thread.start();
+			// Thread thread = new Thread() {
+			// public void run() {
+			// // 将数据库中的账号放入池子
+			// addDbAccountToBotPool(jobid);
+			// };
+			// };
+			// thread.setDaemon(true);
+			// thread.start();
+
+			// 以账号数量为依据，决定job是否停止
+			registePoolService.startWork(job.getAccountNum(), true);
 
 		} else {
 			success = false;
@@ -1221,7 +1227,7 @@ public class BotService implements BotManager {
 	/**
 	* 
 	*/
-	private void addDbAccountToBotPool(String jobid) {
+	public void addDbAccountToBotPool(String jobid) {
 		Account account = new Account();
 		// TODO 查询可用账号，放入队列
 		// 可用，1）针对本job，加入用户数未达到40人

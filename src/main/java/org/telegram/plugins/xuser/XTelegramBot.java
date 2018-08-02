@@ -2,6 +2,7 @@ package org.telegram.plugins.xuser;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.slf4j.LoggerFactory;
 import org.telegram.api.engine.LoggerInterface;
 import org.telegram.api.engine.storage.AbsApiState;
 import org.telegram.bot.ChatUpdatesBuilder;
@@ -16,6 +17,9 @@ import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.LoginStatus;
 import org.telegram.mtproto.log.LogInterface;
 import org.telegram.mtproto.log.Logger;
+import org.telegram.plugins.xuser.work.BotPool;
+
+import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
 
 /**
  * @author Hendrik Hofstadt
@@ -25,6 +29,7 @@ import org.telegram.mtproto.log.Logger;
  * @date 13.03.14
  */
 public class XTelegramBot extends TelegramBot {
+	protected static org.slf4j.Logger logger = LoggerFactory.getLogger(RegTelegramBot.class);
 	private static final String LOGTAG = "KERNELMAIN";
 	private final BotConfig config;
 	private final ChatUpdatesBuilder chatUpdatesBuilder;
@@ -69,6 +74,16 @@ public class XTelegramBot extends TelegramBot {
 			@Override
 			public void w(String tag, String message) {
 				BotLogger.warn("MTPROTO", message);
+				
+				if (message != null && message.startsWith("FLOOD_WAIT_")) {
+					int delay = Integer.parseInt(message
+							.substring("FLOOD_WAIT_".length()));
+					logger.error("接口被禁用~~~~{}",delay);
+					// 停止注册
+					RegistePoolService.start=false;
+					BotPool.run=false;
+					logger.error("设置注册程序的运行标识位为false");
+				}
 			}
 
 			@Override

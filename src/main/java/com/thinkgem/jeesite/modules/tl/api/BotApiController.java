@@ -6,6 +6,7 @@ package com.thinkgem.jeesite.modules.tl.api;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import com.thinkgem.jeesite.modules.api.vo.ReturnWrap;
 import com.thinkgem.jeesite.modules.tl.entity.Group;
 import com.thinkgem.jeesite.modules.tl.service.BotService;
 import com.thinkgem.jeesite.modules.tl.service.GroupService;
+import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
 import com.thinkgem.jeesite.modules.tl.service.RegisteService;
 import com.thinkgem.jeesite.modules.tl.service.ScheduleService;
 import com.thinkgem.jeesite.modules.tl.vo.RequestData;
@@ -40,6 +42,8 @@ public class BotApiController extends BaseController {
 	private RegisteService registeService;
 	@Autowired
 	private ScheduleService scheduleService;
+	@Autowired
+	private RegistePoolService registePoolService;
 
 	/**
 	 * @param data
@@ -53,6 +57,10 @@ public class BotApiController extends BaseController {
 		ReturnWrap result = new ReturnWrap(true);
 		try {
 			String jobid = data.getJobid();
+			// 设置卡商
+			if (StringUtils.isNotBlank(data.getCode()))
+				registePoolService.setCardSupplier(data.getCode());
+			
 			boolean success = botService.startJob(jobid);
 			if (success) {
 				result.success("OK");
@@ -80,7 +88,7 @@ public class BotApiController extends BaseController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * @param data
 	 * @param request
@@ -104,6 +112,7 @@ public class BotApiController extends BaseController {
 		}
 		return result;
 	}
+
 	@RequestMapping(value = "/stopReg")
 	public ReturnWrap stopReg(RequestData data, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -112,6 +121,21 @@ public class BotApiController extends BaseController {
 			String jobid = data.getJobid();
 			boolean success = botService.stopReg(jobid);
 			result.setData(success);
+		} catch (Exception e) {
+			result.fail("启动异常，" + e.getMessage());
+			logger.error("stopReg", e);
+		}
+		return result;
+	}
+
+	@RequestMapping(value = "/addDbAccountToBotPool")
+	public ReturnWrap addDbAccountToBotPool(RequestData data,
+			HttpServletRequest request, HttpServletResponse response) {
+		ReturnWrap result = new ReturnWrap(true);
+		try {
+			String jobid = data.getJobid();
+			botService.addDbAccountToBotPool(jobid);
+			result.setData("OK");
 		} catch (Exception e) {
 			result.fail("启动异常，" + e.getMessage());
 			logger.error("stopReg", e);

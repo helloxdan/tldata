@@ -31,7 +31,7 @@ public class RegisteService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private BotService botService;
-	@Autowired
+	 
 	private SmsCardService smsCardService;
 	// 累计从卡商获取的手机号数量
 	private int phoneNum = 0;

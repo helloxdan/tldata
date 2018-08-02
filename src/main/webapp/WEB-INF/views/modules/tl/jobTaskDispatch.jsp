@@ -89,7 +89,7 @@
 			confirmx("确定数据已经准备就绪，开始执行任务吗？",function(){
 				loading('系统处理中，请稍候……');
 				$.post('${rctx}/api/tl/startJob', {
-					jobid : id 
+					jobid : id ,code:$('#code').val()
 				}, function(result) {
 					if (result.success) { 
 						top.$.jBox.tip("程序启动成功", 'info');
@@ -288,6 +288,11 @@
 		<div class="box box-solid minHeight">
 			<div class="form-group cxtj_text">
 				<a href="${ctx}/tl/jobTask/form?jobId=${jobTask.jobId}&type=fetch&action=dispatch" class="btn btn-blue hide">新增单一任务</a>
+				卡商<select id="code" class="form-control" style="display:inline;">
+					<option value="60m" label="60码"/> 
+					<option value="js" label="极速"/>
+				</select>
+				
 			<a href="javascript:runjob('${jobTask.jobId}')"  class="btn btn-success"  >开始拉人</a>
 			<a href="javascript:stopjob('${jobTask.jobId}')"  class="btn btn-warning"  >停止</a>
 			<a href="javascript:stopReg('${jobTask.jobId}')"  class="btn btn-warning ${regRunStatus ? '':'hide' }"  >停止注册</a>

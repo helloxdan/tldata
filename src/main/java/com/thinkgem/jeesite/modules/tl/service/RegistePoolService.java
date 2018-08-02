@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +34,19 @@ public class RegistePoolService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private BotService botService;
-	@Autowired
+ 
 	private SmsCardService smsCardService;
+	//卡商代码
+	private String cardSupplier; 
+	private Map<String,SmsCardService> cardMaps=Maps.newHashMap();
+	
 	// 累计从卡商获取的手机号数量
 	private AtomicInteger phoneNum = new AtomicInteger(0);
 	// 计划注册号码数，成功数量
 	private int planSize = 0;// 计划获取号码数
 	private AtomicInteger successSize = new AtomicInteger(0);// 成功数
 	// 启动、停止标识位
-	private static boolean start = false;
+	public static boolean start = false;
 	//注册成功后，是否自动运行工单
 	private  boolean autoRunWork = false;
 	private double phoneNumFactor = Double.parseDouble(Global
@@ -77,7 +82,7 @@ public class RegistePoolService {
 		if (num > 0) {
 			logger.error("注册程序启动~~~~~~~~~~~~~~~~~~~~");
 			//addPlanSize(num, false);
-			this.planSize=num;
+			this.planSize=(int)(num*phoneNumFactor);
 			this.successSize.set(0);;
 		}
 		start();
@@ -233,7 +238,7 @@ public class RegistePoolService {
 				} else {
 					logger.warn("{}-{}注册，发验证码失败,不列入取码队列", i[0], phone);
 					// addPlanSize(1, true);
-					smsCardService.freePhone(phone);
+					getSmsCardService().freePhone(phone);
 					returnPool(1, true);
 				}
 			}
@@ -242,7 +247,7 @@ public class RegistePoolService {
 				stop();
 			}
 			if (phone1 != null)
-				smsCardService.freePhone(phone1);
+				getSmsCardService().freePhone(phone1);
 		}
 	}
 
@@ -278,9 +283,9 @@ public class RegistePoolService {
 						|| e.getMessage().contains("ignore")) {
 
 					// 加入黑名单
-					smsCardService.setForbidden(phone);
+					getSmsCardService().setForbidden(phone);
 				}
-				smsCardService.freePhone(phone);
+				getSmsCardService().freePhone(phone);
 				// addPlanSize(1, true);
 				returnPool(1, true);
 				break;
@@ -295,7 +300,7 @@ public class RegistePoolService {
 						logger.error("用注册码注册电报失败，{}", e.getMessage());
 						// addPlanSize(1, true);
 						returnPool(1, true);
-						smsCardService.freePhone(phone);
+						getSmsCardService().freePhone(phone);
 						break;
 					}
 				}
@@ -333,12 +338,17 @@ public class RegistePoolService {
 		} else {
 			// 失败，计入黑名单，调用卡商接口，标记黑名单，避免下次再获取
 			logger.info("{}-{}记黑名单，", index, phone);
-			smsCardService.setForbidden(phone);
+			getSmsCardService().setForbidden(phone);
 		}
 	}
 
 	public SmsCardService getSmsCardService() {
-
+		if(StringUtils.isBlank(getCardSupplier()))
+			throw new RuntimeException("没有指定卡商代码");
+		
+		smsCardService=cardMaps.get(getCardSupplier());
+		if(smsCardService==null)
+			throw new RuntimeException("卡商代码"+getCardSupplier()+"，没有对应实现！");
 		return smsCardService;
 	}
 
@@ -360,6 +370,22 @@ public class RegistePoolService {
 
 	public AtomicInteger getSuccessSize() {
 		return successSize;
+	}
+
+	public String getCardSupplier() {
+		return cardSupplier;
+	}
+
+	public void setCardSupplier(String cardSupplier) {
+		this.cardSupplier = cardSupplier;
+	}
+
+	public Map<String, SmsCardService> getCardMaps() {
+		return cardMaps;
+	}
+
+	public void setCardMaps(Map<String, SmsCardService> cardMaps) {
+		this.cardMaps = cardMaps;
 	}
 	
 }

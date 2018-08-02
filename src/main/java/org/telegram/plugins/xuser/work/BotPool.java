@@ -31,7 +31,7 @@ public class BotPool extends Observable {
 	BotManager botManager;
 	// 缓冲池
 	private Queue<BotWrapper> bots = new LinkedList<BotWrapper>();
-	static boolean run = true;
+	public static boolean run = false;
 	int threadNum = Integer.parseInt(Global.getConfig("thread.work.num"));
 	// 线程池
 	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(threadNum,

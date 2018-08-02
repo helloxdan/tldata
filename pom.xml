@@ -7,7 +7,7 @@
 	<groupId>com.xx</groupId>
 	<artifactId>tlbot</artifactId>
 	<version>1.0.0</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>tlbot</name>
 	<url>http://maven.apache.org</url>
 	<!-- 项目属性 -->
