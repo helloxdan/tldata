@@ -79,7 +79,7 @@ public class RegTelegramBot extends TelegramBot {
 					if (delay > 10)
 						floodCount++;
 					// 少于3次，忽略
-					if (floodCount <= 3)
+					if (floodCount <= 2)
 						return;
 					// 停止注册
 					RegistePoolService.start = false;
