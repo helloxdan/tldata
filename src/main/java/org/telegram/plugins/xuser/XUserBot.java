@@ -574,6 +574,12 @@ public class XUserBot implements IBot {
 		if (apikey != -1) {
 			startRegBot(phone, apikey, apihash);
 		}
+//		try {
+//			Thread.sleep(3000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		data = registe();
 		logger.debug("send registe code result:{},status={}", data.getString("result"), data.getString("status"));
 		/*
@@ -737,6 +743,12 @@ public class XUserBot implements IBot {
 	}
 
 	private TLSentCode retryRegiste(int destDC) throws IOException, TimeoutException {
+//		try {
+//			Thread.sleep(3000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		final TLSentCode sentCode;
 		kernel.getKernelComm().getApi().switchToDc(destDC);
 		final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();

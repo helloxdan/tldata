@@ -29,6 +29,7 @@ public class JsSmsCardService implements SmsCardService {
 	int maxPhoneNum = 1;
 	String username;
 	String password;
+
 	void stop() {
 		this.run = false;
 	}
@@ -46,8 +47,8 @@ public class JsSmsCardService implements SmsCardService {
 
 		String result = null;
 		try {
-			String url = "http://www.js-yzm.com:9180/service.asmx/Hmd2Str?token=" + getToken() + "&xmid=2596&hm="
-					+ phone + "&sf=0";
+			String url = "http://www.js-yzm.com:9180/service.asmx/Hmd2Str?token="
+					+ getToken() + "&xmid=2596&hm=" + phone + "&sf=0";
 			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("加入黑名单结果：" + result);
@@ -69,8 +70,11 @@ public class JsSmsCardService implements SmsCardService {
 			return list;
 		String result = null;
 		try {
-			String url = "http://www.js-yzm.com:9180/service.asmx/GetHM2Str?token=" + getToken() + "&xmid=2596&sl="
-					+ maxPhoneNum + "&lx=0&a1=&a2=&pk=&ks=0&rj=woshishui";
+			String url = "http://www.js-yzm.com:9180/service.asmx/GetHM2Str?token="
+					+ getToken()
+					+ "&xmid=2596&sl="
+					+ maxPhoneNum
+					+ "&lx=0&a1=&a2=&pk=&ks=0&rj=woshishui";
 			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("取号码结果：" + result);
@@ -92,7 +96,7 @@ public class JsSmsCardService implements SmsCardService {
 				logger.warn("取号码失败：" + result);
 			}
 
-		} catch (RestClientException e) {
+		} catch (Exception e) {
 			logger.error("取号码", e);
 			throw new RuntimeException(e.getMessage());
 		}
@@ -137,8 +141,8 @@ public class JsSmsCardService implements SmsCardService {
 
 		String result = null;
 		try {
-			String url = "http://www.js-yzm.com:9180/service.asmx/GetYzm2Str?token=" + getToken() + "&xmid=2596&hm="
-					+ phone + "&sf=0";
+			String url = "http://www.js-yzm.com:9180/service.asmx/GetYzm2Str?token="
+					+ getToken() + "&xmid=2596&hm=" + phone + "&sf=0";
 			result = restTemplate.getForObject(url, String.class);
 			logger.info("{}取验证码结果：{}", phone, result);
 			if (logger.isDebugEnabled()) {
@@ -176,7 +180,7 @@ public class JsSmsCardService implements SmsCardService {
 				logger.warn("获取验证码失败：" + result);
 			}
 
-		} catch (RestClientException e) {
+		} catch (Exception e) {
 			logger.error("取验证码", e);
 			throw new RuntimeException(e.getMessage());
 		}
@@ -204,8 +208,10 @@ public class JsSmsCardService implements SmsCardService {
 	private String login() {
 		// TODO Auto-generated method stub
 		String token = null;
-//		String url = "http://www.js-yzm.com:9180/service.asmx/UserLoginStr?name=woshishui&psw=jj07170316";
-		String url = "http://www.js-yzm.com:9180/service.asmx/UserLoginStr?name="+getUsername()+"&psw="+getPassword();
+		// String url =
+		// "http://www.js-yzm.com:9180/service.asmx/UserLoginStr?name=woshishui&psw=jj07170316";
+		String url = "http://www.js-yzm.com:9180/service.asmx/UserLoginStr?name="
+				+ getUsername() + "&psw=" + getPassword();
 
 		try {
 			token = restTemplate.getForObject(url, String.class);
@@ -226,7 +232,7 @@ public class JsSmsCardService implements SmsCardService {
 
 		} catch (RestClientException e) {
 			logger.error("登录异常异常", e);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException("登录异常，" + e.getMessage());
 		}
 		return token;
 	}
@@ -238,7 +244,7 @@ public class JsSmsCardService implements SmsCardService {
 	@Override
 	public void freePhone(String phone) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public String getUsername() {

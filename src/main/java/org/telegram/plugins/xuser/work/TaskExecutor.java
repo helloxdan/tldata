@@ -106,6 +106,13 @@ public class TaskExecutor implements Observer {
 			// 把bot放回pool
 			botpool.put(botw, 2);
 		} else {
+			//采集和拉人，拉开一个时间差
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
 			int total = 0;
 			int updateNum = getWorkService().inviteUsers(bot, data, users); 
 

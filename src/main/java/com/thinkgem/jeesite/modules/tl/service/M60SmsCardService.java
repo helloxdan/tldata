@@ -290,7 +290,7 @@ public class M60SmsCardService implements SmsCardService {
 
 		} catch (Exception e) {
 			logger.error("登录异常:" + e.getMessage());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException("登录异常，"+e.getMessage());
 		}
 		return token;
 	}

@@ -34,12 +34,12 @@ public class RegistePoolService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private BotService botService;
- 
+
 	private SmsCardService smsCardService;
-	//卡商代码
-	private String cardSupplier; 
-	private Map<String,SmsCardService> cardMaps=Maps.newHashMap();
-	
+	// 卡商代码
+	private String cardSupplier;
+	private Map<String, SmsCardService> cardMaps = Maps.newHashMap();
+
 	// 累计从卡商获取的手机号数量
 	private AtomicInteger phoneNum = new AtomicInteger(0);
 	// 计划注册号码数，成功数量
@@ -47,8 +47,8 @@ public class RegistePoolService {
 	private AtomicInteger successSize = new AtomicInteger(0);// 成功数
 	// 启动、停止标识位
 	public static boolean start = false;
-	//注册成功后，是否自动运行工单
-	private  boolean autoRunWork = false;
+	// 注册成功后，是否自动运行工单
+	private boolean autoRunWork = false;
 	private double phoneNumFactor = Double.parseDouble(Global
 			.getConfig("reg.phonenum.factor"));
 	int phoneThreadNum = 1;// Integer.parseInt(Global.getConfig("thread.phone.num"));
@@ -73,17 +73,20 @@ public class RegistePoolService {
 	}
 
 	/**
-	 * @param num 需要的成功记录数
-	 * @param autoRunWork 注册成功之后，改账号是否自动执行任务
-	 *            
+	 * @param num
+	 *            需要的成功记录数
+	 * @param autoRunWork
+	 *            注册成功之后，改账号是否自动执行任务
+	 * 
 	 */
-	public void startWork(int num,boolean autoRunWork ) {
-		this.autoRunWork=  autoRunWork ;
+	public void startWork(int num, boolean autoRunWork) {
+		this.autoRunWork = autoRunWork;
 		if (num > 0) {
 			logger.error("注册程序启动~~~~~~~~~~~~~~~~~~~~");
-			//addPlanSize(num, false);
-			this.planSize=(int)(num*phoneNumFactor);
-			this.successSize.set(0);;
+			// addPlanSize(num, false);
+			this.planSize = (int) (num * phoneNumFactor);
+			this.successSize.set(0);
+			;
 		}
 		start();
 
@@ -173,20 +176,24 @@ public class RegistePoolService {
 		}
 	}
 
-	/**注册成功后是否自动进入工作模式，false-只是注册，不做其它操作
+	/**
+	 * 注册成功后是否自动进入工作模式，false-只是注册，不做其它操作
+	 * 
 	 * @param auto
 	 */
-	public void setAutoRunWork(boolean auto){
-		this.autoRunWork=auto;
+	public void setAutoRunWork(boolean auto) {
+		this.autoRunWork = auto;
 	}
+
 	/**
 	 * 开始获取手机号列表。
 	 */
 	public void start() {
 		start = true;
 	}
+
 	public boolean isStart() {
-		return start  ;
+		return start;
 	}
 
 	/**
@@ -243,7 +250,9 @@ public class RegistePoolService {
 				}
 			}
 		} catch (Exception e) {
-			if (e.getMessage() != null && e.getMessage().contains("余额不足")) {
+			if (e.getMessage() != null
+					&& (e.getMessage().contains("余额不足") || e.getMessage()
+							.contains("登录异常"))) {
 				stop();
 			}
 			if (phone1 != null)
@@ -321,7 +330,7 @@ public class RegistePoolService {
 	}
 
 	private void sendRegCode(int index, String phone, String code) {
-		JSONObject json = botService.setRegAuthCode(phone, code,autoRunWork);
+		JSONObject json = botService.setRegAuthCode(phone, code, autoRunWork);
 		// 检查返回结果，如果成功，则清除记录；
 		if (json.getBooleanValue("result")) {
 			// 成功累计数
@@ -343,12 +352,12 @@ public class RegistePoolService {
 	}
 
 	public SmsCardService getSmsCardService() {
-		if(StringUtils.isBlank(getCardSupplier()))
+		if (StringUtils.isBlank(getCardSupplier()))
 			throw new RuntimeException("没有指定卡商代码");
-		
-		smsCardService=cardMaps.get(getCardSupplier());
-		if(smsCardService==null)
-			throw new RuntimeException("卡商代码"+getCardSupplier()+"，没有对应实现！");
+
+		smsCardService = cardMaps.get(getCardSupplier());
+		if (smsCardService == null)
+			throw new RuntimeException("卡商代码" + getCardSupplier() + "，没有对应实现！");
 		return smsCardService;
 	}
 
@@ -387,7 +396,7 @@ public class RegistePoolService {
 	public void setCardMaps(Map<String, SmsCardService> cardMaps) {
 		this.cardMaps = cardMaps;
 	}
-	
+
 }
 
 class RegPhone {

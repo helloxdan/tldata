@@ -1,6 +1,8 @@
 package org.telegram.plugins.xuser;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.slf4j.LoggerFactory;
 import org.telegram.api.engine.LoggerInterface;
@@ -29,7 +31,8 @@ import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
  * @date 13.03.14
  */
 public class XTelegramBot extends TelegramBot {
-	protected static org.slf4j.Logger logger = LoggerFactory.getLogger(RegTelegramBot.class);
+	protected static org.slf4j.Logger logger = LoggerFactory
+			.getLogger(XTelegramBot.class);
 	private static final String LOGTAG = "KERNELMAIN";
 	private final BotConfig config;
 	private final ChatUpdatesBuilder chatUpdatesBuilder;
@@ -51,13 +54,15 @@ public class XTelegramBot extends TelegramBot {
 		this.authCancel = authCancel;
 	}
 
-	public XTelegramBot(BotConfig config, ChatUpdatesBuilder chatUpdatesBuilder, int apiKey, String apiHash) {
+	public XTelegramBot(BotConfig config,
+			ChatUpdatesBuilder chatUpdatesBuilder, int apiKey, String apiHash) {
 		super(config, chatUpdatesBuilder, apiKey, apiHash);
 		if (config == null) {
 			throw new NullPointerException("At least a BotConfig must be added");
 		}
 		if (chatUpdatesBuilder == null) {
-			throw new NullPointerException("At least a ChatUpdatesBuilder must be added");
+			throw new NullPointerException(
+					"At least a ChatUpdatesBuilder must be added");
 		}
 		BotLogger.info(LOGTAG, "--------------KERNEL CREATED--------------");
 		setLogging();
@@ -65,24 +70,46 @@ public class XTelegramBot extends TelegramBot {
 		this.apiHash = apiHash;
 		this.config = config;
 		this.chatUpdatesBuilder = chatUpdatesBuilder;
-		chatUpdatesBuilder.setDifferenceParametersService(
-				new DifferenceParametersService(chatUpdatesBuilder.getDatabaseManager()));
+		chatUpdatesBuilder
+				.setDifferenceParametersService(new DifferenceParametersService(
+						chatUpdatesBuilder.getDatabaseManager()));
 	}
+
+	static Timer timer = null;
 
 	private static void setLogging() {
 		Logger.registerInterface(new LogInterface() {
 			@Override
 			public void w(String tag, String message) {
 				BotLogger.warn("MTPROTO", message);
-				
+
 				if (message != null && message.startsWith("FLOOD_WAIT_")) {
 					int delay = Integer.parseInt(message
 							.substring("FLOOD_WAIT_".length()));
-					logger.error("接口被禁用~~~~{}",delay);
+					logger.error("接口被禁用~~~~{}", delay);
+					if(delay<10)
+						return;
 					// 停止注册
-					RegistePoolService.start=false;
-					BotPool.run=false;
-					logger.error("设置注册程序的运行标识位为false");
+					// RegistePoolService.start=false;
+					BotPool.run = false;
+					logger.error("设置程序的运行标识位为false");
+					if (delay < 300) {
+						// 如果被禁时间不是很长，设置定时器，过后再启动
+						if (timer == null) {
+							timer = new Timer();
+							timer.schedule(new TimerTask() {
+
+								@Override
+								public void run() {
+									logger.error("work接口被禁用，恢复运行~~~~");
+									// RegistePoolService.start = true;
+									BotPool.run = true;
+									timer.cancel();
+									timer = null;
+								}
+							}, (delay + 5) * 1000); // 被禁时间+5秒
+						}
+					}
 				}
 			}
 
@@ -119,15 +146,18 @@ public class XTelegramBot extends TelegramBot {
 		});
 	}
 
-	public LoginStatus init()
-			throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	public LoginStatus init() throws NoSuchMethodException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException {
 		BotLogger.debug(LOGTAG, "Creating API");
 		apiState = new MemoryApiState(config.getAuthfile());
 		BotLogger.debug(LOGTAG, "API created");
 		createKernelComm(); // Only set up threads and assign api state
 		createKernelAuth(); // Only assign api state to kernel auth
-		initKernelComm(); // Create TelegramApi and run the updates handler threads
-		final LoginStatus loginResult = startKernelAuth(); // Perform login if necessary
+		initKernelComm(); // Create TelegramApi and run the updates handler
+							// threads
+		final LoginStatus loginResult = startKernelAuth(); // Perform login if
+															// necessary
 		createKernelHandler(); // Create rest of handlers
 		BotLogger.info(LOGTAG, "----------------BOT READY-----------------");
 		return loginResult;
@@ -144,49 +174,58 @@ public class XTelegramBot extends TelegramBot {
 	private void initKernelHandler() {
 		final long start = System.currentTimeMillis();
 		this.mainHandler.start();
-		BotLogger.info(LOGTAG, String.format("%s init in %d ms", this.kernelAuth.getClass().getName(),
+		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
+				this.kernelAuth.getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 	}
 
 	private void initKernelComm() {
 		final long start = System.currentTimeMillis();
 		this.kernelComm.init();
-		BotLogger.info(LOGTAG, String.format("%s init in %d ms", this.kernelComm.getClass().getName(),
+		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
+				this.kernelComm.getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 	}
 
 	private void createKernelAuth() {
 		final long start = System.currentTimeMillis();
-		this.kernelAuth = new KernelAuth(this.apiState, config, this.kernelComm, apiKey, apiHash);
-		BotLogger.info(LOGTAG, String.format("%s init in %d ms", this.kernelAuth.getClass().getName(),
+		this.kernelAuth = new KernelAuth(this.apiState, config,
+				this.kernelComm, apiKey, apiHash);
+		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
+				this.kernelAuth.getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 	}
 
 	private LoginStatus startKernelAuth() {
 		final long start = System.currentTimeMillis();
 		final LoginStatus status = this.kernelAuth.start();
-		BotLogger.info(LOGTAG, String.format("%s started in %d ms", this.kernelAuth.getClass().getName(),
+		BotLogger.info(LOGTAG, String.format("%s started in %d ms",
+				this.kernelAuth.getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 		return status;
 	}
 
-	private void createKernelHandler()
-			throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+	private void createKernelHandler() throws InvocationTargetException,
+			NoSuchMethodException, InstantiationException,
+			IllegalAccessException {
 		final long start = System.currentTimeMillis();
 		chatUpdatesBuilder.setKernelComm(kernelComm);
-		this.mainHandler = new MainHandler(kernelComm, chatUpdatesBuilder.build());
-		BotLogger.info(LOGTAG, String.format("%s init in %d ms", this.mainHandler.getClass().getName(),
+		this.mainHandler = new MainHandler(kernelComm,
+				chatUpdatesBuilder.build());
+		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
+				this.mainHandler.getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 	}
 
 	private void createKernelComm() {
 		final long start = System.currentTimeMillis();
 		// this.kernelComm = new KernelComm(apiKey, apiState);
-//		by xdan
+		// by xdan
 		XKernelComm kernelComm2 = new XKernelComm(apiKey, apiState);
 		kernelComm2.setBot(this);
 		this.kernelComm = kernelComm2;
-		BotLogger.info(LOGTAG, String.format("%s init in %d ms", getKernelComm().getClass().getName(),
+		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
+				getKernelComm().getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 	}
 

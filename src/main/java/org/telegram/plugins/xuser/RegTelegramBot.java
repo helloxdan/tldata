@@ -1,6 +1,8 @@
 package org.telegram.plugins.xuser;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.slf4j.LoggerFactory;
 import org.telegram.api.engine.LoggerInterface;
@@ -29,7 +31,8 @@ import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
  * @date 13.03.14
  */
 public class RegTelegramBot extends TelegramBot {
-	protected static org.slf4j.Logger logger = LoggerFactory.getLogger(RegTelegramBot.class);
+	protected static org.slf4j.Logger logger = LoggerFactory
+			.getLogger(RegTelegramBot.class);
 	private static final String LOGTAG = "KERNELMAIN";
 	private final BotConfig config;
 	private final ChatUpdatesBuilder chatUpdatesBuilder;
@@ -61,6 +64,9 @@ public class RegTelegramBot extends TelegramBot {
 						chatUpdatesBuilder.getDatabaseManager()));
 	}
 
+	static Timer timer = null;
+	static int floodCount = 0;
+
 	private static void setLogging() {
 		Logger.registerInterface(new LogInterface() {
 			@Override
@@ -69,9 +75,31 @@ public class RegTelegramBot extends TelegramBot {
 				if (message != null && message.startsWith("FLOOD_WAIT_")) {
 					int delay = Integer.parseInt(message
 							.substring("FLOOD_WAIT_".length()));
-					logger.error("接口被禁用~~~~{}",delay);
+					logger.error("接口被禁用~~~~{}", delay);
+					if (delay > 10)
+						floodCount++;
+					// 少于3次，忽略
+					if (floodCount <= 3)
+						return;
 					// 停止注册
-					RegistePoolService.start=false;
+					RegistePoolService.start = false;
+					if (delay < 300) {
+						// 如果被禁时间不是很长，设置定时器，过后再启动
+						if (timer == null) {
+							timer = new Timer();
+							timer.schedule(new TimerTask() {
+
+								@Override
+								public void run() {
+									logger.error("reg接口被禁用，恢复运行~~~~");
+									RegistePoolService.start = true;
+									timer.cancel();
+									timer = null;
+									floodCount = 0;
+								}
+							}, (delay + 60) * 1000); // 被禁时间+60秒
+						}
+					}
 				}
 			}
 

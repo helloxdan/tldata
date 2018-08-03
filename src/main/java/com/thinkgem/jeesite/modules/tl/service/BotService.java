@@ -853,7 +853,12 @@ public class BotService implements BotManager {
 			// 已经登陆过
 			throw new RuntimeException("账号" + phone + "实例已经创建，说明已经操作过了");
 		}
-
+//		//启动和发送认证码隔开时间差
+//		try {
+//			Thread.sleep(10000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		// 注册
 		JSONObject json = bot.registe(phone, APIKEY, APIHASH);
 		if ("success".equals(json.getString("result"))) {
@@ -1183,7 +1188,7 @@ public class BotService implements BotManager {
 		boolean success = true;
 		if (botPool.isRun()) {
 			logger.error("程序正在运行，不能重复执行");
-//			throw new RuntimeException("程序正在运行，不能重复执行");
+			// throw new RuntimeException("程序正在运行，不能重复执行");
 			// return false;
 		}
 		// try {
