@@ -399,12 +399,4 @@ public class RegistePoolService {
 
 }
 
-class RegPhone {
-	public RegPhone(String phone, int i) {
-		this.phone = phone;
-		this.index = i;
-	}
-
-	String phone;
-	int index;
-}
+ 

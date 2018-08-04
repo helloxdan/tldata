@@ -114,7 +114,7 @@ public class M60SmsCardService implements SmsCardService {
 			}
 
 		} catch (Exception e) {
-			logger.error("取号码", e);
+			logger.error("取号码,{}", e.getMessage());
 			throw new RuntimeException(e.getMessage());
 		}
 

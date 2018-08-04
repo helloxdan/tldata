@@ -407,6 +407,8 @@ public class RegKernelAuth extends KernelAuth {
 
 	private TLSentCode retryRegiste(int destDC) throws IOException,
 			TimeoutException {
+		BotLogger.info(LOGTAG, "retryRegiste destDC=" + destDC);
+
 		final TLSentCode sentCode;
 		kernelComm.getApi().switchToDc(destDC);
 		final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
@@ -438,13 +440,13 @@ public class RegKernelAuth extends KernelAuth {
 				// 都执行 注册操作,依据检查结果判断是否注册成功
 				String firstName = CreateRandomField
 						.getRandomEnglishFirstName();
-				String lastName = CreateRandomField
-						.getRandomEnglishLastName();
-				final TLRequestAuthSignUp tlRequestAuthSignUp = getSignUpRequest(code,firstName,lastName);
+				String lastName = CreateRandomField.getRandomEnglishLastName();
+				final TLRequestAuthSignUp tlRequestAuthSignUp = getSignUpRequest(
+						code, firstName, lastName);
 				authorization = kernelComm.getApi().doRpcCallNonAuth(
 						tlRequestAuthSignUp);
 				if (authorization != null) {
-					
+
 					config.setRegistered(true);
 					getApiState().doAuth(authorization);
 					BotLogger.info(LOGTAG, "Activation complete as #"
@@ -454,7 +456,7 @@ public class RegKernelAuth extends KernelAuth {
 					BotLogger.info(LOGTAG, "Loaded initial state");
 					resetTimer();
 					result = true;
-					
+
 					json.put("firstName", firstName);
 					json.put("lastName", lastName);
 				} else {

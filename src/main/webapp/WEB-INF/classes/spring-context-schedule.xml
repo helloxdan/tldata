@@ -12,26 +12,28 @@
 	<!-- 调度池 -->
 	<bean id="scheduleService" class="com.thinkgem.jeesite.modules.tl.service.ScheduleService">
 	</bean>
-	<bean id="registeService" class="com.thinkgem.jeesite.modules.tl.service.RegisteService">
-	</bean>
+	  <bean id="botService" class="com.thinkgem.jeesite.modules.tl.service.BotService">
+	</bean>  
 	<!-- <task:scheduler id="taskScheduler" pool-size="10" /> -->
 	<task:scheduled-tasks>
-		<!--更新群组的用户数量 -->
+		<task:scheduled ref="botService" method="scheduleRunWork"
+			cron="0/3 * * * * ?" />
+		<!--更新群组的用户数量
 		<task:scheduled ref="scheduleService" method="scheduleUpdateGroupInfo"
-			cron="0 0/10 * * * ?" />
+			cron="0 0/10 * * * ?" /> -->
 		<!-- 账号自动加入有效群组 <task:scheduled ref="scheduleService" method="scheduleJoinGroup" 
 			cron="0 0/5 * * * ?" /> -->
-		<!-- 抽取用户任务查询，将待处理任务放入队列中 -->
+		<!-- 抽取用户任务查询，将待处理任务放入队列中 
 		<task:scheduled ref="scheduleService" method="scheduleFetchUser"
-			cron="0/30 * * * * ?" />
+			cron="0/30 * * * * ?" />-->
 			
-		<!-- 执行抽取用户，没2秒执行一次，控制频率，不被电报封 -->
+		<!-- 执行抽取用户，没2秒执行一次，控制频率，不被电报封
 		<task:scheduled ref="scheduleService" method="handleAccountFetchUser"
-			cron="0/2 * * * * ?" />
+			cron="0/2 * * * * ?" /> -->
 
 		<!-- 定时从卡商获取手机列表，3分钟一次 -->
 		<task:scheduled ref="registeService" method="getPhoneList"
-			cron="0/20 * * * * ?" />
+			cron="0/10 * * * * ?" />
 		<!-- 定时从卡商获取手机验证码列表，10秒一次 -->
 		<task:scheduled ref="registeService" method="getPhoneCodeList"
 			cron="0/5 * * * * ?" />

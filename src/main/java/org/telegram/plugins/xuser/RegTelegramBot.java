@@ -22,6 +22,7 @@ import org.telegram.mtproto.log.LogInterface;
 import org.telegram.mtproto.log.Logger;
 
 import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
+import com.thinkgem.jeesite.modules.tl.service.RegisteService;
 
 /**
  * @author Hendrik Hofstadt
@@ -75,14 +76,15 @@ public class RegTelegramBot extends TelegramBot {
 				if (message != null && message.startsWith("FLOOD_WAIT_")) {
 					int delay = Integer.parseInt(message
 							.substring("FLOOD_WAIT_".length()));
-					logger.error("接口被禁用~~~~{}", delay);
 					if (delay > 10)
 						floodCount++;
 					// 少于3次，忽略
-					if (floodCount <= 2)
+					if (floodCount <= 5)
 						return;
+					
+					logger.error("reg接口被禁用~~~~{}", delay);
 					// 停止注册
-					RegistePoolService.start = false;
+					RegisteService.start = false;
 					if (delay < 300) {
 						// 如果被禁时间不是很长，设置定时器，过后再启动
 						if (timer == null) {
@@ -90,15 +92,17 @@ public class RegTelegramBot extends TelegramBot {
 							timer.schedule(new TimerTask() {
 
 								@Override
-								public void run() {
+								public void run() {									
 									logger.error("reg接口被禁用，恢复运行~~~~");
-									RegistePoolService.start = true;
+									RegisteService.start = true;
 									timer.cancel();
 									timer = null;
 									floodCount = 0;
 								}
 							}, (delay + 60) * 1000); // 被禁时间+60秒
 						}
+					}else{
+						//大于300秒的，就直接停止了，不设置定时器重新启动了
 					}
 				}
 			}

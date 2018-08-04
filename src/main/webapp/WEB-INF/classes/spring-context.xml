@@ -163,4 +163,10 @@
 		<property name="cardSupplier" value="60m" />
 		<property name="cardMaps" ref="cardMaps"/>
 	</bean>
+	
+	<bean id="registeService"
+		class="com.thinkgem.jeesite.modules.tl.service.RegisteService">
+		<property name="cardSupplier" value="60m" />
+		<property name="cardMaps" ref="cardMaps"/>
+	</bean>
 </beans>

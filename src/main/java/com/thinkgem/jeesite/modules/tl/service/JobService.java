@@ -3,6 +3,8 @@
  */
 package com.thinkgem.jeesite.modules.tl.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -27,6 +29,7 @@ import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.mapper.JsonMapper;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
+import com.thinkgem.jeesite.common.utils.FileUtils;
 import com.thinkgem.jeesite.modules.sys.listener.WebContextListener;
 import com.thinkgem.jeesite.modules.tl.dao.JobDao;
 import com.thinkgem.jeesite.modules.tl.entity.Job;
@@ -51,10 +54,32 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	@Autowired
 	private JobTaskService jobTaskService;
 	private static int[] lock = new int[] { 1 };
+	// 保存jobtask数据线程
+	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1,
+			new DaemonThreadFactory());
+	// 用于定期更新JobGroupList中的数据到数据库中
+	ScheduledExecutorService scheduledThreadPool = Executors
+			.newScheduledThreadPool(1, new DaemonThreadFactory());
+	ScheduledFuture<?> scheduledFuture = null;
+	// 存放所有采集的群组
+	List<JobGroup> jobGroupList = new ArrayList<JobGroup>();
+	Job job = null;
+	// 任务的配置文件，用于输出更新群组采集offset
+	private String cfgFile;
+
+	private boolean run = true;
 
 	public JobService() {
 		WebContextListener.addExecutorService(jobTaskThreadPool);
 		WebContextListener.addExecutorService(scheduledThreadPool);
+	}
+
+	public String getCfgFile() {
+		return cfgFile;
+	}
+
+	public void setCfgFile(String cfgFile) {
+		this.cfgFile = cfgFile;
 	}
 
 	public Job get(String id) {
@@ -173,13 +198,13 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 			jobtask.setLimitNum(Constants.FETCH_PAGE_SIZE);
 
 			// 放入队列中，存储数据库
-			jobTaskThreadPool.execute(new Runnable() {
-				@Override
-				public void run() {
-					saveJobTask(jobtask);
-				}
-
-			});
+			// jobTaskThreadPool.execute(new Runnable() {
+			// @Override
+			// public void run() {
+			// saveJobTask(jobtask);
+			// }
+			//
+			// });
 		}
 
 		logger.debug("任务数据，{}", JsonMapper.toJsonString(data));
@@ -194,11 +219,29 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public void updateJobGroup() {
-		if (jobGroupList.size() > 0)
-			logger.info("开始更新jobGroup数据");
-		// 主要更新offset的值，便于重启的时候，能从正确的位置开始
-		for (JobGroup jobGroup : jobGroupList) {
-			jobGroupService.updateOffset(jobGroup);
+		if (jobGroupList.size() > 0) {
+			logger.debug("开始更新jobGroup数据");
+			// 主要更新offset的值，便于重启的时候，能从正确的位置开始
+			// for (JobGroup jobGroup : jobGroupList) {
+			// jobGroupService.updateOffset(jobGroup);
+			// }
+			if (StringUtils.isBlank(getCfgFile())) {
+				logger.error("输出配置文件为空");
+				return;
+			}
+			try {
+				List<String> lines = new ArrayList<String>();
+				lines.add(job.getGroupUrl());
+				lines.add(job.getUsernum() + "");
+				for (JobGroup jobGroup : jobGroupList) {
+					lines.add(jobGroup.getGroupUrl() + ","
+							+ jobGroup.getOffset());
+				}
+				// 写入文件
+				FileUtils.writeLines(new File(getCfgFile()), lines);
+			} catch (IOException e) {
+				logger.error("输出配置文件失败，{}，{}", getCfgFile(), e.getMessage());
+			}
 		}
 	}
 
@@ -221,18 +264,29 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 		}
 	}
 
-	// 保存jobtask数据线程
-	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1,
-			new DaemonThreadFactory());
-	// 用于定期更新JobGroupList中的数据到数据库中
-	ScheduledExecutorService scheduledThreadPool = Executors
-			.newScheduledThreadPool(1, new DaemonThreadFactory());
-	ScheduledFuture<?> scheduledFuture = null;
-	// 存放所有采集的群组
-	List<JobGroup> jobGroupList = new ArrayList<JobGroup>();
-	Job job = null;
+	public Job getJob() {
+		return job;
+	}
 
-	private boolean run = true;
+	public void setJob(Job job) {
+		this.job = job;
+	}
+
+	public boolean isRun() {
+		return run;
+	}
+
+	public void setRun(boolean run) {
+		this.run = run;
+	}
+
+	public List<JobGroup> getJobGroupList() {
+		return jobGroupList;
+	}
+
+	public void setJobGroupList(List<JobGroup> jobGroupList) {
+		this.jobGroupList = jobGroupList;
+	}
 
 	/**
 	 * 将采集的群组列表放入内容，供work获取任务数据。
@@ -242,9 +296,9 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	public int initRunData(Job job) {
 		this.run = true;
 		this.job = job;
-		JobGroup jobGroup = new JobGroup();
-		jobGroup.setJobId(job.getId());
-		jobGroupList = jobGroupService.findValidList(jobGroup);
+		// JobGroup jobGroup = new JobGroup();
+		// jobGroup.setJobId(job.getId());
+		// jobGroupList = jobGroupService.findValidList(jobGroup);
 		int jobGroupNum = jobGroupList.size();
 
 		long period = Long
@@ -257,9 +311,9 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 						public void run() {
 							if (run) {
 								updateJobGroup();
-							}else{
+							} else {
 								scheduledFuture.cancel(true);
-								scheduledFuture=null;
+								scheduledFuture = null;
 							}
 						}
 					}, 1, period, TimeUnit.SECONDS);
@@ -271,8 +325,8 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 
 	public void stop() {
 		this.run = false;
-		
-		//停止后，执行一次更新操作
+
+		// 停止后，执行一次更新操作
 		updateJobGroup();
 	}
 }

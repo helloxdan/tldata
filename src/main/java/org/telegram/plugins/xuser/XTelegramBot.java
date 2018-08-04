@@ -86,7 +86,7 @@ public class XTelegramBot extends TelegramBot {
 				if (message != null && message.startsWith("FLOOD_WAIT_")) {
 					int delay = Integer.parseInt(message
 							.substring("FLOOD_WAIT_".length()));
-					logger.error("接口被禁用~~~~{}", delay);
+					logger.error("work接口被禁用~~~~{}", delay);
 					if(delay<10)
 						return;
 					// 停止注册

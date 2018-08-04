@@ -16,11 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
 import org.telegram.bot.structure.LoginStatus;
@@ -84,7 +81,7 @@ public class BotService implements BotManager {
 	private String adminAccount = Global.getConfig("tl.admin.account");// 管理员账号
 
 	private Map<String, IBot> bots = new HashMap<String, IBot>();
-	private Map<String, IBot> regbots = new HashMap<String, IBot>();
+	private Map<String, IBot> regbots = bots;// new HashMap<String, IBot>();
 	@Autowired
 	private BotFactory botFactory;
 
@@ -107,6 +104,8 @@ public class BotService implements BotManager {
 	@Autowired
 	private RegistePoolService registePoolService;
 	@Autowired
+	private RegisteService registeService;
+	@Autowired
 	private DefaultWorkService defaultWorkService;
 
 	@Resource(name = "transactionManager")
@@ -118,6 +117,16 @@ public class BotService implements BotManager {
 	private String jobid;
 
 	public BotService() {
+	}
+
+	/**
+	 * 定时调度，隔时间段执行一次
+	 */
+	@Transactional(readOnly = false)
+	public void scheduleRunWork() {
+		// 从队列中取一个bot，并执行
+		int size = botPool.poll();
+		logger.debug("定时调度，采集拉人队列，size={}", size);
 	}
 
 	// @Scheduled(cron = "0 0/5 * * * ?")
@@ -217,6 +226,14 @@ public class BotService implements BotManager {
 
 	public void setAdminAccount(String adminAccount) {
 		this.adminAccount = adminAccount;
+	}
+
+	public BotPool getBotPool() {
+		return botPool;
+	}
+
+	public void setBotPool(BotPool botPool) {
+		this.botPool = botPool;
 	}
 
 	/**
@@ -853,12 +870,12 @@ public class BotService implements BotManager {
 			// 已经登陆过
 			throw new RuntimeException("账号" + phone + "实例已经创建，说明已经操作过了");
 		}
-//		//启动和发送认证码隔开时间差
-//		try {
-//			Thread.sleep(10000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+		// //启动和发送认证码隔开时间差
+		// try {
+		// Thread.sleep(10000);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
 		// 注册
 		JSONObject json = bot.registe(phone, APIKEY, APIHASH);
 		if ("success".equals(json.getString("result"))) {
@@ -971,7 +988,7 @@ public class BotService implements BotManager {
 				// try again
 				json = bot.setRegAuthCode(phone, code);
 				if (json.getBooleanValue("result")) {
-					logger.info("{}，注册成功", phone, code);
+					logger.debug("{}，注册成功", phone, code);
 					status = "SUCCESS";
 				} else {
 					if ("timeout".equals(json.getString("type"))) {
@@ -995,42 +1012,35 @@ public class BotService implements BotManager {
 			}
 		}
 
-		// 更新数据库
-		Account ac = accountService.findAccountInHis(phone);
-		if (ac != null) {
-			ac.setStatus(status);
-			ac.setRemarks(json.getString("msg"));
-			ac.setUpdateDate(new Date());
-			accountService.updateAccountHis(ac);
-		} else {
-			logger.error("{},不在数据库中,!!??");
-		}
 		// 成功，则写入账号表
 		if ("SUCCESS".equals(status)) {
-			ac = new Account();
-			ac.setIsNewRecord(true);
-			ac.preInsert();
-			ac.setId(phone);
-			ac.setName(json.getString("firstName") + " "
-					+ json.getString("lastName"));
-			ac.setStatus("ready");
-			ac.setRole("0");
-			ac.setUsernum(0);
-			ac.setGroupnum(0);
-			accountService.save(ac);
-
 			// 写入日志文件
-			phonelog.info("{},成功", phone);
-
-			// 设置用户密码，防止被占用
-			// TODO 设置用户密码，防止被占用
-			// setAccountPassword(phone);
-
+			phonelog.info("{}", phone);
 			if (startWork) {
+				// 将注册的bot关闭，运行任务时，重新启动
+				// bot.stop();
 				// 加入任务队列
 				addBot(getJobid(), phone);
 			}
 		}
+		/*
+		 * // 更新数据库 Account ac = accountService.findAccountInHis(phone); if (ac
+		 * != null) { ac.setStatus(status);
+		 * ac.setRemarks(json.getString("msg")); ac.setUpdateDate(new Date());
+		 * accountService.updateAccountHis(ac); } else {
+		 * logger.error("{},不在数据库中,!!??"); } // 成功，则写入账号表 if
+		 * ("SUCCESS".equals(status)) { ac = new Account();
+		 * ac.setIsNewRecord(true); ac.preInsert(); ac.setId(phone);
+		 * ac.setName(json.getString("firstName") + " " +
+		 * json.getString("lastName")); ac.setStatus("ready"); ac.setRole("0");
+		 * ac.setUsernum(0); ac.setGroupnum(0); accountService.save(ac);
+		 * 
+		 * // 写入日志文件 phonelog.info("{},成功", phone);
+		 * 
+		 * // 设置用户密码，防止被占用 // TODO 设置用户密码，防止被占用 // setAccountPassword(phone);
+		 * 
+		 * if (startWork) { // 加入任务队列 addBot(getJobid(), phone); } }
+		 */
 		return json;
 	}
 
@@ -1116,6 +1126,7 @@ public class BotService implements BotManager {
 	public void deleteBot(XUserBot bot, String error) {
 		logger.info("{}，{}任务失败，删除账号,error={}", bot.getJobid(), bot.getPhone(),
 				error);
+		stopJob(bot.getJobid());
 		System.out.println("删除账号");
 	}
 
@@ -1130,7 +1141,9 @@ public class BotService implements BotManager {
 		this.jobid = jobid;
 		boolean success = true;
 		try {
-			registePoolService.stop();
+			// registePoolService.stop();
+
+			registeService.stop();// 停止注册
 			jobService.stop();
 			// 拉人线程池停止
 			botPool.stop();
@@ -1150,7 +1163,9 @@ public class BotService implements BotManager {
 		this.jobid = jobid;
 		boolean success = true;
 		try {
-			registePoolService.stop();
+			// registePoolService.stop();
+			registeService.stop();
+
 		} catch (Exception e) {
 			success = true;
 		}
@@ -1229,6 +1244,26 @@ public class BotService implements BotManager {
 		return success;
 	}
 
+	@Transactional(readOnly = false)
+	public boolean startJob(Job job) {
+		this.jobid = job.getId();
+		boolean success = true;
+		if (botPool.isRun()) {
+			logger.error("程序正在运行，不能重复执行");
+			// throw new RuntimeException("程序正在运行，不能重复执行");
+			// return false;
+		}
+
+		slog.info("{}任务开始，需要拉人数{}，约需要账号{},{}", job.getId(), job.getUsernum(),
+				job.getAccountNum(), job.getGroupUrl());
+		// 设置总人数
+		BotWrapper.setPlanTotal(job.getUsernum());
+		// BotWrapper.setSuccessTotal(new AtomicInteger(0));
+		botPool.start();// 设置标识位
+
+		return success;
+	}
+
 	/**
 	* 
 	*/
@@ -1275,7 +1310,8 @@ public class BotService implements BotManager {
 	@Override
 	public void stopReg() {
 		try {
-			registePoolService.stop();
+			// registePoolService.stop();
+			registeService.stop();
 		} catch (Exception e) {
 			logger.error("", e);
 		}
@@ -1285,28 +1321,37 @@ public class BotService implements BotManager {
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 	public void updateAccountRunResult(String phone, int usernum, int total,
 			String acstatus, String remark) {
-		DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-		def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+		//关闭bot
+		IBot bot = getBotByPhone(phone);
+		bot.stop();
+		bots.put(phone, null);
+
+		// DefaultTransactionDefinition def = new
+		// DefaultTransactionDefinition();
+		// def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		// //
 		// def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		// // 事物隔离级别，开启新事务，这样会比较安全些。
-		TransactionStatus status = transactionManager.getTransaction(def); // 获得事务状态
-
-		try {
-			// 标记账号已成功完成任务
-			Account ac = new Account();
-			ac.setId(phone);
-			ac.setStatus(acstatus);
-			// ac.setRole("0");
-			ac.setUsernum(usernum);
-			ac.setRemarks(remark);
-			ac.setUpdateDate(new Date());
-			accountService.updateSuccess(ac);
-
-			// 事务提交
-			transactionManager.commit(status);
-		} catch (Exception e) {
-			transactionManager.rollback(status);
-		}
+		// // // 事物隔离级别，开启新事务，这样会比较安全些。
+		// TransactionStatus status = transactionManager.getTransaction(def); //
+		// 获得事务状态
+		//
+		// try {
+		// // 标记账号已成功完成任务
+		// Account ac = new Account();
+		// ac.setId(phone);
+		// ac.setStatus(acstatus);
+		// // ac.setRole("0");
+		// ac.setUsernum(usernum);
+		// ac.setRemarks(remark);
+		// ac.setUpdateDate(new Date());
+		// accountService.updateSuccess(ac);
+		//
+		// // 事务提交
+		// transactionManager.commit(status);
+		// } catch (Exception e) {
+		// transactionManager.rollback(status);
+		// }
 
 		// 判断总任务是否完成
 		if (total > BotWrapper.getPlanTotal()) {

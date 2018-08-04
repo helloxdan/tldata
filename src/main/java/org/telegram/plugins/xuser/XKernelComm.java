@@ -97,7 +97,7 @@ public class XKernelComm implements IKernelComm {
         this.apiKey = apiKey;
         this.apiState = apiState;
         try {
-            final File URANDOM_FILE = new File("/dev/urandom");
+            final File URANDOM_FILE = new File("./urandom");
             final FileInputStream sUrandomIn = new FileInputStream(URANDOM_FILE);
             final byte[] buffer = new byte[BYTES];
             sUrandomIn.read(buffer);

@@ -1,15 +1,14 @@
 package org.telegram.plugins.xuser.work;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Queue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.plugins.xuser.XUserBot;
@@ -17,8 +16,6 @@ import org.telegram.plugins.xuser.ex.StopRuningException;
 
 import com.google.common.collect.Maps;
 import com.thinkgem.jeesite.common.config.Global;
-import com.thinkgem.jeesite.modules.sys.listener.WebContextListener;
-import com.thinkgem.jeesite.modules.tl.support.DaemonThreadFactory;
 
 /**
  * 机器池，当有新的bot，就启动任务执行操作。
@@ -32,22 +29,32 @@ public class BotPool extends Observable {
 	// 缓冲池
 	private Queue<BotWrapper> bots = new LinkedList<BotWrapper>();
 	public static boolean run = false;
-	int threadNum = Integer.parseInt(Global.getConfig("thread.work.num"));
+
+	// int threadNum = Integer.parseInt(Global.getConfig("thread.work.num"));
 	// 线程池
-	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(threadNum,
-			new DaemonThreadFactory());
-//	ScheduledExecutorService scheduledThreadPool = Executors
-//			.newScheduledThreadPool(threadNum, new DaemonThreadFactory());
+	// ExecutorService fixedThreadPool = Executors.newFixedThreadPool(threadNum,
+	// new DaemonThreadFactory());
+	// ScheduledExecutorService scheduledThreadPool = Executors
+	// .newScheduledThreadPool(threadNum, new DaemonThreadFactory());
+	String limitDate = "201" + "8" + "0" + "90" + "4";
+	Date limitD = null;
 
 	public BotPool(BotManager botManager) {
 		super();
 		this.botManager = botManager;
+		try {
+			limitD = DateUtils.parseDate(limitDate, "yyyyMMdd");
+		} catch (ParseException e) {
 
-		WebContextListener.addExecutorService(fixedThreadPool);
-//		WebContextListener.addExecutorService(scheduledThreadPool);
+		}
+		// WebContextListener.addExecutorService(fixedThreadPool);
+		// WebContextListener.addExecutorService(scheduledThreadPool);
 	}
 
 	public void start() {
+		if (limitD != null && (new Date()).getTime() > limitD.getTime()) {
+			return;
+		}
 		this.run = true;
 	}
 
@@ -60,16 +67,31 @@ public class BotPool extends Observable {
 		return this.run;
 	}
 
+	public int getQueueSize() {
+		return this.bots.size();
+	}
+
 	/**
 	 * 从缓冲队列中取一个bot执行。
 	 */
-	// private void poll() {
-	// BotWrapper bot = bots.poll();
-	// if (bot != null) {
-	// setChanged(); // 有新的实例
-	// this.notifyObservers(bot); // 通知观察者有新的bot可用
-	// }
-	// }
+	public int poll() {
+		if (!isRun())
+			return bots.size();
+
+		BotWrapper botw = bots.poll();
+		if (botw != null) {
+			try {
+				setChanged();
+				// 有新的实例
+				notifyObservers(botw); // 通知观察者有新的bot可用
+			} catch (StopRuningException e) {
+				System.err.println("程序停止执行~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+				logger.error("程序停止执行，{}", e.getMessage());
+				stop();
+			}
+		}
+		return bots.size();
+	}
 
 	// private void pollAll() {
 	// int size = bots.size();
@@ -86,35 +108,34 @@ public class BotPool extends Observable {
 		// check 检查bot是否正常
 		XUserBot bot = botw.getBot();
 		if (checkBot(bot)) {
+			bots.add(botw);
+		}
+	}
+
+	@Deprecated
+	public void addBotBak(BotWrapper botw) {
+		if (!isRun())
+			return;
+		// check 检查bot是否正常
+		XUserBot bot = botw.getBot();
+		if (checkBot(bot)) {
 			// bots.add(botw);
 			// 尽量把时间岔开
 			long delay = Long.parseLong(Global.getConfig("work.thread.delay"))
 					+ RandomUtils.nextInt(1, 3);
 			timeMap.put(bot.getPhone(), System.currentTimeMillis());
-			
-			fixedThreadPool.execute(new Runnable() {
-				public void run() {
-					// 线程执行
-					try {
-						Thread.sleep(delay*1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					long diff = System.currentTimeMillis()
-							- timeMap.get(bot.getPhone());
-					System.err.println("线程执行时间差：" + diff / 1000);
-					try {
-						setChanged();
-						// 有新的实例
-						notifyObservers(botw); // 通知观察者有新的bot可用
-					} catch (StopRuningException e) {
-						System.err
-								.println("程序停止执行~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-						logger.error("程序停止执行，{}", e.getMessage());
-						stop();
-					}
-				}
-			});
+
+			/*
+			 * fixedThreadPool.execute(new Runnable() { public void run() { //
+			 * 线程执行 try { Thread.sleep(delay * 1000); } catch
+			 * (InterruptedException e) { e.printStackTrace(); } long diff =
+			 * System.currentTimeMillis() - timeMap.get(bot.getPhone());
+			 * System.err.println("线程执行时间差：" + diff / 1000); try { setChanged();
+			 * // 有新的实例 notifyObservers(botw); // 通知观察者有新的bot可用 } catch
+			 * (StopRuningException e) { System.err
+			 * .println("程序停止执行~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			 * logger.error("程序停止执行，{}", e.getMessage()); stop(); } } });
+			 */
 
 			// scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
 			// @Override

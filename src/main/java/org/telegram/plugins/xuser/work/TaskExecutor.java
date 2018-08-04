@@ -106,30 +106,31 @@ public class TaskExecutor implements Observer {
 			// 把bot放回pool
 			botpool.put(botw, 2);
 		} else {
-			//采集和拉人，拉开一个时间差
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
+			// 采集和拉人，拉开一个时间差
+			// try {
+			// Thread.sleep(2000);
+			// } catch (InterruptedException e) {
+			// e.printStackTrace();
+			// }
+
 			int total = 0;
-			int updateNum = getWorkService().inviteUsers(bot, data, users); 
+			int updateNum = getWorkService().inviteUsers(bot, data, users);
 
 			if (updateNum <= 0) {
 				updateNum = 0;
 				// 累计一次更新为0的操作
 				// 如果超过5次，说明该账号，可能已经用满额度了
 				botw.setEmptyCount(botw.getEmptyCount() + 1);
+
 			} else {
 				// 累计总完成次数
 				total = BotWrapper.addSuccess(updateNum);
 				botw.setEmptyCount(0);// 计数清零
 				slog.info("{},本次成功{}人,已完成{}人,总{}人", bot.getPhone(), updateNum,
 						botw.getUsernum() + updateNum, total);
-				
-				//总任务完成
-				if(total>BotWrapper.getPlanTotal()){
+
+				// 总任务完成
+				if (total > BotWrapper.getPlanTotal()) {
 					botManager.updateAccountRunResult(bot.getPhone(),
 							botw.getUsernum(), total, "success", "成功");
 				}
@@ -137,7 +138,8 @@ public class TaskExecutor implements Observer {
 			// 标记bot拉的人数
 			botw.setUsernum(botw.getUsernum() + updateNum);
 
-			if (botw.getEmptyCount() <= 5 && botw.getUsernum() < 40) {
+			// 如果此时拉人总数已经达到了37以上，也可以认为认为完成
+			if (botw.getEmptyCount() <= 5 && botw.getUsernum() < 37) {
 				// 如果拉的人数不够40，继续放入线程池
 				// FIXME 如果拉的人数不够40，继续放入线程池
 				botpool.put(botw, 2);
