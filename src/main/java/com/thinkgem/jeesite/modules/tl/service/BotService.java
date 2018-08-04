@@ -1322,9 +1322,10 @@ public class BotService implements BotManager {
 	public void updateAccountRunResult(String phone, int usernum, int total,
 			String acstatus, String remark) {
 
-		//关闭bot
+		// 关闭bot
 		IBot bot = getBotByPhone(phone);
-		bot.stop();
+		if (bot != null)
+			bot.stop();
 		bots.put(phone, null);
 
 		// DefaultTransactionDefinition def = new
