@@ -3,9 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
-import org.hibernate.validator.constraints.Length;
-import javax.validation.constraints.NotNull;
-
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 
 /**
@@ -30,7 +27,6 @@ public class DifferencesData extends DataEntity<DifferencesData> {
 		super(id);
 	}
 
-	@Length(min=1, max=15, message="登录账号长度必须介于 1 和 15 之间")
 	public String getAccount() {
 		return account;
 	}
@@ -39,7 +35,6 @@ public class DifferencesData extends DataEntity<DifferencesData> {
 		this.account = account;
 	}
 	
-	@NotNull(message="botid不能为空")
 	public Integer getBotid() {
 		return botid;
 	}
@@ -48,7 +43,6 @@ public class DifferencesData extends DataEntity<DifferencesData> {
 		this.botid = botid;
 	}
 	
-	@NotNull(message="pts不能为空")
 	public Integer getPts() {
 		return pts;
 	}
@@ -57,7 +51,6 @@ public class DifferencesData extends DataEntity<DifferencesData> {
 		this.pts = pts;
 	}
 	
-	@NotNull(message="date不能为空")
 	public Integer getDate() {
 		return date;
 	}
@@ -66,7 +59,6 @@ public class DifferencesData extends DataEntity<DifferencesData> {
 		this.date = date;
 	}
 	
-	@NotNull(message="seq不能为空")
 	public Integer getSeq() {
 		return seq;
 	}

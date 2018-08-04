@@ -3,9 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
-import org.hibernate.validator.constraints.Length;
-import javax.validation.constraints.NotNull;
-
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 
 /**
@@ -30,7 +27,6 @@ public class Chat extends DataEntity<Chat> {
 		super(id);
 	}
 
-	@Length(min=1, max=15, message="所属账号长度必须介于 1 和 15 之间")
 	public String getAccount() {
 		return account;
 	}
@@ -39,7 +35,6 @@ public class Chat extends DataEntity<Chat> {
 		this.account = account;
 	}
 	
-	@NotNull(message="会话ID不能为空")
 	public String getChatid() {
 		return chatid;
 	}
@@ -48,7 +43,6 @@ public class Chat extends DataEntity<Chat> {
 		this.chatid = chatid;
 	}
 	
-	@NotNull(message="是否频道不能为空")
 	public Integer getIsChannel() {
 		return isChannel;
 	}
@@ -57,7 +51,6 @@ public class Chat extends DataEntity<Chat> {
 		this.isChannel = isChannel;
 	}
 	
-	@Length(min=0, max=100, message="群组名称长度必须介于 0 和 100 之间")
 	public String getTitle() {
 		return title;
 	}

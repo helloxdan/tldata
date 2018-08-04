@@ -3,8 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
-import org.hibernate.validator.constraints.Length;
-
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 
 /**
@@ -38,7 +36,6 @@ public class Job extends DataEntity<Job> {
 		super(id);
 	}
 
-	@Length(min = 0, max = 100, message = "任务名称长度必须介于 0 和 100 之间")
 	public String getName() {
 		return name;
 	}
@@ -47,7 +44,6 @@ public class Job extends DataEntity<Job> {
 		this.name = name;
 	}
 
-	@Length(min = 0, max = 200, message = "群组邀请码长度必须介于 0 和 200 之间")
 	public String getGroupUrl() {
 		return groupUrl;
 	}
@@ -56,7 +52,6 @@ public class Job extends DataEntity<Job> {
 		this.groupUrl = groupUrl;
 	}
 
-	@Length(min = 0, max = 200, message = "群组名称长度必须介于 0 和 200 之间")
 	public String getGroupName() {
 		return groupName;
 	}
@@ -81,7 +76,6 @@ public class Job extends DataEntity<Job> {
 		this.fromGroupId = fromGroupId;
 	}
 
-	@Length(min = 0, max = 200, message = "来源群邀请码长度必须介于 0 和 200 之间")
 	public String getFromGroupUrl() {
 		return fromGroupUrl;
 	}
@@ -90,7 +84,6 @@ public class Job extends DataEntity<Job> {
 		this.fromGroupUrl = fromGroupUrl;
 	}
 
-	@Length(min = 0, max = 50, message = "来源群名称长度必须介于 0 和 50 之间")
 	public String getFromGroupName() {
 		return fromGroupName;
 	}
@@ -115,7 +108,6 @@ public class Job extends DataEntity<Job> {
 		this.day = day;
 	}
 
-	@Length(min = 1, max = 100, message = "老板长度必须介于 1 和 100 之间")
 	public String getBoss() {
 		return boss;
 	}
@@ -124,7 +116,6 @@ public class Job extends DataEntity<Job> {
 		this.boss = boss;
 	}
 
-	@Length(min = 1, max = 30, message = "任务状态长度必须介于 1 和 30 之间")
 	public String getStatus() {
 		return status;
 	}

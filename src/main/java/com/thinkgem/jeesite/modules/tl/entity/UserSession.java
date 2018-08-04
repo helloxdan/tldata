@@ -3,9 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
-import org.hibernate.validator.constraints.Length;
-import javax.validation.constraints.NotNull;
-
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 
 /**
@@ -33,7 +30,6 @@ public class UserSession extends DataEntity<UserSession> {
 		super(id);
 	}
 
-	@Length(min = 1, max = 15, message = "登录账号长度必须介于 1 和 15 之间")
 	public String getAccount() {
 		return account;
 	}
@@ -42,7 +38,6 @@ public class UserSession extends DataEntity<UserSession> {
 		this.account = account;
 	}
 
-	@NotNull(message = "用户id不能为空")
 	public Integer getUserid() {
 		return userid;
 	}
@@ -59,7 +54,6 @@ public class UserSession extends DataEntity<UserSession> {
 		this.userhash = userhash;
 	}
 
-	@Length(min = 1, max = 100, message = "用户名称长度必须介于 1 和 100 之间")
 	public String getUsername() {
 		return username;
 	}

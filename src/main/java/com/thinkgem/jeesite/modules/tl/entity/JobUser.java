@@ -5,8 +5,6 @@ package com.thinkgem.jeesite.modules.tl.entity;
 
 import java.util.Date;
 
-import org.hibernate.validator.constraints.Length;
-
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 import com.thinkgem.jeesite.modules.utils.Constants;
 
@@ -47,7 +45,6 @@ public class JobUser extends DataEntity<JobUser> {
 		super(id);
 	}
 
-	@Length(min = 0, max = 64, message = "任务ID长度必须介于 0 和 64 之间")
 	public String getJobId() {
 		return jobId;
 	}
@@ -56,7 +53,6 @@ public class JobUser extends DataEntity<JobUser> {
 		this.jobId = jobId;
 	}
 
-	@Length(min = 0, max = 64, message = "登录账号长度必须介于 0 和 64 之间")
 	public String getAccount() {
 		return account;
 	}
@@ -81,7 +77,6 @@ public class JobUser extends DataEntity<JobUser> {
 		this.userid = userid;
 	}
 
-	@Length(min = 0, max = 100, message = "用户名长度必须介于 0 和 100 之间")
 	public String getUsername() {
 		return username;
 	}
@@ -98,7 +93,6 @@ public class JobUser extends DataEntity<JobUser> {
 		this.userHash = userHash;
 	}
 
-	@Length(min = 0, max = 1, message = "是否已邀请长度必须介于 0 和 1 之间")
 	public String getStatus() {
 		return status;
 	}

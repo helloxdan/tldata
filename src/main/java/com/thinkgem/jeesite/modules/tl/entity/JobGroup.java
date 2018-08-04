@@ -3,10 +3,9 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
-import org.hibernate.validator.constraints.Length;
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 
 /**
@@ -36,7 +35,6 @@ public class JobGroup extends DataEntity<JobGroup> implements
 		super(id);
 	}
 
-	@Length(min = 1, max = 64, message = "任务ID长度必须介于 1 和 64 之间")
 	public String getJobId() {
 		return jobId;
 	}
@@ -45,7 +43,6 @@ public class JobGroup extends DataEntity<JobGroup> implements
 		this.jobId = jobId;
 	}
 
-	@Length(min = 1, max = 64, message = "群组ID长度必须介于 1 和 64 之间")
 	public String getGroupId() {
 		return groupId;
 	}
@@ -54,7 +51,6 @@ public class JobGroup extends DataEntity<JobGroup> implements
 		this.groupId = groupId;
 	}
 
-	@Length(min = 0, max = 200, message = "群组名称长度必须介于 0 和 200 之间")
 	public String getGroupName() {
 		return groupName;
 	}
@@ -63,7 +59,6 @@ public class JobGroup extends DataEntity<JobGroup> implements
 		this.groupName = groupName;
 	}
 
-	@Length(min = 0, max = 100, message = "群组link长度必须介于 0 和 100 之间")
 	public String getGroupUrl() {
 		return groupUrl;
 	}
@@ -80,7 +75,6 @@ public class JobGroup extends DataEntity<JobGroup> implements
 		this.usernum = usernum;
 	}
 
-	@Length(min = 0, max = 11, message = "抽取数据的索引偏移数长度必须介于 0 和 11 之间")
 	public int getOffset() {
 		return offset;
 	}

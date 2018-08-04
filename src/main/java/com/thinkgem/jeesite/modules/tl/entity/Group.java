@@ -3,8 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
-import org.hibernate.validator.constraints.Length;
-
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -50,7 +48,6 @@ public class Group extends DataEntity<Group> {
 		this.username = username;
 	}
 
-	@Length(min = 0, max = 200, message = "群组名称长度必须介于 0 和 200 之间")
 	public String getName() {
 		return name;
 	}
@@ -59,7 +56,6 @@ public class Group extends DataEntity<Group> {
 		this.name = name;
 	}
 
-	@Length(min = 0, max = 100, message = "邀请码长度必须介于 0 和 100 之间")
 	public String getUrl() {
 		return url;
 	}
@@ -68,7 +64,6 @@ public class Group extends DataEntity<Group> {
 		this.url = url;
 	}
 
-	@Length(min = 0, max = 1, message = "是否频道长度必须介于 0 和 1 之间")
 	public String getIsChannel() {
 		return isChannel;
 	}

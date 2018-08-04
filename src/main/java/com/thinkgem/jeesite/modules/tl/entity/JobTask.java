@@ -3,8 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
-import org.hibernate.validator.constraints.Length;
-
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 
 /**
@@ -47,7 +45,6 @@ public class JobTask extends DataEntity<JobTask> {
 		super(id);
 	}
 
-	@Length(min = 0, max = 64, message = "任务ID长度必须介于 0 和 64 之间")
 	public String getJobId() {
 		return jobId;
 	}
@@ -56,7 +53,6 @@ public class JobTask extends DataEntity<JobTask> {
 		this.jobId = jobId;
 	}
 
-	@Length(min = 0, max = 64, message = "登录账号长度必须介于 0 和 64 之间")
 	public String getAccount() {
 		return account;
 	}
@@ -65,7 +61,6 @@ public class JobTask extends DataEntity<JobTask> {
 		this.account = account;
 	}
 
-	@Length(min = 0, max = 50, message = "任务类型长度必须介于 0 和 50 之间")
 	public String getType() {
 		return type;
 	}
@@ -74,7 +69,6 @@ public class JobTask extends DataEntity<JobTask> {
 		this.type = type;
 	}
 
-	@Length(min = 0, max = 200, message = "来源群组链接长度必须介于 0 和 200 之间")
 	public String getGroupId() {
 		return groupId;
 	}
@@ -101,7 +95,6 @@ public class JobTask extends DataEntity<JobTask> {
 		this.limitNum = limitNum;
 	}
 
-	@Length(min = 0, max = 1, message = "是否已经完成长度必须介于 0 和 1 之间")
 	public String getStatus() {
 		return status;
 	}

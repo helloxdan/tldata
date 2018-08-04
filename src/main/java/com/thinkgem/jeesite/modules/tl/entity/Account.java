@@ -3,8 +3,6 @@
  */
 package com.thinkgem.jeesite.modules.tl.entity;
 
-import org.hibernate.validator.constraints.Length;
-
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -49,7 +47,6 @@ public class Account extends DataEntity<Account> {
 		super(id);
 	}
 
-	@Length(min = 0, max = 15, message = "用户名长度必须介于 0 和 15 之间")
 	public String getName() {
 		return name;
 	}
@@ -67,7 +64,6 @@ public class Account extends DataEntity<Account> {
 		this.loginDate = loginDate;
 	}
 
-	@Length(min = 0, max = 50, message = "用户状态长度必须介于 0 和 50 之间")
 	public String getStatus() {
 		return status;
 	}
