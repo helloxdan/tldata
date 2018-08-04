@@ -30,8 +30,8 @@ import com.thinkgem.jeesite.modules.utils.JobCacheUtils;
 public class DefaultWorkService implements WorkService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	protected Logger slog = LoggerFactory.getLogger("com.telegram.success");
-	@Autowired
-	private JobTaskService jobTaskService;
+//	@Autowired
+//	private JobTaskService jobTaskService;
 	// 模拟运行的开关
 	// boolean demo = true;
 	public static boolean demo = Boolean.getBoolean(Global.getConfig("tl.work.demo"));

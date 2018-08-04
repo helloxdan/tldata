@@ -32,22 +32,13 @@ public class ScheduleService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private BotDataService botDataService;
-	@Autowired
-	private AccountService accountService;
+	 
 	@Autowired
 	private JobService jobService;
-	@Autowired
-	private JobTaskService jobTaskService;
-	@Autowired
-	private JobUserService jobUserService;
-	@Autowired
-	private GroupService groupService;
-	@Autowired
-	private ChatService chatService;
+	 
 	@Autowired
 	private BotService botService;
-	@Autowired
-	private TlUserService tlUserService;
+ 
 
 	Boolean run = null;
 
@@ -74,15 +65,15 @@ public class ScheduleService {
 			return;
 		// TODO
 		Group group = new Group();
-		List<Group> list = groupService.findListWithoutUsernum(group);
-		int num = 0;
-		for (Group g : list) {
-			// 暂时只执行两次，检查api接口是否支持连续执行
-			if (num == 2)
-				break;
-			updateGroupInfo(g);
-			num++;
-		}
+//		List<Group> list = groupService.findListWithoutUsernum(group);
+//		int num = 0;
+//		for (Group g : list) {
+//			// 暂时只执行两次，检查api接口是否支持连续执行
+//			if (num == 2)
+//				break;
+//			updateGroupInfo(g);
+//			num++;
+//		}
 	}
 
 	@Transactional(readOnly = false)
@@ -97,21 +88,21 @@ public class ScheduleService {
 			// String link = json.getString("link");
 			Integer usernum = json.getInteger("usernum");
 			if (usernum != null) {
-				Group group = groupService.get(g.getId());
-				// group.setUrl(link);
-				group.setUsernum(usernum);
-				group.preUpdate();
-				groupService.save(group);
+//				Group group = groupService.get(g.getId());
+//				// group.setUrl(link);
+//				group.setUsernum(usernum);
+//				group.preUpdate();
+//				groupService.save(group);
 			} else {
 				logger.warn("通过账号{}无法获取群组【{}】详情", botService.getAdminAccount(),
 						g.getName());
 
 				if ("CHANNEL_PRIVATE".equals(json.getString("msg"))) {
 					// remove
-					Group group = groupService.get(g.getId());
-					group.setOut("1");
-					group.setStatus("1");
-					groupService.save(group);
+//					Group group = groupService.get(g.getId());
+//					group.setOut("1");
+//					group.setStatus("1");
+//					groupService.save(group);
 				}
 			}
 
@@ -136,7 +127,7 @@ public class ScheduleService {
 		// 2.找一个link url 不为空，索引偏移量少的群组
 		// 3.执行抽取用户的操作
 		Account account = new Account();
-		List<Account> alist = accountService.findUnfullUserAccount(account);
+		List<Account> alist =null;// accountService.findUnfullUserAccount(account);
 		if (accountFetchQueue.size() > 0) {
 			// 待队列中执行完
 			return;
@@ -159,7 +150,7 @@ public class ScheduleService {
 
 		Account a = accountFetchQueue.poll();
 		if (a != null) {
-			Group g = groupService.getOneGroupForFetch();
+			Group g = null;//groupService.getOneGroupForFetch();
 			if (g == null) {
 				// logger.warn("没有可抽取用户的群组");
 				return;
@@ -174,7 +165,7 @@ public class ScheduleService {
 			fetchUserFromGroup(a.getId(), g);
 
 			// 汇总下用户有效用户数
-			accountService.updateAccountData(a.getId());
+//			accountService.updateAccountData(a.getId());
 		}
 	}
 
@@ -245,7 +236,7 @@ public class ScheduleService {
 				// u.getLangCode();
 				// u.getFirstName();
 				// u.getLastName();
-				jobUserService.insertUserToJob(ju, "auto");
+//				jobUserService.insertUserToJob(ju, "auto");
 
 				TlUser tlu = new TlUser();
 				tlu.setId(ju.getUserid());
@@ -261,14 +252,14 @@ public class ScheduleService {
 						.toString());
 
 				// 同时写入tl_user表
-				tlUserService.insertOrUpdate(tlu);
+//				tlUserService.insertOrUpdate(tlu);
 
 				num++;
 			}
 
 			// 修改群组的offset值
 			g.setOffset(g.getOffset() + Constants.FETCH_PAGE_SIZE);
-			groupService.updateOffset(g);
+//			groupService.updateOffset(g);
 		} catch (Exception e) {
 			logger.error(phone + "-从群组" + g.getName() + "抽取用户异常,{}",
 					e.getMessage());

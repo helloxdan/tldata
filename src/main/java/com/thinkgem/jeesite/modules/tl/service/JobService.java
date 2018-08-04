@@ -16,7 +16,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +25,9 @@ import org.telegram.plugins.xuser.XUserBot;
 import org.telegram.plugins.xuser.work.TaskData;
 import org.telegram.plugins.xuser.work.TaskQuery;
 
-import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.mapper.JsonMapper;
-import com.thinkgem.jeesite.common.persistence.Page;
-import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.common.utils.FileUtils;
-import com.thinkgem.jeesite.modules.sys.listener.WebContextListener;
-import com.thinkgem.jeesite.modules.tl.dao.JobDao;
 import com.thinkgem.jeesite.modules.tl.entity.Job;
 import com.thinkgem.jeesite.modules.tl.entity.JobGroup;
 import com.thinkgem.jeesite.modules.tl.entity.JobTask;
@@ -46,13 +42,13 @@ import com.thinkgem.jeesite.modules.utils.Constants;
  */
 @Service
 @Transactional(readOnly = true)
-public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
-
-	@Autowired
-	private JobGroupService jobGroupService;
-
-	@Autowired
-	private JobTaskService jobTaskService;
+public class JobService implements TaskQuery {
+	protected Logger logger = LoggerFactory.getLogger(getClass());
+	// @Autowired
+	// private JobGroupService jobGroupService;
+	//
+	// @Autowired
+	// private JobTaskService jobTaskService;
 	private static int[] lock = new int[] { 1 };
 	// 保存jobtask数据线程
 	ExecutorService jobTaskThreadPool = Executors.newFixedThreadPool(1,
@@ -70,8 +66,8 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 	private boolean run = true;
 
 	public JobService() {
-		WebContextListener.addExecutorService(jobTaskThreadPool);
-		WebContextListener.addExecutorService(scheduledThreadPool);
+		// WebContextListener.addExecutorService(jobTaskThreadPool);
+		// WebContextListener.addExecutorService(scheduledThreadPool);
 	}
 
 	public String getCfgFile() {
@@ -80,61 +76,6 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 
 	public void setCfgFile(String cfgFile) {
 		this.cfgFile = cfgFile;
-	}
-
-	public Job get(String id) {
-		return super.get(id);
-	}
-
-	public List<Job> findList(Job job) {
-		return super.findList(job);
-	}
-
-	public Page<Job> findPage(Page<Job> page, Job job) {
-		return super.findPage(page, job);
-	}
-
-	@Transactional(readOnly = false)
-	public void save(Job job) {
-		// super.save(job);
-		if (job.getAccountNum() == -1) {
-			// 根据所需要拉的人数，推算出需要的账号
-			Integer accountNum = (int) (job.getUsernum() / Constants.USER_LIMIT_SIZE);
-			job.setAccountNum(accountNum);
-		}
-		if (job.getIsNewRecord()) {
-			job.preInsert();
-			dao.insert(job);
-		} else {
-			job.preUpdate();
-			dao.update(job);
-		}
-	}
-
-	@Transactional(readOnly = false)
-	public void delete(Job job) {
-		super.delete(job);
-
-		// delete job data
-		// TODO
-	}
-
-	@Transactional(readOnly = false)
-	public void del(String ids) {
-		if (StringUtils.isNoneBlank(ids)) {
-			String[] delIds = ids.split(",");
-			for (String id : delIds) {
-				Job job = new Job(id);
-				super.delete(job);
-			}
-		}
-		// 删除缓存
-		// IcareUtils.removeCache();
-	}
-
-	public JSONObject getRpcCallInfoByTaskid(String taskid) {
-		JobTask jobTask = new JobTask(taskid);
-		return this.dao.getRpcCallInfoByTaskid(jobTask);
 	}
 
 	// public TaskData getTaskData2(String jobid) {
@@ -214,7 +155,7 @@ public class JobService extends CrudService<JobDao, Job> implements TaskQuery {
 
 	@Transactional(readOnly = false)
 	public void saveJobTask(JobTask jobtask) {
-		jobTaskService.save(jobtask);
+		// jobTaskService.save(jobtask);
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)

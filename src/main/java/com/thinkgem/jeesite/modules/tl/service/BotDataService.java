@@ -19,6 +19,7 @@ import org.telegram.plugins.xuser.XUtils;
 import org.telegram.plugins.xuser.entity.ChatImpl;
 import org.telegram.plugins.xuser.entity.User;
 
+import com.google.common.collect.Maps;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.modules.tl.entity.DifferencesData;
@@ -30,19 +31,19 @@ import com.thinkgem.jeesite.modules.tl.entity.UserSession;
 @Transactional(readOnly = true)
 public class BotDataService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
-	@Autowired
-	private ChatService chatService;
-	@Autowired
-	private GroupService groupService;
-	@Autowired
-	private UserSessionService userSessionService;
-	@Autowired
-	private DifferencesDataService differencesDataService;
-	@Autowired
-	private TlUserService tlUserService;
+//	@Autowired
+//	private ChatService chatService;
+//	@Autowired
+//	private GroupService groupService;
+//	@Autowired
+//	private UserSessionService userSessionService;
+//	@Autowired
+//	private DifferencesDataService differencesDataService;
+//	@Autowired
+//	private TlUserService tlUserService;
 
 	public Chat getChatById(String phone, int chatId) {
-		return chatService.getChatById(phone, chatId);
+		return null;//chatService.getChatById(phone, chatId);
 
 	}
 
@@ -58,7 +59,7 @@ public class BotDataService {
 			chat.setChatid(cc.getId() + "");
 			chat.setIsChannel(cc.isChannel() ? 1 : 0);
 			chat.setTitle(cc.getTitle());
-			chatService.save(chat);
+//			chatService.save(chat);
 
 			// 增加群组表
 			Group group = new Group();
@@ -68,7 +69,7 @@ public class BotDataService {
 			group.setIsChannel(cc.isChannel() ? "1" : "0");
 			group.setStatus(Global.NO);
 			group.setUpcateDate(new Date());
-			groupService.insertOrUpdate(group);
+//			groupService.insertOrUpdate(group);
 		} catch (Exception e) {
 			logger.error("updateChat", e);
 			success = false;
@@ -88,7 +89,7 @@ public class BotDataService {
 			chat.setChatid(cc.getId() + "");
 			chat.setIsChannel(cc.isChannel() ? 1 : 0);
 			chat.setTitle(cc.getTitle());
-			chatService.save(chat);
+//			chatService.save(chat);
 
 			// 增加群组表
 			Group group = new Group();
@@ -98,7 +99,7 @@ public class BotDataService {
 			group.setIsChannel(cc.isChannel() ? "1" : "0");
 			group.setStatus(Global.NO);
 			group.setUpcateDate(new Date());
-			groupService.insertOrUpdate(group);
+//			groupService.insertOrUpdate(group);
 		} catch (Exception e) {
 			logger.error("addChat", e);
 			success = false;
@@ -107,7 +108,7 @@ public class BotDataService {
 	}
 
 	public @Nullable IUser getUserById(String phone, int userId) {
-		return userSessionService.getUserById(phone, userId);
+		return null;//userSessionService.getUserById(phone, userId);
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
@@ -121,7 +122,7 @@ public class BotDataService {
 			us.setUserid(user.getUserId());
 			us.setUserhash(user.getUserHash());
 			us.setUsername(user.getUsername());
-			userSessionService.save(us);
+//			userSessionService.save(us);
 
 			String firstName=XUtils.transChartset(user.getFirstName());
 			String lastName=XUtils.transChartset(user.getLastName());
@@ -142,7 +143,7 @@ public class BotDataService {
 				tlUser.setLastname(lastName);
 				tlUser.setLangcode(user.getLangCode());
 				tlUser.setMsgTime(new Date());
-				tlUserService.insertOrUpdate(tlUser);
+//				tlUserService.insertOrUpdate(tlUser);
 			}
 		} catch (Exception e) {
 			logger.error("addUser", e);
@@ -163,13 +164,13 @@ public class BotDataService {
 			us.setUserid(user.getUserId());
 			us.setUserhash(user.getUserHash());
 			us.setUsername(user.getUsername());
-			userSessionService.save(us);
+//			userSessionService.save(us);
 
 			// 消息数量+1
 			TlUser tlUser = new TlUser();
 			tlUser.setId(user.getUserId() + "");
 			tlUser.setMsgTime(new Date());
-			tlUserService.updateMsgNum(tlUser);
+//			tlUserService.updateMsgNum(tlUser);
 		} catch (Exception e) {
 			logger.error("addUser", e);
 			success = false;
@@ -185,7 +186,7 @@ public class BotDataService {
 		// 只查询前100条记录
 		page.setPageSize(100);
 		userSession.setPage(page);
-		List<UserSession> list = userSessionService.findList(userSession);
+		List<UserSession> list =new ArrayList<UserSession>();// userSessionService.findList(userSession);
 		List<User> users = new ArrayList<User>();
 		for (UserSession user : list) {
 			User u = new User(user.getUserid());
@@ -199,7 +200,9 @@ public class BotDataService {
 	}
 
 	public @NotNull Map<Integer, int[]> getDifferencesData(String phone) {
-		return differencesDataService.getDifferencesData(phone);
+		@NotNull
+		Map<Integer, int[]> diffMap=Maps.newHashMap();
+		return diffMap ;//differencesDataService.getDifferencesData(phone);
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
@@ -207,7 +210,7 @@ public class BotDataService {
 		// 检查是否存在记录，没有则新增，否则更新
 		try {
 			String id = phone + botId;
-			DifferencesData diff = differencesDataService.get(id);
+			DifferencesData diff =new DifferencesData();// differencesDataService.get(id);
 			if (diff == null) {
 				diff = new DifferencesData();
 				diff.setIsNewRecord(true);
@@ -227,7 +230,7 @@ public class BotDataService {
 				diff.setSeq(seq);
 				diff.setUpdateDate(new Date());
 			}
-			differencesDataService.save(diff);
+//			differencesDataService.save(diff);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

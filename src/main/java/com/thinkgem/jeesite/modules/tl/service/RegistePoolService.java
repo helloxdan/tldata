@@ -68,8 +68,8 @@ public class RegistePoolService {
 	// ScheduledExecutorService queryCodePool = Executors
 	// .newScheduledThreadPool(1);
 	public RegistePoolService() {
-		WebContextListener.addExecutorService(regPool);
-		WebContextListener.addExecutorService(queryCodePool);
+//		WebContextListener.addExecutorService(regPool);
+//		WebContextListener.addExecutorService(queryCodePool);
 	}
 
 	/**

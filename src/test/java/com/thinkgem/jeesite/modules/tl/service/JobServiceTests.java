@@ -83,7 +83,7 @@ public class JobServiceTests extends BaseServiceTests {
 
 		String jobid = "20180726110703";
 		try {
-			botService.startJob(jobid);
+//			botService.startJob(jobid);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
