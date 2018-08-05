@@ -54,7 +54,7 @@ public class BotStartor {
 			String factorstr = System.getProperty("factor");
 			if (StringUtils.isNotBlank(factorstr))
 				factor = Integer.parseInt(factorstr);
-			
+
 			// 卡商编码
 			cardCode = System.getProperty("cardCode");
 			if ("true".equals(isdemo)) {
@@ -80,7 +80,7 @@ public class BotStartor {
 			startWork(jobData);
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("程序移除，退出运行",e);
 			System.exit(0);
 		}
 
@@ -100,8 +100,8 @@ public class BotStartor {
 			g.setGroupId(url[0]);
 			g.setGroupName(url[0]);
 			g.setGroupUrl(url[0]);
-			// FIXME 设置用户数量
-			g.setUsernum(10000);// 设置最大值
+			// 设置用户数量
+			g.setUsernum(Integer.parseInt(url[2]));// 采集群组的总人数
 			g.setOffset(Integer.parseInt(url[1]));// 位置偏移
 			list.add(g);
 		}
@@ -142,6 +142,7 @@ public class BotStartor {
 			logger.info(l);
 		}
 		jobData.toGroupUrl = lines.get(0);
+		// 拉人目标数
 		jobData.usernum = Integer.parseInt(lines.get(1));
 
 		for (int i = 2; i < lines.size(); i++) {
@@ -272,15 +273,21 @@ class JobData {
 	public void addFromGroup(String url) {
 		if (StringUtils.isBlank(url))
 			return;
-		String[] urls = new String[2];
+		String[] urls = new String[3];
 		if (url != null) {
 			String[] strs = url.split(",");
-			if (strs.length > 1) {
+			if (strs.length > 2) {
 				urls[0] = strs[0];
 				urls[1] = strs[1];
+				urls[2] = strs[2];// 群组用户数
+			} else if (strs.length > 1) {
+				urls[0] = strs[0];
+				urls[1] = strs[1];
+				urls[2] = "10000";
 			} else {
 				urls[0] = strs[0];
 				urls[1] = "0";
+				urls[2] = "10000";
 			}
 		}
 		fromGroupUrls.add(urls);

@@ -38,7 +38,10 @@
 		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
 		<property name="configLocation" value="classpath:${ehcache.configFile}" />
 	</bean>
-
+	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManager" ref="cacheManager"/>
+	</bean>
+	
 	<!-- 计划任务配置，用 @Service @Lazy(false)标注类，用@Scheduled(cron = "0 0 2 * * ?")标注方法 -->
 	<task:executor id="executor" pool-size="10" />
 	<task:scheduler id="scheduler" pool-size="10" />
@@ -64,6 +67,7 @@
 	<bean id="jsSmsCardService"
 		class="com.thinkgem.jeesite.modules.tl.service.JsSmsCardService">
 		<property name="restTemplate" ref="restTemplate" />
+		<property name="project" value="${tl.sms.js.project}" />
 		<property name="username" value="${tl.sms.js.username}" />
 		<property name="password" value="${tl.sms.js.password}" />
 		<property name="maxPhoneNum" value="5" />
@@ -71,9 +75,9 @@
 	<bean id="m60SmsCardService"
 		class="com.thinkgem.jeesite.modules.tl.service.M60SmsCardService">
 		<property name="restTemplate" ref="restTemplate" />
-		<property name="project" value="${tl.sms.project}" />
-		<property name="username" value="${tl.sms.username}" />
-		<property name="password" value="${tl.sms.password}" />
+		<property name="project" value="${tl.sms.60m.project}" />
+		<property name="username" value="${tl.sms.60m.username}" />
+		<property name="password" value="${tl.sms.60m.password}" />
 	</bean>
 
   <!-- map集合的注入 -->

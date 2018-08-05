@@ -27,6 +27,7 @@ public class JsSmsCardService implements SmsCardService {
 	boolean run = true;
 	// 每次获取手机号 数量
 	int maxPhoneNum = 1;
+	String project="2596";
 	String username;
 	String password;
 
@@ -269,6 +270,14 @@ public class JsSmsCardService implements SmsCardService {
 
 	public void setMaxPhoneNum(int maxPhoneNum) {
 		this.maxPhoneNum = maxPhoneNum;
+	}
+
+	public String getProject() {
+		return project;
+	}
+
+	public void setProject(String project) {
+		this.project = project;
 	}
 
 }

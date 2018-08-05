@@ -30,11 +30,12 @@ import com.thinkgem.jeesite.modules.utils.JobCacheUtils;
 public class DefaultWorkService implements WorkService {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 	protected Logger slog = LoggerFactory.getLogger("com.telegram.success");
-//	@Autowired
-//	private JobTaskService jobTaskService;
+	// @Autowired
+	// private JobTaskService jobTaskService;
 	// 模拟运行的开关
 	// boolean demo = true;
-	public static boolean demo = Boolean.getBoolean(Global.getConfig("tl.work.demo"));
+	public static boolean demo = Boolean.getBoolean(Global
+			.getConfig("tl.work.demo"));
 
 	Map<String, Integer> chatIdMap = Maps.newHashMap();
 	Map<String, Long> chatAccessMap = Maps.newHashMap();
@@ -182,6 +183,7 @@ public class DefaultWorkService implements WorkService {
 		int size = RandomUtils.nextInt(1, Constants.FETCH_PAGE_SIZE);
 		for (int i = 0; i < size; i++) {
 			JobUser u = new JobUser();
+			u.setId("" + RandomUtils.nextInt(100000, 999999));
 			u.setAccount(bot.getPhone());
 			u.setJobId(bot.getJobid());
 			u.setFirstname("xu");
@@ -189,6 +191,13 @@ public class DefaultWorkService implements WorkService {
 			u.setFromGroup(data.getSrcGroupUrl());
 			u.setFromGroupName(data.getSrcGroupUrl());
 			list.add(u);
+
+			// FIXEM 能判断用户是否已经加过是最好了，数据有点大，用其它缓存才行
+			if (JobCacheUtils.existsJobUser(bot.getJobid(), "" + u.getId())) {
+				//
+				logger.info("用户{}已经存在~", u.getFirstname() + u.getLastname());
+				continue;
+			}
 		}
 	}
 

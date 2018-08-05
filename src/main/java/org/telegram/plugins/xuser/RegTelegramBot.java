@@ -20,6 +20,7 @@ import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.LoginStatus;
 import org.telegram.mtproto.log.LogInterface;
 import org.telegram.mtproto.log.Logger;
+import org.telegram.plugins.xuser.work.BotPool;
 
 import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
 import com.thinkgem.jeesite.modules.tl.service.RegisteService;
@@ -72,17 +73,19 @@ public class RegTelegramBot extends TelegramBot {
 		Logger.registerInterface(new LogInterface() {
 			@Override
 			public void w(String tag, String message) {
-				BotLogger.warn("MTPROTO", message);
+				BotLogger.warn("REG TLAPI MTPROTO", message);
+				// [5_8_2018_14:18:53] {WARNING} MTPROTO - too more
 				if (message != null && message.startsWith("FLOOD_WAIT_")) {
 					int delay = Integer.parseInt(message
 							.substring("FLOOD_WAIT_".length()));
-					if (delay > 10)
+					// if (delay > 10)
+					if (delay > 300)
 						floodCount++;
 					// 少于3次，忽略
-					if (floodCount <= 5)
+					if (floodCount <= 3)
 						return;
-					
-					logger.error("reg接口被禁用~~~~{}", delay);
+
+					logger.error("reg接口被警告禁用~~~~{}", delay);
 					// 停止注册
 					RegisteService.start = false;
 					if (delay < 300) {
@@ -92,18 +95,26 @@ public class RegTelegramBot extends TelegramBot {
 							timer.schedule(new TimerTask() {
 
 								@Override
-								public void run() {									
+								public void run() {
 									logger.error("reg接口被禁用，恢复运行~~~~");
 									RegisteService.start = true;
 									timer.cancel();
 									timer = null;
 									floodCount = 0;
 								}
-							}, (delay + 60) * 1000); // 被禁时间+60秒
+							}, (60 + 60) * 1000); // 被禁时间+60秒（改为固定时间120秒）
 						}
-					}else{
-						//大于300秒的，就直接停止了，不设置定时器重新启动了
+					} else {
+						// 大于300秒的，就直接停止了，不设置定时器重新启动了
+						
 					}
+				} else if (message != null && message.startsWith("too more")) {
+					// 停止
+					logger.error("reg接口警告 too more，停止运行~~~~~~~~~~~~~");
+					RegisteService.start = false;
+					BotPool.run = false;
+				} else {
+
 				}
 			}
 
@@ -228,7 +239,10 @@ public class RegTelegramBot extends TelegramBot {
 
 	private void createKernelComm() {
 		final long start = System.currentTimeMillis();
-		this.kernelComm = new KernelComm(apiKey, apiState);
+		// this.kernelComm = new KernelComm(apiKey, apiState);
+		XKernelComm kernelComm2 = new XKernelComm(apiKey, apiState);
+		// kernelComm2.setBot(this);
+		this.kernelComm = kernelComm2;
 		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
 				getKernelComm().getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));

@@ -146,8 +146,8 @@ public class TaskExecutor implements Observer {
 			} else {
 
 				if (botw.getEmptyCount() > 5) {
-					slog.info("{}，{}， 已完成{}，账号失效，退出", bot.getJobid(),
-							bot.getPhone(), botw.getUsernum());
+					slog.info("{}，{}， 已完成{}/{}，账号失效，退出", bot.getJobid(),
+							bot.getPhone(), botw.getUsernum(), total);
 					// 如果5次，一个都没拉到，说明可能账号已经拉满人数了
 					if (botw.getUsernum() == 0) {
 						// FIXME 标记账号已完成任务
@@ -156,7 +156,7 @@ public class TaskExecutor implements Observer {
 								"5次都拉不到人，可能已经拉过人");
 					}
 				} else {
-					slog.info("{}，{}，{},total={},完成任务，退出", bot.getJobid(),
+					slog.info("{}，{}，{}/{},本号任务完成，退出", bot.getJobid(),
 							bot.getPhone(), botw.getUsernum(), total);
 
 					// FIXME 标记账号已完成任务

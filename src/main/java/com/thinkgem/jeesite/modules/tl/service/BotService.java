@@ -72,18 +72,17 @@ public class BotService implements BotManager {
 	@Autowired
 	private BotFactory botFactory;
 	@Autowired
-	private BotDataService  botDataService;
-	 
+	private BotDataService botDataService;
+
 	@Autowired
 	private JobService jobService;
- 
+
 	@Autowired
 	private RegistePoolService registePoolService;
 	@Autowired
 	private RegisteService registeService;
 	@Autowired
 	private DefaultWorkService defaultWorkService;
- 
 
 	private BotPool botPool = null;
 
@@ -159,7 +158,7 @@ public class BotService implements BotManager {
 	@Transactional(readOnly = false)
 	public String accountInit(RequestData data) {
 		// 1.将所有注册过的账号设置为就绪状态
-//		accountService.resetAccountStatus();
+		// accountService.resetAccountStatus();
 		// 2.将所有实例注销
 		logger.info("注销所有实例");
 		Set<String> sets = bots.keySet();
@@ -210,8 +209,6 @@ public class BotService implements BotManager {
 		this.botPool = botPool;
 	}
 
- 
-
 	/**
 	 * @param data
 	 */
@@ -236,7 +233,7 @@ public class BotService implements BotManager {
 				// bots.put(getAdminAccount(), bot);
 				bot.setStatus(XUserBot.STATUS_OK);
 				// 更改帐号状态为run
-//				updateAccountState(data.getPhone(), Account.STATUS_RUN);
+				// updateAccountState(data.getPhone(), Account.STATUS_RUN);
 			} else {
 				String title = data.getPhone() + "登录失败，status" + status;
 				logger.error(title);
@@ -254,6 +251,7 @@ public class BotService implements BotManager {
 		}
 		return status;
 	}
+
 	/**
 	 * 删除账号。
 	 * 
@@ -262,14 +260,14 @@ public class BotService implements BotManager {
 	@Transactional(readOnly = false)
 	public void removeAccount(String phone) {
 		try {
-//			accountService.delete(new Account(phone));
+			// accountService.delete(new Account(phone));
 			// 删除文件
 			deleteAuthFile(phone);
 		} catch (Exception e) {
 			logger.error("删除账号{},error={}", phone, e.getMessage());
 		}
 	}
-	 
+
 	@Transactional(readOnly = false)
 	public JSONObject getState(RequestData data) {
 		IBot bot = getBot(data);
@@ -301,7 +299,6 @@ public class BotService implements BotManager {
 		return bot.importInvite(data.getUrl());
 	}
 
-	   
 	@Transactional(readOnly = false)
 	public boolean stop(RequestData data) {
 		IBot bot = getBot(data);
@@ -332,7 +329,7 @@ public class BotService implements BotManager {
 
 		if (bot.isAuthCancel()) {
 			bots.put(data.getPhone(), null);
-//			removeAccount(data.getPhone());
+			 removeAccount(data.getPhone());
 			throw new RuntimeException(data.getPhone() + "账号失效");
 		}
 		return bot;
@@ -368,7 +365,7 @@ public class BotService implements BotManager {
 
 		if (bot != null && bot.isAuthCancel()) {
 			bots.put(phone, null);
-//			removeAccount(phone);
+			 removeAccount(phone);
 			throw new UnvalidateAccountException(phone + "账号失效");
 		}
 		return bot;
@@ -400,13 +397,11 @@ public class BotService implements BotManager {
 
 		if (bot != null && bot.isAuthCancel()) {
 			regbots.put(phone, null);
-//			removeAccount(phone);
+			 removeAccount(phone);
 			throw new UnvalidateAccountException(phone + "账号失效");
 		}
 		return bot;
 	}
-
-	  
 
 	/**
 	 * 在某账号下查找用户名和群组。
@@ -420,6 +415,7 @@ public class BotService implements BotManager {
 		IBot bot = getBotByPhone(phone);
 		return bot.searchUser(username);
 	}
+
 	/**
 	 * 注册单个账号。
 	 * 
@@ -431,29 +427,29 @@ public class BotService implements BotManager {
 		logger.debug("注册，发送验证码，{}", phone);
 		String status = "FAILUE";
 		// 1.先检查账号是否已经注册过了
-//		Account ac = accountService.findAccountInHis(phone);
+		// Account ac = accountService.findAccountInHis(phone);
 		boolean save = true;
-//		if (ac != null) {
-//			save = false;
-//			if ("SUCCESS".equals(ac.getStatus())) {
-//				logger.warn("账号{}已经在数据库中，不用注册了", phone);
-//				return success;
-//			}
-//			if ("FAILURE".equals(ac.getStatus())) {
-//				// 2.检查账号是否已经处理过。有可能账号已经试过不成功，黑名单
-//				logger.warn("账号{}提交注册失败，已列入黑名单", phone);
-//				return success;
-//			} else {
-//				// 记录尝试次数+1
-//				ac.setTrynum(ac.getTrynum() + 1);
-//				ac.setUpdateDate(new Date());
-//				accountService.updateAccountHis(ac);
-//				logger.warn("账号{}注册失败，try again", phone);
-//
-//				regbots.put(phone, null);
-//			}
-//
-//		}
+		// if (ac != null) {
+		// save = false;
+		// if ("SUCCESS".equals(ac.getStatus())) {
+		// logger.warn("账号{}已经在数据库中，不用注册了", phone);
+		// return success;
+		// }
+		// if ("FAILURE".equals(ac.getStatus())) {
+		// // 2.检查账号是否已经处理过。有可能账号已经试过不成功，黑名单
+		// logger.warn("账号{}提交注册失败，已列入黑名单", phone);
+		// return success;
+		// } else {
+		// // 记录尝试次数+1
+		// ac.setTrynum(ac.getTrynum() + 1);
+		// ac.setUpdateDate(new Date());
+		// accountService.updateAccountHis(ac);
+		// logger.warn("账号{}注册失败，try again", phone);
+		//
+		// regbots.put(phone, null);
+		// }
+		//
+		// }
 
 		XUserBot bot = (XUserBot) regbots.get(phone);
 		if (bot == null) {
@@ -516,16 +512,16 @@ public class BotService implements BotManager {
 		}
 		if (save) {
 			// 保存try记录
-//			ac = new Account();
-//			ac.setIsNewRecord(true);
-//			ac.setId(phone);
-//			ac.setTrynum(1);
-//			ac.setStatus(status);
-//			ac.setUpdateDate(new Date());
-//			ac.setRole("0");
-//			ac.setCreateBy(new User("1"));
-//			ac.setUpdateBy(new User("1"));
-//			accountService.insertAccountHis(ac);
+			// ac = new Account();
+			// ac.setIsNewRecord(true);
+			// ac.setId(phone);
+			// ac.setTrynum(1);
+			// ac.setStatus(status);
+			// ac.setUpdateDate(new Date());
+			// ac.setRole("0");
+			// ac.setCreateBy(new User("1"));
+			// ac.setUpdateBy(new User("1"));
+			// accountService.insertAccountHis(ac);
 		}
 
 		return success;
@@ -536,15 +532,15 @@ public class BotService implements BotManager {
 			// File auth = new File("auth/" + phone + ".auth");
 			// auth.deleteOnExit();
 			String path = Global.getConfig("tl.auth.path") + phone + ".auth";
-			String bakpath = Global.getConfig("tl.auth.path") + "authdel"
-					+ File.separator + phone + ".auth";
-			File bakauth = new File(Global.getConfig("tl.auth.path")
-					+ "authdel");
-			if (!bakauth.exists())
-				bakauth.mkdir();
+			// String bakpath = Global.getConfig("tl.auth.path") + "authdel"
+			// + File.separator + phone + ".auth";
+			// File bakauth = new File(Global.getConfig("tl.auth.path")
+			// + "authdel");
+			// if (!bakauth.exists())
+			// bakauth.mkdir();
 
 			// 备份文件，避免误删除
-			FileUtils.copyFile(path, bakpath);
+			// FileUtils.copyFile(path, bakpath);
 
 			File authfile = new File(path);
 			authfile.deleteOnExit();
@@ -602,7 +598,7 @@ public class BotService implements BotManager {
 				regbots.put(phone, null);
 
 				// 删除auth文件
-//				removeAccount(phone);
+				 removeAccount(phone);
 			}
 		}
 
@@ -666,7 +662,7 @@ public class BotService implements BotManager {
 		boolean success = bot.setAccountPassword(phone, password, hint);
 		if (success) {
 			// 标记账号为已设置密码
-//			accountService.updatePwdLock(phone);
+			// accountService.updatePwdLock(phone);
 		}
 	}
 
@@ -677,13 +673,13 @@ public class BotService implements BotManager {
 	 */
 	@Transactional(readOnly = false)
 	public void setAccountPwd(RequestData data) {
-//		Account account = new Account();
-//		account.setPwdLock(Global.NO);
-//		account.setId(data.getPhone());
-//		List<Account> list = accountService.findList(account);
-//		for (Account ac : list) {
-//			setAccountPassword(ac.getId());
-//		}
+		// Account account = new Account();
+		// account.setPwdLock(Global.NO);
+		// account.setId(data.getPhone());
+		// List<Account> list = accountService.findList(account);
+		// for (Account ac : list) {
+		// setAccountPassword(ac.getId());
+		// }
 	}
 
 	/**
@@ -785,7 +781,6 @@ public class BotService implements BotManager {
 		return success;
 	}
 
-	 
 	@Transactional(readOnly = false)
 	public boolean startJob(Job job) {
 		this.jobid = job.getId();
@@ -814,7 +809,7 @@ public class BotService implements BotManager {
 		// TODO 查询可用账号，放入队列
 		// 可用，1）针对本job，加入用户数未达到40人
 		// account.setRole("0");
-		List<Account> list =null;// accountService.findAvalidList(account);
+		List<Account> list = null;// accountService.findAvalidList(account);
 		slog.warn(" 查询可用账号，放入队列,size={}", list.size());
 		int i = 0;
 		for (Account ac : list) {
@@ -903,9 +898,16 @@ public class BotService implements BotManager {
 			System.out
 					.println("=========================================================================================================");
 			System.out
-					.println("=========================================================================================================");
+					.println("==========================================退出=============================================================");
 			System.out
 					.println("=========================================================================================================");
+			// 停止10秒，然后退出系统
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.exit(0);
 		}
 	}
 

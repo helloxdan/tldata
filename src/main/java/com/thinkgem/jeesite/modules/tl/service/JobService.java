@@ -119,24 +119,30 @@ public class JobService implements TaskQuery {
 			// ！！！！！位置前移，就是下次读取的位置
 			jobGroup.setOffset(jobGroup.getOffset() + Constants.FETCH_PAGE_SIZE);
 
-			// 检查jobGroup的offset到达10000，就删除该jobGroup
+			// 检查jobGroup的offset到达10000或者大于群组的用户数，就删除该jobGroup
 			if (jobGroup.getOffset() >= 9900) {
+				// FIXME 是否超出10000人就不能采集，得测下
+				// jobGroupList.remove(0);
+				logger.warn("{}群组采集已达到1000人，移出列表", jobGroup.getGroupUrl());
+			}
+			if (jobGroup.getOffset() > jobGroup.getUsernum()) {
 				jobGroupList.remove(0);
+				logger.warn("{}群组采集位置到达群组用户数上限，移出列表", jobGroup.getGroupUrl());
 			}
 
 			// ！！！！
 			// logger.info("{},{},offset={}",phone,jobGroup.getGroupUrl(),jobGroup.getOffset());
 
 			// 将数据存储到数据
-			JobTask jobtask = new JobTask();
-			jobtask.setJobId(jobid);
-			jobtask.setStatus(JobTask.STATUS_NONE);//
-			jobtask.setJobGroupUrl(job.getGroupUrl());
-			jobtask.setAccount(phone);
-			jobtask.setGroupId(jobGroup.getGroupId());
-			jobtask.setGroupUrl(jobGroup.getGroupUrl());
-			jobtask.setOffsetNum(jobGroup.getOffset());
-			jobtask.setLimitNum(Constants.FETCH_PAGE_SIZE);
+			// JobTask jobtask = new JobTask();
+			// jobtask.setJobId(jobid);
+			// jobtask.setStatus(JobTask.STATUS_NONE);//
+			// jobtask.setJobGroupUrl(job.getGroupUrl());
+			// jobtask.setAccount(phone);
+			// jobtask.setGroupId(jobGroup.getGroupId());
+			// jobtask.setGroupUrl(jobGroup.getGroupUrl());
+			// jobtask.setOffsetNum(jobGroup.getOffset());
+			// jobtask.setLimitNum(Constants.FETCH_PAGE_SIZE);
 
 			// 放入队列中，存储数据库
 			// jobTaskThreadPool.execute(new Runnable() {
