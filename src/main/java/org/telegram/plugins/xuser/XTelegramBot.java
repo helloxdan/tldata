@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.telegram.api.engine.LoggerInterface;
 import org.telegram.api.engine.storage.AbsApiState;
@@ -21,6 +22,7 @@ import org.telegram.mtproto.log.LogInterface;
 import org.telegram.mtproto.log.Logger;
 import org.telegram.plugins.xuser.work.BotPool;
 
+import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
 
 /**
@@ -34,17 +36,18 @@ public class XTelegramBot extends TelegramBot {
 	protected static org.slf4j.Logger logger = LoggerFactory
 			.getLogger(XTelegramBot.class);
 	private static final String LOGTAG = "KERNELMAIN";
-	private final BotConfig config;
-	private final ChatUpdatesBuilder chatUpdatesBuilder;
-	private final int apiKey;
-	private final String apiHash;
-	private AbsApiState apiState;
-	private KernelAuth kernelAuth;
-	private MainHandler mainHandler;
-	private IKernelComm kernelComm;
+	// private final BotConfig config;
+	// private final ChatUpdatesBuilder chatUpdatesBuilder;
+	// private final int apiKey;
+	// private final String apiHash;
+	// private AbsApiState apiState;
+	// private KernelAuth kernelAuth;
+	// private MainHandler mainHandler;
+	// private IKernelComm kernelComm;
 
 	// 账号认证是否取消，这个是在kernelComm回调方法中得到的
 	private boolean authCancel = false;
+	private static int TRY_NUM = -1;
 
 	public boolean isAuthCancel() {
 		return authCancel;
@@ -57,25 +60,42 @@ public class XTelegramBot extends TelegramBot {
 	public XTelegramBot(BotConfig config,
 			ChatUpdatesBuilder chatUpdatesBuilder, int apiKey, String apiHash) {
 		super(config, chatUpdatesBuilder, apiKey, apiHash);
-		if (config == null) {
-			throw new NullPointerException("At least a BotConfig must be added");
-		}
-		if (chatUpdatesBuilder == null) {
-			throw new NullPointerException(
-					"At least a ChatUpdatesBuilder must be added");
-		}
-		BotLogger.info(LOGTAG, "--------------KERNEL CREATED--------------");
+		// if (config == null) {
+		// throw new NullPointerException("At least a BotConfig must be added");
+		// }
+		// if (chatUpdatesBuilder == null) {
+		// throw new NullPointerException(
+		// "At least a ChatUpdatesBuilder must be added");
+		// }
+		// BotLogger.info(LOGTAG, "--------------KERNEL CREATED--------------");
 		setLogging();
-		this.apiKey = apiKey;
-		this.apiHash = apiHash;
-		this.config = config;
-		this.chatUpdatesBuilder = chatUpdatesBuilder;
-		chatUpdatesBuilder
-				.setDifferenceParametersService(new DifferenceParametersService(
-						chatUpdatesBuilder.getDatabaseManager()));
+		// this.apiKey = apiKey;
+		// this.apiHash = apiHash;
+		// this.config = config;
+		// this.chatUpdatesBuilder = chatUpdatesBuilder;
+		// chatUpdatesBuilder
+		// .setDifferenceParametersService(new DifferenceParametersService(
+		// chatUpdatesBuilder.getDatabaseManager()));
+	}
+
+	public static int getTRY_NUM() {
+		if (TRY_NUM == -1) {
+			String trynum = Global.getConfig("tl.floodwait.trynum");
+			if (StringUtils.isBlank(trynum)) {
+				TRY_NUM = Integer.parseInt(trynum);
+			} else {
+				TRY_NUM = 3;
+			}
+		}
+		return TRY_NUM;
+	}
+
+	public static void setTRY_NUM(int tRY_NUM) {
+		TRY_NUM = tRY_NUM;
 	}
 
 	static Timer timer = null;
+	static int floodCount = 0;
 
 	private static void setLogging() {
 		Logger.registerInterface(new LogInterface() {
@@ -87,7 +107,13 @@ public class XTelegramBot extends TelegramBot {
 					int delay = Integer.parseInt(message
 							.substring("FLOOD_WAIT_".length()));
 					logger.error("work接口被禁用~~~~{}", delay);
-					if(delay<10)
+					if (delay < 10)
+						return;
+					// if (delay > 10)
+					if (delay > 300)
+						floodCount++;
+					// 少于3次，忽略
+					if (floodCount <= getTRY_NUM())
 						return;
 					// 停止注册
 					// RegistePoolService.start=false;
@@ -105,6 +131,7 @@ public class XTelegramBot extends TelegramBot {
 									// RegistePoolService.start = true;
 									BotPool.run = true;
 									timer.cancel();
+									floodCount = 0;
 									timer = null;
 								}
 							}, (delay + 5) * 1000); // 被禁时间+5秒

@@ -4,16 +4,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.telegram.api.engine.LoggerInterface;
-import org.telegram.api.engine.storage.AbsApiState;
 import org.telegram.bot.ChatUpdatesBuilder;
 import org.telegram.bot.kernel.IKernelComm;
 import org.telegram.bot.kernel.KernelAuth;
-import org.telegram.bot.kernel.KernelComm;
 import org.telegram.bot.kernel.MainHandler;
 import org.telegram.bot.kernel.TelegramBot;
-import org.telegram.bot.kernel.differenceparameters.DifferenceParametersService;
 import org.telegram.bot.kernel.engine.MemoryApiState;
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
@@ -22,7 +20,7 @@ import org.telegram.mtproto.log.LogInterface;
 import org.telegram.mtproto.log.Logger;
 import org.telegram.plugins.xuser.work.BotPool;
 
-import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
+import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.modules.tl.service.RegisteService;
 
 /**
@@ -36,34 +34,51 @@ public class RegTelegramBot extends TelegramBot {
 	protected static org.slf4j.Logger logger = LoggerFactory
 			.getLogger(RegTelegramBot.class);
 	private static final String LOGTAG = "KERNELMAIN";
-	private final BotConfig config;
-	private final ChatUpdatesBuilder chatUpdatesBuilder;
-	private final int apiKey;
-	private final String apiHash;
-	private AbsApiState apiState;
+	// private final BotConfig config;
+	// private final ChatUpdatesBuilder chatUpdatesBuilder;
+	// private final int apiKey;
+	// private final String apiHash;
+	// private AbsApiState apiState;
 	private RegKernelAuth kernelAuth;
-	private MainHandler mainHandler;
-	private IKernelComm kernelComm;
+	// private MainHandler mainHandler;
+	// private IKernelComm kernelComm;
+	private static int TRY_NUM = -1;
 
 	public RegTelegramBot(BotConfig config,
 			ChatUpdatesBuilder chatUpdatesBuilder, int apiKey, String apiHash) {
 		super(config, chatUpdatesBuilder, apiKey, apiHash);
-		if (config == null) {
-			throw new NullPointerException("At least a BotConfig must be added");
-		}
-		if (chatUpdatesBuilder == null) {
-			throw new NullPointerException(
-					"At least a ChatUpdatesBuilder must be added");
-		}
-		BotLogger.info(LOGTAG, "--------------KERNEL CREATED--------------");
+		// if (config == null) {
+		// throw new NullPointerException("At least a BotConfig must be added");
+		// }
+		// if (chatUpdatesBuilder == null) {
+		// throw new NullPointerException(
+		// "At least a ChatUpdatesBuilder must be added");
+		// }
+		// BotLogger.info(LOGTAG, "--------------KERNEL CREATED--------------");
 		setLogging();
-		this.apiKey = apiKey;
-		this.apiHash = apiHash;
-		this.config = config;
-		this.chatUpdatesBuilder = chatUpdatesBuilder;
-		chatUpdatesBuilder
-				.setDifferenceParametersService(new DifferenceParametersService(
-						chatUpdatesBuilder.getDatabaseManager()));
+		// this.apiKey = apiKey;
+		// this.apiHash = apiHash;
+		// this.config = config;
+		// this.chatUpdatesBuilder = chatUpdatesBuilder;
+		// chatUpdatesBuilder
+		// .setDifferenceParametersService(new DifferenceParametersService(
+		// chatUpdatesBuilder.getDatabaseManager()));
+	}
+
+	public static int getTRY_NUM() {
+		if (TRY_NUM == -1) {
+			String trynum = Global.getConfig("tl.floodwait.trynum");
+			if (StringUtils.isBlank(trynum)) {
+				TRY_NUM = Integer.parseInt(trynum);
+			} else {
+				TRY_NUM = 3;
+			}
+		}
+		return TRY_NUM;
+	}
+
+	public static void setTRY_NUM(int tRY_NUM) {
+		TRY_NUM = tRY_NUM;
 	}
 
 	static Timer timer = null;
@@ -82,7 +97,7 @@ public class RegTelegramBot extends TelegramBot {
 					if (delay > 300)
 						floodCount++;
 					// 少于3次，忽略
-					if (floodCount <= 3)
+					if (floodCount <= getTRY_NUM())
 						return;
 
 					logger.error("reg接口被警告禁用~~~~{}", delay);
@@ -106,7 +121,7 @@ public class RegTelegramBot extends TelegramBot {
 						}
 					} else {
 						// 大于300秒的，就直接停止了，不设置定时器重新启动了
-						
+
 					}
 				} else if (message != null && message.startsWith("too more")) {
 					// 停止
@@ -136,17 +151,17 @@ public class RegTelegramBot extends TelegramBot {
 		org.telegram.api.engine.Logger.registerInterface(new LoggerInterface() {
 			@Override
 			public void w(String tag, String message) {
-				BotLogger.warn("TELEGRAMAPI", message);
+				BotLogger.warn("x-TELEGRAMAPI", message);
 			}
 
 			@Override
 			public void d(String tag, String message) {
-				BotLogger.debug("TELEGRAMAPI", message);
+				BotLogger.debug("x-TELEGRAMAPI", message);
 			}
 
 			@Override
 			public void e(String tag, Throwable t) {
-				BotLogger.error("TELEGRAMAPI", t);
+				BotLogger.error("x-TELEGRAMAPI", t);
 			}
 		});
 	}

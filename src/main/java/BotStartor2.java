@@ -24,6 +24,7 @@ import com.thinkgem.jeesite.modules.tl.service.JobService;
 import com.thinkgem.jeesite.modules.tl.service.MockSmsCardService;
 import com.thinkgem.jeesite.modules.tl.service.RegisteService;
 import com.thinkgem.jeesite.modules.tl.service.SmsCardService;
+import com.thinkgem.jeesite.modules.tl.vo.RequestData;
 
 /**
  * 
@@ -33,8 +34,8 @@ import com.thinkgem.jeesite.modules.tl.service.SmsCardService;
  * @author ThinkPad
  *
  */
-public class BotStartor {
-	protected static Logger logger = LoggerFactory.getLogger(BotStartor.class);
+public class BotStartor2 {
+	protected static Logger logger = LoggerFactory.getLogger(BotStartor2.class);
 	// 演示模式
 	static boolean mock = false;
 
@@ -51,36 +52,23 @@ public class BotStartor {
 	public static void main(String[] args) {
 		try {
 			String isdemo = System.getProperty("demo");
-			String factorstr = System.getProperty("factor");
-			if (StringUtils.isNotBlank(factorstr))
-				factor = Integer.parseInt(factorstr);
 
-			// 卡商编码
-			cardCode = System.getProperty("cardCode");
 			if ("true".equals(isdemo)) {
 				// 演示模式
 				mock = true;
-				cardCode = "mock";
 			}
-			logger.info("使用卡商编码：{}", cardCode);
-
 			// FIXME
 			initContext();
-			// 取配置文件信息，得到jobid，拉人总数和采集群信息
-			String cfgFileName = System.getProperty("filename");
-			logger.info("读取配置文件：{}", cfgFileName);
 
-			// 设置配置文件，用于输出采集群组的offset
-			getJobService().setCfgFile(cfgFileName);
-
-			JobData jobData = readJobData(cfgFileName);
-			jobData.setJobid(DateUtils.formatDate(new Date(), "yyyyMMddhhmmss"));// 任务id
-
-			// 开始执行
-			startWork(jobData);
+			RequestData data = new RequestData();
+			String phone = System.getProperty("phone");
+			data.setPhone(phone);
+			getBotService().start(data);
+			
+			
 
 		} catch (Exception e) {
-			logger.error("程序移除，退出运行",e);
+			logger.error("程序移除，退出运行", e);
 			System.exit(0);
 		}
 
@@ -241,7 +229,7 @@ public class BotStartor {
 	}
 
 	public static void setBotService(BotService botService) {
-		BotStartor.botService = botService;
+		BotStartor2.botService = botService;
 	}
 
 	public static JobService getJobService() {
@@ -249,7 +237,7 @@ public class BotStartor {
 	}
 
 	public static void setJobService(JobService jobService) {
-		BotStartor.jobService = jobService;
+		BotStartor2.jobService = jobService;
 	}
 
 	public static RegisteService getRegisteService() {
@@ -257,80 +245,7 @@ public class BotStartor {
 	}
 
 	public static void setRegisteService(RegisteService registeService) {
-		BotStartor.registeService = registeService;
-	}
-
-}
-
-class JobData {
-	// 任务数据
-	String jobid;
-	String toGroupUrl;
-	int offset; // 抽取数据的索引偏移数
-	int usernum;
-	List<String[]> fromGroupUrls = new ArrayList<String[]>();
-
-	public void addFromGroup(String url) {
-		if (StringUtils.isBlank(url))
-			return;
-		String[] urls = new String[3];
-		if (url != null) {
-			String[] strs = url.split(",");
-			if (strs.length > 2) {
-				urls[0] = strs[0];
-				urls[1] = strs[1];
-				urls[2] = strs[2];// 群组用户数
-			} else if (strs.length > 1) {
-				urls[0] = strs[0];
-				urls[1] = strs[1];
-				urls[2] = "10000";
-			} else {
-				urls[0] = strs[0];
-				urls[1] = "0";
-				urls[2] = "10000";
-			}
-		}
-		fromGroupUrls.add(urls);
-	}
-
-	public String getJobid() {
-		return jobid;
-	}
-
-	public void setJobid(String jobid) {
-		this.jobid = jobid;
-	}
-
-	public String getToGroupUrl() {
-		return toGroupUrl;
-	}
-
-	public void setToGroupUrl(String toGroupUrl) {
-		this.toGroupUrl = toGroupUrl;
-	}
-
-	public int getUsernum() {
-		return usernum;
-	}
-
-	public void setUsernum(int usernum) {
-		this.usernum = usernum;
-	}
-
-	public List<String[]> getFromGroupUrls() {
-		return fromGroupUrls;
-	}
-
-	public void setFromGroupUrls(List<String[]> fromGroupUrls) {
-		this.fromGroupUrls = fromGroupUrls;
-	}
-
-	public int getOffset() {
-		return offset;
-	}
-
-	public void setOffset(int offset) {
-		this.offset = offset;
+		BotStartor2.registeService = registeService;
 	}
 
 }

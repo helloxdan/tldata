@@ -665,7 +665,8 @@ public class XUserBot implements IBot {
 					.setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
-			logger.info("创建注册实例，" + phone);
+			logger.info("创建注册实例apikey={},apihash={},phone={}", apikey, apihash,
+					phone);
 			kernel = new RegTelegramBot(botConfig, builder, apikey, apihash);
 			// 覆盖默认的DifferenceParametersService
 			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
