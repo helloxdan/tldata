@@ -50,10 +50,23 @@ public class BotStartor {
 	 */
 	public static void main(String[] args) {
 		try {
+			String proxyHost = System.getProperty("proxyHost");
+			String proxyPort = System.getProperty("proxyPort");
+			if (StringUtils.isNotBlank(proxyHost)) {
+				System.out.println("设置代理:"+proxyHost+":"+proxyPort);
+				System.setProperty("socksProxyHost", proxyHost);
+				System.setProperty("socksProxyPort", proxyPort);
+			}
+
 			String isdemo = System.getProperty("demo");
 			String factorstr = System.getProperty("factor");
 			if (StringUtils.isNotBlank(factorstr))
 				factor = Integer.parseInt(factorstr);
+			
+			//指定dc
+			String dcstr = System.getProperty("dc");
+			if (StringUtils.isNotBlank(dcstr))
+				XUserBot.defaultDc=Integer.parseInt(dcstr);
 
 			// 卡商编码
 			cardCode = System.getProperty("cardCode");
@@ -80,7 +93,7 @@ public class BotStartor {
 			startWork(jobData);
 
 		} catch (Exception e) {
-			logger.error("程序移除，退出运行",e);
+			logger.error("程序移除，退出运行", e);
 			System.exit(0);
 		}
 

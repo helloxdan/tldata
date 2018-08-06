@@ -182,11 +182,11 @@ public class JobService implements TaskQuery {
 				lines.add(job.getUsernum() + "");
 				for (JobGroup jobGroup : jobGroupList) {
 					lines.add(jobGroup.getGroupUrl() + ","
-							+ jobGroup.getOffset());
+							+ jobGroup.getOffset()+","+jobGroup.getUsernum());
 				}
 				// 写入文件
 				FileUtils.writeLines(new File(getCfgFile()), lines);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				logger.error("输出配置文件失败，{}，{}", getCfgFile(), e.getMessage());
 			}
 		}

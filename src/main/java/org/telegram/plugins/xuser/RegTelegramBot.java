@@ -8,8 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.telegram.api.engine.LoggerInterface;
 import org.telegram.bot.ChatUpdatesBuilder;
-import org.telegram.bot.kernel.IKernelComm;
-import org.telegram.bot.kernel.KernelAuth;
 import org.telegram.bot.kernel.MainHandler;
 import org.telegram.bot.kernel.TelegramBot;
 import org.telegram.bot.kernel.engine.MemoryApiState;
@@ -18,6 +16,7 @@ import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.LoginStatus;
 import org.telegram.mtproto.log.LogInterface;
 import org.telegram.mtproto.log.Logger;
+import org.telegram.plugins.xuser.support.BotConfigImpl;
 import org.telegram.plugins.xuser.work.BotPool;
 
 import com.thinkgem.jeesite.common.config.Global;
@@ -44,9 +43,14 @@ public class RegTelegramBot extends TelegramBot {
 	// private IKernelComm kernelComm;
 	private static int TRY_NUM = -1;
 
+	private static String phone = null;
+
 	public RegTelegramBot(BotConfig config,
 			ChatUpdatesBuilder chatUpdatesBuilder, int apiKey, String apiHash) {
 		super(config, chatUpdatesBuilder, apiKey, apiHash);
+		if (config instanceof BotConfigImpl) {
+			this.phone = ((BotConfigImpl) config).getPhoneNumber();
+		}
 		// if (config == null) {
 		// throw new NullPointerException("At least a BotConfig must be added");
 		// }
@@ -68,7 +72,7 @@ public class RegTelegramBot extends TelegramBot {
 	public static int getTRY_NUM() {
 		if (TRY_NUM == -1) {
 			String trynum = Global.getConfig("tl.floodwait.trynum");
-			if (StringUtils.isBlank(trynum)) {
+			if (StringUtils.isNotBlank(trynum)) {
 				TRY_NUM = Integer.parseInt(trynum);
 			} else {
 				TRY_NUM = 3;
@@ -88,7 +92,7 @@ public class RegTelegramBot extends TelegramBot {
 		Logger.registerInterface(new LogInterface() {
 			@Override
 			public void w(String tag, String message) {
-				BotLogger.warn("REG TLAPI MTPROTO", message);
+				BotLogger.warn("REG TLAPI MTPROTO", phone + "," + message);
 				// [5_8_2018_14:18:53] {WARNING} MTPROTO - too more
 				if (message != null && message.startsWith("FLOOD_WAIT_")) {
 					int delay = Integer.parseInt(message
@@ -121,13 +125,44 @@ public class RegTelegramBot extends TelegramBot {
 						}
 					} else {
 						// 大于300秒的，就直接停止了，不设置定时器重新启动了
+						// 如果被禁时间不是很长，设置定时器，过后再启动
+						if (timer == null) {
+							timer = new Timer();
+							timer.schedule(new TimerTask() {
 
+								@Override
+								public void run() {
+									logger.error("reg接口被禁用，恢复运行~~~~");
+									RegisteService.start = true;
+									timer.cancel();
+									timer = null;
+									floodCount = 0;
+								}
+							}, (60 + 60) * 1000); // 被禁时间+60秒（改为固定时间120秒）
+						}
 					}
 				} else if (message != null && message.startsWith("too more")) {
 					// 停止
-					logger.error("reg接口警告 too more，停止运行~~~~~~~~~~~~~");
+					logger.error("reg接口警告 too more，停止运行10分钟~~~~~~~~~~~~~");
 					RegisteService.start = false;
 					BotPool.run = false;
+
+					// 如果被禁时间不是很长，设置定时器，过后再启动
+					if (timer == null) {
+						timer = new Timer();
+						timer.schedule(new TimerTask() {
+
+							@Override
+							public void run() {
+								logger.error("reg接口被警告too more禁用，10分钟后恢复运行~~~~");
+								RegisteService.start = true;
+								BotPool.run = true;
+								timer.cancel();
+								timer = null;
+								floodCount = 0;
+							}
+						}, (600) * 1000); // 10分钟
+					}
 				} else {
 
 				}
@@ -170,7 +205,10 @@ public class RegTelegramBot extends TelegramBot {
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException {
 		BotLogger.debug(LOGTAG, "Creating API");
-		apiState = new MemoryApiState(config.getAuthfile());
+		MemoryApiState apiState1 = new MemoryApiState(getConfig().getAuthfile());
+		// FIXME  默认的dc
+		 apiState1.setPrimaryDc(XUserBot.defaultDc);
+		setApiState(apiState1);
 		BotLogger.debug(LOGTAG, "API created");
 		createKernelComm(); // Only set up threads and assign api state
 		createKernelAuth(); // Only assign api state to kernel auth
@@ -196,17 +234,17 @@ public class RegTelegramBot extends TelegramBot {
 		return status;
 	}
 
-	public void startBot() {
-		initKernelHandler();
-	}
-
-	public void stopBot() {
-		// this.mainHandler.stop();
-	}
+	// public void startBot() {
+	// initKernelHandler();
+	// }
+	//
+	// public void stopBot() {
+	// this.mainHandler.stop();
+	// }
 
 	private void initKernelHandler() {
 		final long start = System.currentTimeMillis();
-		this.mainHandler.start();
+		getMainHandler().start();
 		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
 				this.kernelAuth.getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
@@ -214,9 +252,9 @@ public class RegTelegramBot extends TelegramBot {
 
 	private void initKernelComm() {
 		final long start = System.currentTimeMillis();
-		this.kernelComm.init();
+		getKernelComm().init();
 		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
-				this.kernelComm.getClass().getName(),
+				getKernelComm().getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 	}
 
@@ -224,8 +262,9 @@ public class RegTelegramBot extends TelegramBot {
 		final long start = System.currentTimeMillis();
 		// this.kernelAuth = new KernelAuth(this.apiState, config,
 		// this.kernelComm, apiKey, apiHash);
-		this.kernelAuth = new RegKernelAuth(this.apiState, config,
-				this.kernelComm, apiKey, apiHash);
+		this.kernelAuth = new RegKernelAuth(getApiState(), getConfig(),
+				getKernelComm(), getApiKey(), getApiHash());
+		setKernelAuth(this.kernelAuth);
 		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
 				this.kernelAuth.getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
@@ -244,42 +283,24 @@ public class RegTelegramBot extends TelegramBot {
 			NoSuchMethodException, InstantiationException,
 			IllegalAccessException {
 		final long start = System.currentTimeMillis();
-		chatUpdatesBuilder.setKernelComm(kernelComm);
-		this.mainHandler = new MainHandler(kernelComm,
-				chatUpdatesBuilder.build());
+		getChatUpdatesBuilder().setKernelComm(getKernelComm());
+		MainHandler mainHandler2 = new MainHandler(getKernelComm(),
+				getChatUpdatesBuilder().build());
+		setMainHandler(mainHandler2);
 		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
-				this.mainHandler.getClass().getName(),
+				getMainHandler().getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 	}
 
 	private void createKernelComm() {
 		final long start = System.currentTimeMillis();
-		// this.kernelComm = new KernelComm(apiKey, apiState);
-		XKernelComm kernelComm2 = new XKernelComm(apiKey, apiState);
+		// this.kernelComm = new KernelComm(getApiKey(), getApiState());
+		XKernelComm kernelComm2 = new XKernelComm(getApiKey(), getApiState());
 		// kernelComm2.setBot(this);
-		this.kernelComm = kernelComm2;
+		setKernelComm(kernelComm2);
 		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
 				getKernelComm().getClass().getName(),
 				(start - System.currentTimeMillis()) * -1));
 	}
 
-	public BotConfig getConfig() {
-		return this.config;
-	}
-
-	public IKernelComm getKernelComm() {
-		return this.kernelComm;
-	}
-
-	public KernelAuth getKernelAuth() {
-		return this.kernelAuth;
-	}
-
-	public MainHandler getMainHandler() {
-		return this.mainHandler;
-	}
-
-	public boolean isAuthenticated() {
-		return this.apiState.isAuthenticated();
-	}
 }

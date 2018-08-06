@@ -1,11 +1,15 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -14,7 +18,6 @@ import org.telegram.bot.structure.LoginStatus;
 import org.telegram.plugins.xuser.XUserBot;
 
 import com.alibaba.fastjson.JSONObject;
-import com.thinkgem.jeesite.common.utils.DateUtils;
 import com.thinkgem.jeesite.modules.tl.entity.Job;
 import com.thinkgem.jeesite.modules.tl.entity.JobGroup;
 import com.thinkgem.jeesite.modules.tl.service.BotFactory;
@@ -59,19 +62,60 @@ public class BotStartor2 {
 			}
 			// FIXME
 			initContext();
-
+			System.setProperty("socksProxyHost","127.0.0.1");
+			System.setProperty("socksProxyPort","1080");
+			System.out.println(System.getProperty("https.proxyHost"));
+			System.out.println(System.getProperty("https.proxyPort"));
+//			System.setProperty("https.proxyHost","127.0.0.1");
+//			System.setProperty("https.proxyPort","1080");
+			
 			RequestData data = new RequestData();
 			String phone = System.getProperty("phone");
 			data.setPhone(phone);
-			getBotService().start(data);
-			
-			
+			 getBotService().start(data);
+
+//			openUrl();
 
 		} catch (Exception e) {
 			logger.error("程序移除，退出运行", e);
 			System.exit(0);
 		}
 
+	}
+
+	private static void openUrl() {
+		try {
+			
+			// 建立连接
+			URL url = new URL("https://www.google.com");
+			HttpURLConnection httpUrlConn = (HttpURLConnection) url
+					.openConnection();
+			httpUrlConn.setDoInput(true);
+			httpUrlConn.setRequestMethod("GET");
+			httpUrlConn.setRequestProperty("User-Agent",
+					"Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+			// 获取输入流
+			InputStream input = httpUrlConn.getInputStream();
+			// 将字节输入流转换为字符输入流
+			InputStreamReader read = new InputStreamReader(input, "utf-8");
+			// 为字符输入流添加缓冲
+			BufferedReader br = new BufferedReader(read);
+			// 读取返回结果
+			String data = br.readLine();
+			while (data != null) {
+				System.out.println(data);
+				data = br.readLine();
+			}
+			// 释放资源
+			br.close();
+			read.close();
+			input.close();
+			httpUrlConn.disconnect();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

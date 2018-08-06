@@ -158,17 +158,17 @@ public class XTelegramBot extends TelegramBot {
 		org.telegram.api.engine.Logger.registerInterface(new LoggerInterface() {
 			@Override
 			public void w(String tag, String message) {
-				BotLogger.warn("TELEGRAMAPI", message);
+				BotLogger.warn("xx-TELEGRAMAPI", message);
 			}
 
 			@Override
 			public void d(String tag, String message) {
-				BotLogger.debug("TELEGRAMAPI", message);
+				BotLogger.debug("xx-TELEGRAMAPI", message);
 			}
 
 			@Override
 			public void e(String tag, Throwable t) {
-				BotLogger.error("TELEGRAMAPI", t);
+				BotLogger.error("xx-TELEGRAMAPI", t);
 			}
 		});
 	}
@@ -190,13 +190,7 @@ public class XTelegramBot extends TelegramBot {
 		return loginResult;
 	}
 
-	public void startBot() {
-		initKernelHandler();
-	}
-
-	public void stopBot() {
-		this.mainHandler.stop();
-	}
+ 
 
 	private void initKernelHandler() {
 		final long start = System.currentTimeMillis();
@@ -256,23 +250,5 @@ public class XTelegramBot extends TelegramBot {
 				(start - System.currentTimeMillis()) * -1));
 	}
 
-	public BotConfig getConfig() {
-		return this.config;
-	}
-
-	public IKernelComm getKernelComm() {
-		return this.kernelComm;
-	}
-
-	public KernelAuth getKernelAuth() {
-		return this.kernelAuth;
-	}
-
-	public MainHandler getMainHandler() {
-		return this.mainHandler;
-	}
-
-	public boolean isAuthenticated() {
-		return this.apiState.isAuthenticated();
-	}
+	 
 }

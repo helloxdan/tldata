@@ -45,7 +45,7 @@ public class TelegramBot {
         this.apiHash = apiHash;
         this.config = config;
         this.chatUpdatesBuilder = chatUpdatesBuilder;
-        chatUpdatesBuilder.setDifferenceParametersService(new DifferenceParametersService(chatUpdatesBuilder.getDatabaseManager()));
+//        chatUpdatesBuilder.setDifferenceParametersService(new DifferenceParametersService(chatUpdatesBuilder.getDatabaseManager()));
     }
 
     private static void setLogging() {
@@ -155,15 +155,48 @@ public class TelegramBot {
         return this.kernelComm;
     }
 
-    public KernelAuth getKernelAuth() {
+    public void setKernelComm(IKernelComm kernelComm) {
+		this.kernelComm = kernelComm;
+	}
+
+	public KernelAuth getKernelAuth() {
         return this.kernelAuth;
     }
 
-    public MainHandler getMainHandler() {
+    public void setKernelAuth(KernelAuth kernelAuth) {
+		this.kernelAuth = kernelAuth;
+	}
+
+	public MainHandler getMainHandler() {
         return this.mainHandler;
     }
 
-    public boolean isAuthenticated() {
+    public void setMainHandler(MainHandler mainHandler) {
+		this.mainHandler = mainHandler;
+	}
+
+	public boolean isAuthenticated() {
         return this.apiState.isAuthenticated();
     }
+
+	public ChatUpdatesBuilder getChatUpdatesBuilder() {
+		return chatUpdatesBuilder;
+	}
+
+	public int getApiKey() {
+		return apiKey;
+	}
+
+	public String getApiHash() {
+		return apiHash;
+	}
+
+	public AbsApiState getApiState() {
+		return apiState;
+	}
+
+	public void setApiState(AbsApiState apiState) {
+		this.apiState = apiState;
+	}
+    
 }

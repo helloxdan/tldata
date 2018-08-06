@@ -94,6 +94,8 @@ public class XUserBot implements IBot {
 	private BotDataService botDataService;
 	TelegramBot kernel = null;
 
+	public static int defaultDc = 5;
+
 	public IBotDataService getBotDataService(BotDataService botDataService) {
 		// 一个封装实例，每个bot一个实例
 		return new DefaultBotDataService(botDataService);
@@ -428,7 +430,7 @@ public class XUserBot implements IBot {
 	public boolean stop() {
 		if (kernel != null) {
 			kernel.stopBot();
-			// kernel.getKernelComm().getApi().close();
+			kernel.getKernelComm().getApi().close();
 		}
 		// TODO 停止
 		return true;
@@ -592,11 +594,11 @@ public class XUserBot implements IBot {
 		}
 
 		// wait
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		// try {
+		// Thread.sleep(500);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
 
 		data = registe();
 		logger.debug("send registe code result:{},status={}",
@@ -668,6 +670,7 @@ public class XUserBot implements IBot {
 			logger.info("创建注册实例apikey={},apihash={},phone={}", apikey, apihash,
 					phone);
 			kernel = new RegTelegramBot(botConfig, builder, apikey, apihash);
+
 			// 覆盖默认的DifferenceParametersService
 			DifferenceParametersService differenceParametersService = new DifferenceParametersService(
 					botDataService);
@@ -675,6 +678,9 @@ public class XUserBot implements IBot {
 			builder.setDifferenceParametersService(differenceParametersService);
 
 			status = kernel.init();
+			// 指定dc
+			// kernel.getApiState().setPrimaryDc(defaultDc);
+			// kernel.getKernelComm().getApi().switchToDc(defaultDc);
 		} catch (Exception e) {
 			logger.error("启动异常", e);
 			throw new RuntimeException("启动异常:" + e.getMessage());
@@ -729,9 +735,12 @@ public class XUserBot implements IBot {
 						final int destDC = kernelAuth.updateDCWhenLogin(e);
 						if (destDC != -1) {
 							getApiState().setPrimaryDc(destDC);
-							kernelComm.getApi().switchToDc(destDC);
+							// kernelComm.getApi().switchToDc(destDC);
 							sentCode = retryRegiste(destDC);
 						}
+					} else {
+						logger.error("registe error,{},{}", e.getErrorCode(),
+								e.getMessage());
 					}
 				} catch (TimeoutException e) {
 					// BotLogger.error(LOGTAG, e);
@@ -789,12 +798,13 @@ public class XUserBot implements IBot {
 		final TLSentCode sentCode;
 		kernel.getKernelComm().getApi().switchToDc(destDC);
 
-		// wait
+		// wait 迁移dc
 		try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Thread.sleep(300);
+		} catch (InterruptedException ee) {
+			ee.printStackTrace();
 		}
+
 		final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
 		sentCode = kernel.getKernelComm().getApi()
 				.doRpcCallNonAuth(tlRequestAuthSendCode);
