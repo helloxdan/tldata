@@ -142,6 +142,12 @@ public class RegisteService {
 			return;
 		if (!phoneQueue.isEmpty())
 			return;
+		
+		//取码队列超过5个，暂停获取新的号码
+		if(codeQueue.size()>=5){
+			return;
+		}
+		
 		String phone1 = null;
 		try {
 			// 如果队列中太多，暂缓取新手机号

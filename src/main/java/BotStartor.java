@@ -56,6 +56,8 @@ public class BotStartor {
 				System.out.println("设置代理:"+proxyHost+":"+proxyPort);
 				System.setProperty("socksProxyHost", proxyHost);
 				System.setProperty("socksProxyPort", proxyPort);
+				System.setProperty("https.proxyHost",proxyHost);
+				System.setProperty("https.proxyPort",proxyPort);
 			}
 
 			String isdemo = System.getProperty("demo");
