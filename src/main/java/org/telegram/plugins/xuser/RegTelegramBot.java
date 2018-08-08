@@ -101,13 +101,18 @@ public class RegTelegramBot extends TelegramBot {
 					if (delay > 300)
 						floodCount++;
 					// 少于3次，忽略
-					if (floodCount <= getTRY_NUM())
+					if (delay < 86400 && floodCount <= getTRY_NUM())
 						return;
 
 					logger.error("reg接口被警告禁用~~~~{}", delay);
 					// 停止注册
 					RegisteService.start = false;
-					if (delay < 300) {
+					if (delay >= 86400) {
+						logger.error("reg接口被封，封，封！!!!!!!!!!{}", delay);
+						logger.error("程序终止！！！！！");
+						RegisteService.start = false;
+						BotPool.run = false;
+					} else if (delay < 300) {
 						// 如果被禁时间不是很长，设置定时器，过后再启动
 						if (timer == null) {
 							timer = new Timer();
@@ -206,8 +211,8 @@ public class RegTelegramBot extends TelegramBot {
 			InvocationTargetException {
 		BotLogger.debug(LOGTAG, "Creating API");
 		MemoryApiState apiState1 = new MemoryApiState(getConfig().getAuthfile());
-		// FIXME  默认的dc
-		 apiState1.setPrimaryDc(XUserBot.defaultDc);
+		// FIXME 默认的dc
+		apiState1.setPrimaryDc(XUserBot.defaultDc);
 		setApiState(apiState1);
 		BotLogger.debug(LOGTAG, "API created");
 		createKernelComm(); // Only set up threads and assign api state
