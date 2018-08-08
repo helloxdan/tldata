@@ -17,7 +17,7 @@
 	<!-- <task:scheduler id="taskScheduler" pool-size="10" /> -->
 	<task:scheduled-tasks>
 		<task:scheduled ref="botService" method="scheduleRunWork"
-			cron="0/3 * * * * ?" />
+			cron="0/5 * * * * ?" />
 		<!--更新群组的用户数量
 		<task:scheduled ref="scheduleService" method="scheduleUpdateGroupInfo"
 			cron="0 0/10 * * * ?" /> -->

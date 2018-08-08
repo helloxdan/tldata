@@ -139,7 +139,7 @@ public class TaskExecutor implements Observer {
 			botw.setUsernum(botw.getUsernum() + updateNum);
 
 			// 如果此时拉人总数已经达到了37以上，也可以认为认为完成
-			if (botw.getEmptyCount() <= 5 && botw.getUsernum() < 37) {
+			if (botw.getEmptyCount() <= 5 && botw.getUsernum() < 35) {
 				// 如果拉的人数不够40，继续放入线程池
 				// FIXME 如果拉的人数不够40，继续放入线程池
 				botpool.put(botw, 2);

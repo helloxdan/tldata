@@ -91,12 +91,10 @@ public class DefaultWorkService implements WorkService {
 					String firstName = XUtils.transChartset(u.getFirstName());
 					String lastName = XUtils.transChartset(u.getLastName());
 					if (firstName != null
-							&& ((firstName.length() > 100
-									|| lastName.length() > 100 || (firstName
-									.contains("拉人")
-									|| firstName.contains("电报群") || firstName
-										.contains("用户"))))) {
-						logger.debug("用户名长度大于100，存在  拉人  电报群、用户 字样，忽略");
+							&& ((firstName.length() > 50
+									|| lastName.length() > 50 || containForbiddenChar(
+										firstName, lastName)))) {
+						logger.debug("用户名长度大于50，存在  拉人  电报群、用户 字样，忽略");
 						continue;
 					}
 
@@ -124,6 +122,20 @@ public class DefaultWorkService implements WorkService {
 			}
 		}
 		return list;
+	}
+
+	private boolean containForbiddenChar(String firstName, String lastName) {
+		boolean c = firstName.contains("拉人") || firstName.contains("电报群")
+				|| firstName.contains("用户") || firstName.contains("股票")
+				|| firstName.contains("微信") || firstName.contains("私聊")
+				|| firstName.contains("出售") || firstName.contains("管理");
+		if (lastName != null) {
+			c = c || lastName.contains("拉人") || lastName.contains("电报群")
+					|| lastName.contains("用户") || lastName.contains("股票")
+					|| lastName.contains("微信") || lastName.contains("私聊")
+					|| lastName.contains("出售") || lastName.contains("管理");
+		}
+		return c;
 	}
 
 	@Override

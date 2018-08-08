@@ -108,10 +108,18 @@ public class RegTelegramBot extends TelegramBot {
 					// 停止注册
 					RegisteService.start = false;
 					if (delay >= 86400) {
-						logger.error("reg接口被封，封，封！!!!!!!!!!{}", delay);
-						logger.error("程序终止！！！！！");
+						logger.error("API 接口被封，封，封！!!!!!!!!!{}", delay);
+						logger.error("程序终止！！！！！,10秒钟后退出");
 						RegisteService.start = false;
 						BotPool.run = false;
+						
+						// 停止10秒，然后退出系统
+						try {
+							Thread.sleep(10000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						System.exit(0);
 					} else if (delay < 300) {
 						// 如果被禁时间不是很长，设置定时器，过后再启动
 						if (timer == null) {
