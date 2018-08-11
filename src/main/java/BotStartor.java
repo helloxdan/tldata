@@ -53,22 +53,22 @@ public class BotStartor {
 			String proxyHost = System.getProperty("proxyHost");
 			String proxyPort = System.getProperty("proxyPort");
 			if (StringUtils.isNotBlank(proxyHost)) {
-				System.out.println("设置代理:"+proxyHost+":"+proxyPort);
-				System.setProperty("socksProxyHost", proxyHost);
-				System.setProperty("socksProxyPort", proxyPort);
-				System.setProperty("https.proxyHost",proxyHost);
-				System.setProperty("https.proxyPort",proxyPort);
+				// System.out.println("设置代理:"+proxyHost+":"+proxyPort);
+				// System.setProperty("socksProxyHost", proxyHost);
+				// System.setProperty("socksProxyPort", proxyPort);
+				// System.setProperty("https.proxyHost",proxyHost);
+				// System.setProperty("https.proxyPort",proxyPort);
 			}
 
 			String isdemo = System.getProperty("demo");
 			String factorstr = System.getProperty("factor");
 			if (StringUtils.isNotBlank(factorstr))
 				factor = Integer.parseInt(factorstr);
-			
-			//指定dc
+
+			// 指定dc
 			String dcstr = System.getProperty("dc");
 			if (StringUtils.isNotBlank(dcstr))
-				XUserBot.defaultDc=Integer.parseInt(dcstr);
+				XUserBot.defaultDc = Integer.parseInt(dcstr);
 
 			// 卡商编码
 			cardCode = System.getProperty("cardCode");
@@ -78,6 +78,12 @@ public class BotStartor {
 				cardCode = "mock";
 			}
 			logger.info("使用卡商编码：{}", cardCode);
+			//释放所有号码
+			String cardFreeAll = System.getProperty("cardFreeAll");
+			if (StringUtils.isNotBlank(cardFreeAll)
+					&& "true".equals(cardFreeAll)) {
+				RegisteService.freeAllPhone = true;
+			}
 
 			// FIXME
 			initContext();

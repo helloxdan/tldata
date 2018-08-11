@@ -29,4 +29,10 @@ public class EmptySmsCardService implements SmsCardService {
 		
 	}
 
+	@Override
+	public void freeAllPhone() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

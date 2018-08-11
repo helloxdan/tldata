@@ -85,8 +85,8 @@ public class BotPool extends Observable {
 				// 有新的实例
 				notifyObservers(botw); // 通知观察者有新的bot可用
 			} catch (StopRuningException e) {
-				System.err.println("程序停止执行~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 				logger.error("程序停止执行，{}", e.getMessage());
+				System.err.println("程序停止执行~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 				stop();
 			}
 		}

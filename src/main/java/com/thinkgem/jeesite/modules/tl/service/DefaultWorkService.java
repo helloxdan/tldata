@@ -14,6 +14,7 @@ import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
 import org.telegram.plugins.xuser.XUserBot;
 import org.telegram.plugins.xuser.XUtils;
+import org.telegram.plugins.xuser.ex.ForbiddenGroupException;
 import org.telegram.plugins.xuser.work.BotWrapper;
 import org.telegram.plugins.xuser.work.TaskData;
 import org.telegram.plugins.xuser.work.WorkService;
@@ -75,14 +76,30 @@ public class DefaultWorkService implements WorkService {
 			} else {
 				TLVector<TLAbsUser> users = bot.collectUsers(chatId,
 						accessHash, data.getOffset(), data.getLimit());
-				logger.info("采集结果：job={}，account={},size={},{}",
-						bot.getJobid(), phone, users.size(),
+				logger.info("采集结果：job={}，account={},offset={},size={},{}",
+						bot.getJobid(), phone,data.getOffset(), users.size(),
 						data.getSrcGroupName());
 
+				//如果采集不到用户，说明已经到达上限10000或者超出用户数量
+				if(users.size()==0){
+					throw new ForbiddenGroupException(
+							"采集用户数为0，可能已经达到采集上限10000或者超出群组的总用户数");
+				}
+				
 				int num = 0;
 				// 将数据存储到数据库
 				for (TLAbsUser tluser : users) {
 					TLUser u = (TLUser) tluser;
+
+					if (u.isBot() || u.isDeleted() || u.isRestricted()
+							|| u.isVerified()) {
+						logger.debug(
+								"忽略用户{},{}，isBot={},isDeleted={},isRestricted={},isVerified={}",
+								u.getId(), u.getUserName(), u.isBot(),
+								u.isDeleted(), u.isRestricted(), u.isVerified());
+						continue;
+					}
+
 					if (StringUtils.isBlank(u.getUserName())) {
 						logger.debug("用户没有username，忽略");
 						continue;
@@ -187,12 +204,17 @@ public class DefaultWorkService implements WorkService {
 		}
 		return updateNum;
 	}
-
+int mockTotal=0;
 	private void mockCollectUser(XUserBot bot, TaskData data, List<JobUser> list) {
 		System.err.println(bot.getPhone() + ",模拟采集用户," + data.getSrcGroupUrl()
 				+ ",offset=" + data.getOffset() + "~~~~~~~~~~~~~~~~~~~~");
 		// TODO Auto-generated method stub
 		int size = RandomUtils.nextInt(1, Constants.FETCH_PAGE_SIZE);
+		mockTotal=mockTotal+size;
+		if(mockTotal>=150){
+			throw new ForbiddenGroupException(
+					"mock,采集用户数为0，可能已经达到采集上限10000或者超出群组的总用户数");
+		}
 		for (int i = 0; i < size; i++) {
 			JobUser u = new JobUser();
 			u.setId("" + RandomUtils.nextInt(100000, 999999));

@@ -195,6 +195,12 @@ public class JobServiceTests extends BaseServiceTests {
 				// TODO Auto-generated method stub
 
 			}
+
+			@Override
+			public void freeAllPhone() {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 

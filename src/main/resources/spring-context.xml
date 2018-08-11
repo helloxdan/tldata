@@ -86,12 +86,20 @@
 		<property name="username" value="${tl.sms.ym.username}" />
 		<property name="password" value="${tl.sms.ym.password}" />
 	</bean>
+	<bean id="zmSmsCardService"
+		class="com.thinkgem.jeesite.modules.tl.service.ZmSmsCardService">
+		<property name="restTemplate" ref="restTemplate" />
+		<property name="project" value="${tl.sms.zm.project}" />
+		<property name="username" value="${tl.sms.zm.username}" />
+		<property name="password" value="${tl.sms.zm.password}" />
+	</bean>
 
   <!-- map集合的注入 -->
     <util:map id="cardMaps">
         <entry key="js" value-ref="jsSmsCardService"/>
 		<entry key="60m" value-ref="m60SmsCardService"/>
 		<entry key="ym" value-ref="ymSmsCardService"/>
+		<entry key="zm" value-ref="zmSmsCardService"/>
     </util:map>
 	<bean id="registePoolService"
 		class="com.thinkgem.jeesite.modules.tl.service.RegistePoolService">

@@ -15,4 +15,5 @@ public interface SmsCardService {
 
 	void setForbidden(String phone);
 	void freePhone(String phone);
+	void freeAllPhone( );
 }

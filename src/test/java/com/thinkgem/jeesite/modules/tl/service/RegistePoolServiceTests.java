@@ -111,6 +111,12 @@ public class RegistePoolServiceTests {
 				// TODO Auto-generated method stub
 				
 			}
+
+			@Override
+			public void freeAllPhone() {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 

@@ -119,17 +119,20 @@ public class JobService implements TaskQuery {
 			// ！！！！！位置前移，就是下次读取的位置
 			jobGroup.setOffset(jobGroup.getOffset() + Constants.FETCH_PAGE_SIZE);
 
-			// 检查jobGroup的offset到达10000或者大于群组的用户数，就删除该jobGroup
-			if (jobGroup.getOffset() >= 9900) {
-				// FIXME 是否超出10000人就不能采集，得测下
-				// jobGroupList.remove(0);
-				logger.warn("{}群组采集已达到1000人，移出列表", jobGroup.getGroupUrl());
+			//如果设置属性fetchLimit=false，则不校验
+			if (!"false".equals(System.getProperty("fetchLimit"))) {
+				// 检查jobGroup的offset到达10000或者大于群组的用户数，就删除该jobGroup
+				if (jobGroup.getOffset() >= 9900) {
+					// FIXME 是否超出10000人就不能采集，得测下
+					// jobGroupList.remove(0);
+					logger.warn("{}群组采集已达到10000人，移出列表", jobGroup.getGroupUrl());
+				}
+				if (jobGroup.getOffset() > jobGroup.getUsernum()) {
+					jobGroupList.remove(0);
+					logger.warn("{}群组采集位置到达群组用户数上限，移出列表",
+							jobGroup.getGroupUrl());
+				}
 			}
-			if (jobGroup.getOffset() > jobGroup.getUsernum()) {
-				jobGroupList.remove(0);
-				logger.warn("{}群组采集位置到达群组用户数上限，移出列表", jobGroup.getGroupUrl());
-			}
-
 			// ！！！！
 			// logger.info("{},{},offset={}",phone,jobGroup.getGroupUrl(),jobGroup.getOffset());
 
@@ -182,7 +185,8 @@ public class JobService implements TaskQuery {
 				lines.add(job.getUsernum() + "");
 				for (JobGroup jobGroup : jobGroupList) {
 					lines.add(jobGroup.getGroupUrl() + ","
-							+ jobGroup.getOffset()+","+jobGroup.getUsernum());
+							+ jobGroup.getOffset() + ","
+							+ jobGroup.getUsernum());
 				}
 				// 写入文件
 				FileUtils.writeLines(new File(getCfgFile()), lines);

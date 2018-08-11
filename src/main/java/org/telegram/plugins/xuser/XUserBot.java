@@ -371,7 +371,7 @@ public class XUserBot implements IBot {
 		// TODO Auto-generated method stub
 		logger.debug("{},addUsers to group {},{}", getAccount(), chatId,
 				jobUsers.size());
-		int usernum = jobUsers.size();
+		int usernum = 0;//jobUsers.size();
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
 			TLRequestChannelsInviteToChannel req = new TLRequestChannelsInviteToChannel();
@@ -406,9 +406,9 @@ public class XUserBot implements IBot {
 					if (uu instanceof TLUser) {
 						TLUser uuu = (TLUser) uu;
 						if (StringUtils.isNotBlank(uuu.getUserName())) {
-							slog.info("{},id={},username={},from={}",
+							slog.info("{},id={},username={}, from={}",
 									ajobUser.getJobId(), uuu.getId(),
-									uuu.getUserName(),
+									uuu.getUserName(), 
 									ajobUser.getFromGroupName());
 						}
 					} else {
@@ -711,11 +711,11 @@ public class XUserBot implements IBot {
 
 				BotLogger.debug(LOGTAG, " wait formoment for getDC List ");
 				// wait
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+//				try {
+//					Thread.sleep(200);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
 
 				BotConfig config = kernel.getConfig();
 				BotLogger.info(LOGTAG,
@@ -736,6 +736,8 @@ public class XUserBot implements IBot {
 						if (destDC != -1) {
 							getApiState().setPrimaryDc(destDC);
 							// kernelComm.getApi().switchToDc(destDC);
+							// edit by xdan 设置默认dc
+							defaultDc=destDC;
 							sentCode = retryRegiste(destDC);
 						}
 					} else {
@@ -799,11 +801,11 @@ public class XUserBot implements IBot {
 		kernel.getKernelComm().getApi().switchToDc(destDC);
 
 		// wait 迁移dc
-		try {
-			Thread.sleep(300);
-		} catch (InterruptedException ee) {
-			ee.printStackTrace();
-		}
+//		try {
+//			Thread.sleep(300);
+//		} catch (InterruptedException ee) {
+//			ee.printStackTrace();
+//		}
 
 		final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
 		sentCode = kernel.getKernelComm().getApi()

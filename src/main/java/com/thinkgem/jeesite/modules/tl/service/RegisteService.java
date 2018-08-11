@@ -54,6 +54,8 @@ public class RegisteService {
 	public static boolean start = false;
 	private AtomicInteger successSize = new AtomicInteger(0);// 成功数
 	Map<String, Boolean> phoneMap = Maps.newConcurrentMap();
+	//释放释放所有占用的号码
+	public static boolean freeAllPhone = false;
 
 	private boolean existsPhone(String phone) {
 		if (!phoneMap.containsKey(phone)) {
@@ -85,6 +87,11 @@ public class RegisteService {
 	public void start() {
 		logger.warn("注册程序启动");
 		start = true;
+		
+		if(freeAllPhone){
+			getSmsCardService().freeAllPhone();
+			logger.warn("释放所有的手机号~~~~~~~~~~~~");
+		}
 	}
 
 	/**
@@ -220,22 +227,23 @@ public class RegisteService {
 						|| e.getMessage().contains("ignore")) {
 					iterator.remove();
 					// 加入黑名单
-					getSmsCardService().setForbidden(phone);
+					getSmsCardService().freePhone(phone);
 					add(1);
-					continue;
+					break;
 				}
 				getSmsCardService().freePhone(phone);
 				add(1);
-				continue;
+				break;
 			}
 
-			if (list != null && list.size() > 0) {
-				logger.debug("从卡商获取手机验证码记录数={}", list.size());
-			}
 			for (String[] pc : list) {
 				codeQueue.add(pc);
 				// 已经获取到验证码，移除记录
 				iterator.remove();
+			}
+			if (list != null && list.size() > 0) {
+				logger.debug("从卡商获取手机验证码记录数={}", list.size());
+				break;
 			}
 		}
 	}

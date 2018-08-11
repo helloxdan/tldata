@@ -13,18 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 
-import com.alibaba.fastjson.JSONObject;
-import com.thinkgem.jeesite.common.security.Digests;
-
 /**
- * 60码卡商。http://www.60ma.net/apiwiki/apiwiki-cn.html
+ * 接码。http://www.tay8.com/home
  * 
  * @author ThinkPad
  *
  */
-public class M60SmsCardService implements SmsCardService {
+public class ZmSmsCardService implements SmsCardService {
 	private static final String GJDM = "86";
-	// private static final String GJDM = "95";
 
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -32,7 +28,7 @@ public class M60SmsCardService implements SmsCardService {
 	private RestTemplate restTemplate;
 
 	// telegram
-	String project = "B3244DD57208B76";
+	String project = "18183";
 	String username;
 	String password;
 
@@ -50,75 +46,28 @@ public class M60SmsCardService implements SmsCardService {
 	}
 
 	@Override
-	public void setForbidden(String phone) {
-		if (StringUtils.isBlank(phone)) {
-			logger.warn("加入黑名单的手机号为空");
-			return;
-		}
-
-		if (phone.startsWith(GJDM)) {
-			phone = phone.substring(2);
-		}
-
-		JSONObject result = null;
-		try {
-			String url = "http://sms.60ma.net/newsmssrv?cmd=addblacktelnum&encode=utf-8&userid="
-					+ getUserid()
-					+ "&userkey="
-					+ getToken()
-					+ "&telnum="
-					+ phone + "&docks=" + getProject() + "&dtype=json";
-			logger.debug("拉黑url={}", url);
-			result = restTemplate.getForObject(url, JSONObject.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("加入黑名单结果：" + result);
-			}
-			result = result.getJSONObject("Return");
-			String staus = result.getString("Staus");
-			if (!"0".equals(staus)) {
-				// throw new RuntimeException("加入黑名单失败");
-				logger.error("加入黑名单失败" + result.getString("ErrorInfo"));
-			} else {
-				logger.info("加入黑名单成功");
-			}
-
-		} catch (Exception e) {
-			logger.error("加入黑名单失败,{}", e.getMessage() == null ? "" : e
-					.getMessage().substring(0, 20));
-			// throw new RuntimeException(e.getMessage());
-		}
-	}
-
-	@Override
 	public List<String> getPhoneList() {
 		List<String> list = new ArrayList<String>();
 		if (!run)
 			return list;
-		JSONObject result = null;
+		String result = null;
 		try {
 			String token = getToken();
-			String url = "http://sms.60ma.net/newsmssrv?cmd=gettelnum&encode=utf-8&userid="
-					+ getUserid()
-					+ "&userkey="
-					+ token
-					+ "&docks="
-					+ getProject() + "&dtype=json";
-			result = restTemplate.getForObject(url, JSONObject.class);
+			// http://api.tay8.com/msgcode/api/do.php
+			String url = "http://api.tay8.com/msgcode/api/do.php?action=getPhone&token=%s&sid=%s";
+			url = String.format(url, token, project);
+			result = restTemplate.getForObject(url, String.class);
 
-			// 返回示例：{"Return":{"Staus":"0","Telnum":"17011134058","ErrorInfo":"获取成功！}}
+			// 返回示例：
 			if (logger.isInfoEnabled()) {
 				logger.info("取号码结果：" + result);
 			}
-			result = result.getJSONObject("Return");
-			String staus = result.getString("Staus");
-			if (!"0".equals(staus)) {
-				// throw new RuntimeException("获取号码失败"
-				// + result.getString("ErrorInfo"));
-				logger.error("获取号码失败," + result.getString("ErrorInfo"));
-				throw new RuntimeException(result.getString("ErrorInfo"));
-			} else {
-				String phone = result.getString("Telnum");
+			if (result.startsWith("1")) {
+				String phone = result.split("\\|")[1];
 				list.add(GJDM + phone);
+			} else {
+				logger.error("获取号码失败," + result);
+				throw new RuntimeException(result);
 			}
 
 		} catch (Exception e) {
@@ -147,19 +96,9 @@ public class M60SmsCardService implements SmsCardService {
 		// String[] strArr = string.split(" ");
 		System.out.println(string);
 
-		System.out.println("8613751872".substring(2));
-
-		try {
-			String password = "123456";
-			MessageDigest md5 = MessageDigest.getInstance("MD5");
-			password = new String(md5.digest(password.getBytes("utf-8")),
-					"utf-8");
-			System.out.println(password);
-			System.out.println(Digests.md5("123456".getBytes("utf-8")));
-			System.out.println(M60SmsCardService.encryption("123456"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String re = "success|0073435121acc113bf08110731c738a18f4b0e55";
+		String[] res = re.split("\\|");
+		System.out.println(res[0] + "," + res[1]);
 
 	}
 
@@ -202,34 +141,22 @@ public class M60SmsCardService implements SmsCardService {
 			phone = phone.substring(2);
 		}
 
-		JSONObject result = null;
+		String result = null;
 		try {
-			String url = "http://sms.60ma.net/newsmssrv?cmd=getsms&encode=utf-8&userid="
-					+ getUserid()
-					+ "&userkey="
-					+ getToken()
-					+ "&telnum="
-					+ phone + "&dockcode=" + getProject() + "&dtype=json";
+			//
+			String url = "http://api.tay8.com/msgcode/api/do.php?action=getMessage&sid=%s&phone=%s&token=%s&author=";
+			url = String.format(url, project, phone, token);
 			// logger.info("取验证码url={}",url);
-			result = restTemplate.getForObject(url, JSONObject.class);
-			if (logger.isDebugEnabled())
-				logger.debug("{}取验证码结果：{}", phone, result);
-			// 返回示例：{"Return":{"Staus":"0","SmsContent":"你正在注册微信帐号，验证码71408。请勿转发。【腾讯科技】,"ErrorInfo":"成功！}}
+			result = restTemplate.getForObject(url, String.class);
+			// 收到短信：success|短信内容
+			// 短信尚未到达：3001，应继续调用取短信接口，直到超时为止。
+			// 请求失败：错误代码，请根据不同错误代码进行不同的处理。
 			if (logger.isDebugEnabled()) {
 				logger.debug("{}取验证码结果：{}", phone, result);
 			}
 
-			result = result.getJSONObject("Return");
-			String staus = result.getString("Staus");
-			if (!"0".equals(staus)) {
-				// throw new RuntimeException("获取验证码失败");
-				logger.error("{}，[{}]获取验证码失败：{}", phone, getProject(), result);
-				if (result.getString("ErrorInfo").contains("您并未拥有此卡")) {
-					// 忽略此卡
-					throw new RuntimeException("ingore");
-				}
-			} else {
-				String content = result.getString("SmsContent");
+			if (result.startsWith("1")) {
+				String content = result.split("\\|")[1];
 				logger.info("{}获取验证码：{}", phone, content);
 				// 正则表达式，获取数字
 				String regEx = "[^0-9]";// 匹配指定范围内的数字
@@ -244,10 +171,11 @@ public class M60SmsCardService implements SmsCardService {
 				// 将输入的字符串中非数字部分用空格取代并存入一个字符串
 				String code = m.replaceAll(" ").trim();
 				list.add(new String[] { GJDM + phone, code });
-
 				// 释放号码
 				freePhone(phone);
-
+			}  else {
+				logger.error("{}，[{}]获取验证码失败,{}", phone, getProject(), result);
+//				throw new RuntimeException(result);
 			}
 
 		} catch (Exception e) {
@@ -282,26 +210,23 @@ public class M60SmsCardService implements SmsCardService {
 	 */
 	private String login() {
 		// TODO Auto-generated method stub
-		JSONObject re = null;
-		String url = "http://sms.60ma.net/loginuser?cmd=login&encode=utf-8&dtype=json&username="
-				+ getUsername() + "&password=" + getPassword();
-
+		String re = null;
+		String url = "http://api.tay8.com/msgcode/api/do.php?action=loginIn&name=%s&password=%s";
+		url = String.format(url, getUsername(), getPassword());
 		try {
-			re = restTemplate.getForObject(url, JSONObject.class);
+			re = restTemplate.getForObject(url, String.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("登录结果：", re);
 			}
-
-			JSONObject ret = re.getJSONObject("Return");
-			String staus = ret.getString("Staus");
-			if ("0".equals(staus)) {
-				token = ret.getString("UserKey");
-				setUserid(ret.getString("UserID"));
-				logger.info("登录60码短信平台成功，re={}", re);
+			// 登录成功：success|token
+			if (re.startsWith("1")) {
+				token = re.split("\\|")[1];
+				// setUserid(ret.getString("UserID"));
+				logger.info("登录接码短信平台成功，token={}", token);
 			} else {
 				token = null;
-				logger.info("登录60码短信平台失败，error={}", re.getString("ErrorInfo"));
-				throw new RuntimeException("登录60码短信平台失败");
+				logger.info("登录接码短信平台失败，error={}", re);
+				throw new RuntimeException("登录接码短信平台失败");
 			}
 
 		} catch (Exception e) {
@@ -324,11 +249,11 @@ public class M60SmsCardService implements SmsCardService {
 	}
 
 	public String getPassword() {
-		try {
-			password = M60SmsCardService.encryption(password);
-		} catch (Exception e) {
-			logger.error("md5 密码失败", e);
-		}
+		// try {
+		// password = YmSmsCardService.encryption(password);
+		// } catch (Exception e) {
+		// logger.error("md5 密码失败", e);
+		// }
 		return password;
 	}
 
@@ -355,26 +280,20 @@ public class M60SmsCardService implements SmsCardService {
 			phone = phone.substring(2);
 		}
 
-		JSONObject result = null;
+		String result = null;
 		try {
-			String url = "http://sms.60ma.net/newsmssrv?cmd=freetelnum&encode=utf-8&userid="
-					+ getUserid()
-					+ "&userkey="
-					+ getToken()
-					+ "&telnum="
-					+ phone + "&docks=" + getProject() + "&dtype=json";
-			logger.debug("釋放url={}", url);
-			result = restTemplate.getForObject(url, JSONObject.class);
+			String url = "http://api.tay8.com/msgcode/api/do.php?action=cancelRecv&sid=%s&phone=%s&token=%s";
+			url = String.format(url, project, phone, token);
+			logger.debug("释放url={}", url);
+			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
-				logger.info("釋放手机号结果：" + result);
+				logger.info("释放手机号结果：" + result);
 			}
-			result = result.getJSONObject("Return");
-			String staus = result.getString("Staus");
-			if (!"0".equals(staus)) {
-				// throw new RuntimeException("加入黑名单失败");
-				logger.error("釋放手机号失败" + result.getString("ErrorInfo"));
-			} else {
+
+			if (result.startsWith("1")) {
 				logger.info("釋放手机号成功");
+			} else {
+				logger.error("{}釋放手机号失败,{}", phone, result);
 			}
 
 		} catch (Exception e) {
@@ -385,28 +304,34 @@ public class M60SmsCardService implements SmsCardService {
 	}
 
 	@Override
-	public void freeAllPhone() {
-		JSONObject result = null;
+	public void setForbidden(String phone) {
+		if (StringUtils.isBlank(phone)) {
+			logger.warn("加入黑名单的手机号为空");
+			return;
+		}
+
+		if (phone.startsWith(GJDM)) {
+			phone = phone.substring(2);
+		}
+
+		String result = null;
 		try {
-			token = getToken();
-			String url = "http://sms.60ma.net/newsmssrv?cmd=freetelnumall&encode=utf-8&userid="
-					+ getUserid() + "&userkey=" + token + "&dtype=json";
-			logger.info("释放所有url={}", url);
-			result = restTemplate.getForObject(url, JSONObject.class);
+			String url = "http://api.tay8.com/msgcode/api/do.php?action=addBlacklist&sid=%s&phone=%s&token=%s";
+			url = String.format(url, project, phone, token);
+			logger.debug("拉黑url={}", url);
+			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
-				logger.info("释放所有手机号结果：" + result);
+				logger.info("{}加入黑名单结果：{}", phone, result);
 			}
-			result = result.getJSONObject("Return");
-			String staus = result.getString("Staus");
-			if (!"0".equals(staus)) {
-				// throw new RuntimeException("加入黑名单失败");
-				logger.error("释放所有手机号失败" + result.getString("ErrorInfo"));
+			if (result.startsWith("1")) {
+				logger.info("加入黑名单成功");
 			} else {
-				logger.info("释放所有手机号成功");
+				// throw new RuntimeException("加入黑名单失败");
+				logger.error("{}加入黑名单失败,{}", phone, result);
 			}
 
 		} catch (Exception e) {
-			logger.error("释放所有手机号失败,{}", e.getMessage() == null ? "" : e
+			logger.error("{}加入黑名单失败,{}", phone, e.getMessage() == null ? "" : e
 					.getMessage().substring(0, 20));
 			// throw new RuntimeException(e.getMessage());
 		}
@@ -418,6 +343,31 @@ public class M60SmsCardService implements SmsCardService {
 
 	public void setProject(String project) {
 		this.project = project;
+	}
+
+	@Override
+	public void freeAllPhone() {
+		String result = null;
+		try {
+			String url = "http://api.tay8.com/msgcode/api/do.php?action=cancelAllRecv&token=%s";
+			url = String.format(url, getToken());
+			logger.debug("释放所有url={}", url);
+			result = restTemplate.getForObject(url, String.class);
+			if (logger.isInfoEnabled()) {
+				logger.info("释放所有手机号结果：" + result);
+			}
+
+			if (result.startsWith("1")) {
+				logger.info("释放所有手机号成功");
+			} else {
+				logger.error("释放所有手机号失败,{}", result);
+			}
+
+		} catch (Exception e) {
+			logger.error("释放所有手机号失败,{}", e.getMessage() == null ? "" : e
+					.getMessage().substring(0, 20));
+			// throw new RuntimeException(e.getMessage());
+		}
 	}
 
 }

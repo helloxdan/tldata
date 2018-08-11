@@ -280,4 +280,10 @@ public class JsSmsCardService implements SmsCardService {
 		this.project = project;
 	}
 
+	@Override
+	public void freeAllPhone() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
