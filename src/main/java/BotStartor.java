@@ -53,13 +53,16 @@ public class BotStartor {
 			String proxyHost = System.getProperty("proxyHost");
 			String proxyPort = System.getProperty("proxyPort");
 			if (StringUtils.isNotBlank(proxyHost)) {
-				// System.out.println("设置代理:"+proxyHost+":"+proxyPort);
-				// System.setProperty("socksProxyHost", proxyHost);
-				// System.setProperty("socksProxyPort", proxyPort);
+				 System.out.println("设置代理:"+proxyHost+":"+proxyPort);
+				 System.setProperty("socksProxyHost", proxyHost);
+				 System.setProperty("socksProxyPort", proxyPort);
 				// System.setProperty("https.proxyHost",proxyHost);
 				// System.setProperty("https.proxyPort",proxyPort);
+				 
+//				 System.setProperty("java.nio.channels.spi.SelectorProvider", "sun.nio.ch.XuSelectorProvider");
 			}
-
+			
+			 
 			String isdemo = System.getProperty("demo");
 			String factorstr = System.getProperty("factor");
 			if (StringUtils.isNotBlank(factorstr))

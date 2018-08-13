@@ -30,8 +30,8 @@ public class BotLogger {
 
 	static {
 		// logger.setLevel(Level.WARNING);
-		logger.setLevel(Level.INFO);
-		// logger.setLevel(Level.FINE);
+//		logger.setLevel(Level.INFO);
+		 logger.setLevel(Level.FINE);
 		loggerThread.start();
 		lastFileDate = LocalDateTime.now();
 		if ((currentFileName == null) || (currentFileName.compareTo("") == 0)) {

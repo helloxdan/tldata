@@ -223,9 +223,9 @@ public class RegisteService {
 			try {
 				list = getSmsCardService().getPhoneCode(phone);
 			} catch (Exception e) {
+				iterator.remove();
 				if ("ignore".equals(e.getMessage())
 						|| e.getMessage().contains("ignore")) {
-					iterator.remove();
 					// 加入黑名单
 					getSmsCardService().freePhone(phone);
 					add(1);

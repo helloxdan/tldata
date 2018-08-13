@@ -226,7 +226,7 @@ public class M60SmsCardService implements SmsCardService {
 				logger.error("{}，[{}]获取验证码失败：{}", phone, getProject(), result);
 				if (result.getString("ErrorInfo").contains("您并未拥有此卡")) {
 					// 忽略此卡
-					throw new RuntimeException("ingore");
+					throw new RuntimeException("ignore");
 				}
 			} else {
 				String content = result.getString("SmsContent");
