@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.thinkgem.jeesite.modules.tl.ex.SmsLoginException;
 
 /**
  * 账号注册服务。
@@ -151,14 +150,15 @@ public class RegisteService {
 			return;
 		
 		//取码队列超过5个，暂停获取新的号码
-		if(codeQueue.size()>=5){
+		if(codeMaps.size()>=3){
+			logger.info("取码队列超过3个，暂停获取新的号码");
 			return;
 		}
 		
 		String phone1 = null;
 		try {
 			// 如果队列中太多，暂缓取新手机号
-			if (botService.getBotPool().getQueueSize() > 5) {
+			if (botService.getBotPool().getQueueSize() > 3) {
 				logger.debug("队列有{}个号在运行，暂缓取新号", botService.getBotPool()
 						.getQueueSize());
 				return;
@@ -187,6 +187,10 @@ public class RegisteService {
 				phoneQueue.add(phone);
 			}
 
+		}catch(SmsLoginException e){
+			//停止运行
+			logger.error("登录失败，停止运行");
+			stop();
 		} catch (Exception e) {
 			if (e.getMessage() != null
 					&& (e.getMessage().contains("余额不足") || e.getMessage()
@@ -293,7 +297,7 @@ public class RegisteService {
 				logger.warn("{}账号没有发送短信验证码的记录", kv[0]);
 				return;
 			}
-
+			logger.info("{}开始注册，验证码={}", kv[0], kv[1]);
 			JSONObject json = botService.setRegAuthCode(kv[0], kv[1], true);
 			// FIXME
 			// JSONObject json = new JSONObject();

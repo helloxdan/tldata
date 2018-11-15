@@ -11,6 +11,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.api.TLConfig;
+import org.telegram.api.TLDcOption;
 import org.telegram.api.account.TLAbsAccountPassword;
 import org.telegram.api.account.TLAccountNoPassword;
 import org.telegram.api.account.TLAccountPasswordInputSettings;
@@ -149,8 +150,8 @@ public class XUserBot implements IBot {
 					.setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
-			logger.info("创建实例，api=[{}],apihash=[{}],phone={}", apikey, apihash,
-					phone);
+			logger.info("创建实例，api=[{}],apihash=[{}],phone=[{}]", apikey,
+					apihash, phone);
 			// kernel = new TelegramBot(botConfig, builder, apikey, apihash);
 			kernel = new XTelegramBot(botConfig, builder, apikey, apihash);
 
@@ -197,6 +198,11 @@ public class XUserBot implements IBot {
 	public boolean isAuthCancel() {
 		if (this.kernel instanceof XTelegramBot) {
 			boolean iscancel = ((XTelegramBot) this.kernel).isAuthCancel();
+			if (iscancel)
+				this.status = STATUS_CANCEL;
+			return iscancel;
+		} else if (this.kernel instanceof RegTelegramBot) {
+			boolean iscancel = ((RegTelegramBot) this.kernel).isAuthCancel();
 			if (iscancel)
 				this.status = STATUS_CANCEL;
 			return iscancel;
@@ -349,7 +355,7 @@ public class XUserBot implements IBot {
 			users = result.getUsers();
 
 		} catch (IOException e) {
-			logger.error("采集群用户失败", e);
+			logger.error(chatId + "，采集群用户失败", e);
 			if (e.getMessage() != null
 					&& e.getMessage().contains("CHAT_ADMIN_REQUIRED")) {
 				throw new ForbiddenGroupException(
@@ -371,7 +377,7 @@ public class XUserBot implements IBot {
 		// TODO Auto-generated method stub
 		logger.debug("{},addUsers to group {},{}", getAccount(), chatId,
 				jobUsers.size());
-		int usernum = 0;//jobUsers.size();
+		int usernum = 0;// jobUsers.size();
 		try {
 			TelegramApi api = kernel.getKernelComm().getApi();
 			TLRequestChannelsInviteToChannel req = new TLRequestChannelsInviteToChannel();
@@ -408,7 +414,7 @@ public class XUserBot implements IBot {
 						if (StringUtils.isNotBlank(uuu.getUserName())) {
 							slog.info("{},id={},username={}, from={}",
 									ajobUser.getJobId(), uuu.getId(),
-									uuu.getUserName(), 
+									uuu.getUserName(),
 									ajobUser.getFromGroupName());
 						}
 					} else {
@@ -639,8 +645,10 @@ public class XUserBot implements IBot {
 		BotConfig config = kernel.getConfig();
 		final TLRequestAuthSendCode tlRequestAuthSendCode = new TLRequestAuthSendCode();
 		tlRequestAuthSendCode.setPhoneNumber(config.getPhoneNumber());
-		tlRequestAuthSendCode.setApiId(Constants.APIKEY);
-		tlRequestAuthSendCode.setApiHash(Constants.APIHASH);
+		logger.debug("send code request:apikey={},hash={}", kernel.getApiKey(),
+				kernel.getApiHash());
+		tlRequestAuthSendCode.setApiId(kernel.getApiKey());
+		tlRequestAuthSendCode.setApiHash(kernel.getApiHash());
 		// tlRequestAuthSendCode.set
 		return tlRequestAuthSendCode;
 	}
@@ -667,8 +675,8 @@ public class XUserBot implements IBot {
 					.setMessageHandler(messageHandler)
 					.setTlMessageHandler(tlMessageHandler);
 
-			logger.info("创建注册实例apikey={},apihash={},phone={}", apikey, apihash,
-					phone);
+			logger.info("创建注册实例apikey=[{}],apihash=[{}],phone=[{}]", apikey,
+					apihash, phone);
 			kernel = new RegTelegramBot(botConfig, builder, apikey, apihash);
 
 			// 覆盖默认的DifferenceParametersService
@@ -703,6 +711,12 @@ public class XUserBot implements IBot {
 					final TLConfig config = kernelComm.getApi()
 							.doRpcCallNonAuth(new TLRequestHelpGetConfig());
 					BotLogger.info(LOGTAG, "Loaded DC list");
+					TLVector<TLDcOption> dcs = config.getDcOptions();
+					if (dcs != null) {
+						// for (TLDcOption dc : dcs) {
+						// logger.info("dc:{},{},{}",dc.getId(),dc.getIpAddress(),dc.getPort());
+						// }
+					}
 					getApiState().updateSettings(config);
 				} catch (IOException | TimeoutException e) {
 					// BotLogger.error(LOGTAG, e);
@@ -711,11 +725,11 @@ public class XUserBot implements IBot {
 
 				BotLogger.debug(LOGTAG, " wait formoment for getDC List ");
 				// wait
-//				try {
-//					Thread.sleep(200);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
+				// try {
+				// Thread.sleep(200);
+				// } catch (InterruptedException e) {
+				// e.printStackTrace();
+				// }
 
 				BotConfig config = kernel.getConfig();
 				BotLogger.info(LOGTAG,
@@ -737,7 +751,7 @@ public class XUserBot implements IBot {
 							getApiState().setPrimaryDc(destDC);
 							// kernelComm.getApi().switchToDc(destDC);
 							// edit by xdan 设置默认dc
-							defaultDc=destDC;
+							defaultDc = destDC;
 							sentCode = retryRegiste(destDC);
 						}
 					} else {
@@ -801,11 +815,11 @@ public class XUserBot implements IBot {
 		kernel.getKernelComm().getApi().switchToDc(destDC);
 
 		// wait 迁移dc
-//		try {
-//			Thread.sleep(300);
-//		} catch (InterruptedException ee) {
-//			ee.printStackTrace();
-//		}
+		// try {
+		// Thread.sleep(300);
+		// } catch (InterruptedException ee) {
+		// ee.printStackTrace();
+		// }
 
 		final TLRequestAuthSendCode tlRequestAuthSendCode = getSendCodeRequest();
 		sentCode = kernel.getKernelComm().getApi()

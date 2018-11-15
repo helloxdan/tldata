@@ -28,17 +28,17 @@ public class PlainTcpConnection {
 
 	public PlainTcpConnection(String ip, int port) throws IOException {
     	  this.socket =null;
-    	String proxyHost = System.getProperty("socksProxyHost" );
-    	String proxyPort = System.getProperty("socksProxyPort" );
-    	if(StringUtils.isNotBlank(proxyHost)){
-    		InetSocketAddress proxyAddr = new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort));
-    		Proxy proxy = new Proxy(Proxy.Type.SOCKS, proxyAddr);
-    		  this.socket =  new Socket(proxy);
-    	}else{    	
-    		  this.socket =  new Socket();
-    	}
+//    	String proxyHost = System.getProperty("socksProxyHost" );
+//    	String proxyPort = System.getProperty("socksProxyPort" );
+//    	if(StringUtils.isNotBlank(proxyHost)){
+//    		InetSocketAddress proxyAddr = new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort));
+//    		Proxy proxy = new Proxy(Proxy.Type.SOCKS, proxyAddr);
+//    		  this.socket =  new Socket(proxy);
+//    	}else{    	
+//    		  this.socket =  new Socket();
+//    	}
         
-//        this.socket = new Socket();
+        this.socket = new Socket();
         this.socket.connect(new InetSocketAddress(ip, port), CONNECTION_TIMEOUT);
         this.socket.setKeepAlive(true);
         this.socket.setTcpNoDelay(true);

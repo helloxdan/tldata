@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.security.Digests;
+import com.thinkgem.jeesite.modules.tl.ex.SmsLoginException;
 
 /**
  * 60码卡商。http://www.60ma.net/apiwiki/apiwiki-cn.html
@@ -23,7 +24,7 @@ import com.thinkgem.jeesite.common.security.Digests;
  *
  */
 public class M60SmsCardService implements SmsCardService {
-	private static final String GJDM = "86";
+//	private static final String GJDM = "86";
 	// private static final String GJDM = "95";
 
 	protected Logger logger = LoggerFactory.getLogger(getClass());
@@ -32,6 +33,7 @@ public class M60SmsCardService implements SmsCardService {
 	private RestTemplate restTemplate;
 
 	// telegram
+	String country;
 	String project = "B3244DD57208B76";
 	String username;
 	String password;
@@ -56,7 +58,7 @@ public class M60SmsCardService implements SmsCardService {
 			return;
 		}
 
-		if (phone.startsWith(GJDM)) {
+		if (phone.startsWith(getCountry())) {
 			phone = phone.substring(2);
 		}
 
@@ -118,9 +120,12 @@ public class M60SmsCardService implements SmsCardService {
 				throw new RuntimeException(result.getString("ErrorInfo"));
 			} else {
 				String phone = result.getString("Telnum");
-				list.add(GJDM + phone);
+				list.add(getCountry() + phone);
 			}
 
+		} catch (SmsLoginException e) {
+			//登录异常，向上抛出
+			throw e;
 		} catch (Exception e) {
 			logger.error("取号码,{}", e.getMessage());
 			throw new RuntimeException(e.getMessage());
@@ -198,7 +203,7 @@ public class M60SmsCardService implements SmsCardService {
 			logger.warn("取验证码的手机号为空");
 			return list;
 		}
-		if (phone.startsWith(GJDM)) {
+		if (phone.startsWith(getCountry())) {
 			phone = phone.substring(2);
 		}
 
@@ -243,7 +248,7 @@ public class M60SmsCardService implements SmsCardService {
 
 				// 将输入的字符串中非数字部分用空格取代并存入一个字符串
 				String code = m.replaceAll(" ").trim();
-				list.add(new String[] { GJDM + phone, code });
+				list.add(new String[] { getCountry() + phone, code });
 
 				// 释放号码
 				freePhone(phone);
@@ -306,7 +311,7 @@ public class M60SmsCardService implements SmsCardService {
 
 		} catch (Exception e) {
 			logger.error("登录异常:" + e.getMessage());
-			throw new RuntimeException("登录异常，" + e.getMessage());
+			throw new SmsLoginException("登录异常，" + e.getMessage());
 		}
 		return token;
 	}
@@ -351,7 +356,7 @@ public class M60SmsCardService implements SmsCardService {
 			return;
 		}
 
-		if (phone.startsWith(GJDM)) {
+		if (phone.startsWith(getCountry())) {
 			phone = phone.substring(2);
 		}
 
@@ -405,6 +410,9 @@ public class M60SmsCardService implements SmsCardService {
 				logger.info("释放所有手机号成功");
 			}
 
+		} catch (SmsLoginException e) {
+			//登录异常，向上抛出
+			throw e;
 		} catch (Exception e) {
 			logger.error("释放所有手机号失败,{}", e.getMessage() == null ? "" : e
 					.getMessage().substring(0, 20));
@@ -418,6 +426,14 @@ public class M60SmsCardService implements SmsCardService {
 
 	public void setProject(String project) {
 		this.project = project;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
 	}
 
 }

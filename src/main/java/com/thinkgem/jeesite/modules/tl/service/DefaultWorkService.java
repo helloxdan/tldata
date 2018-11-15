@@ -1,14 +1,15 @@
 package com.thinkgem.jeesite.modules.tl.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.api.user.TLAbsUser;
 import org.telegram.api.user.TLUser;
@@ -41,6 +42,44 @@ public class DefaultWorkService implements WorkService {
 	Map<String, Integer> chatIdMap = Maps.newHashMap();
 	Map<String, Long> chatAccessMap = Maps.newHashMap();
 
+	static Set<String> extWords = new HashSet<String>();
+	static {
+		extWords.add("拉人");
+		extWords.add("电报");
+		extWords.add("用户");
+		extWords.add("股票");
+		extWords.add("微信");
+		extWords.add("私聊");
+		extWords.add("出售");
+		extWords.add("管理");
+		extWords.add("客服");
+	}
+
+	public static void setExtWords(String words) {
+		if (StringUtils.isBlank(words))
+			return;
+
+		words = words.replace("，", ",");
+		words = words.replace("、", ",");
+		String[] ewords = words.split(",");
+		for (String w : ewords) {
+			extWords.add(w);
+		}
+	}
+
+	public static void main(String[] args) {
+		DefaultWorkService.setExtWords("管里，股票，微信、客戶");
+		String name = "223管4客戶拉";
+		boolean c = false;
+		for (String w : extWords) {
+			if (name.contains(w)) {
+				System.out.println(name + "{}包含非法字符【" + w + "】");
+				c = true;
+				break;
+			}
+		}
+	}
+
 	@Override
 	public List<JobUser> collectUsers(XUserBot bot, TaskData data) {
 		List<JobUser> list = new ArrayList<JobUser>();
@@ -66,32 +105,45 @@ public class DefaultWorkService implements WorkService {
 					chatAccessMap.put(key, accessHash);
 				} else {
 					chatId = 0;
+					String errorMsg = json.getString("msg");
 					// 加入群组失败
 					logger.warn("{},加入群组{}，失败,{}", phone,
 							data.getSrcGroupName(), json.getString("msg"));
+
+					// 如果加入群组失败，检查失败原因，停采从该群采集
+					if (errorMsg.contains("FLOOD_WAIT_")) {
+						int delay = Integer.parseInt(errorMsg
+								.substring("FLOOD_WAIT_".length()));
+						try {
+							logger.warn("{},线程停止运行{}秒", phone, delay);
+							Thread.sleep(delay * 1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			}
 			if (chatId == 0) {
-				logger.warn("{},无群组信息，无法采集", phone);
+				logger.warn("{},无群组信息，无法采集，{}", phone, data.getSrcGroupUrl());
 			} else {
 				TLVector<TLAbsUser> users = bot.collectUsers(chatId,
 						accessHash, data.getOffset(), data.getLimit());
 				logger.info("采集结果：job={}，account={},offset={},size={},{}",
-						bot.getJobid(), phone,data.getOffset(), users.size(),
+						bot.getJobid(), phone, data.getOffset(), users.size(),
 						data.getSrcGroupName());
 
-				//如果采集不到用户，说明已经到达上限10000或者超出用户数量
-				if(users.size()==0){
+				// 如果采集不到用户，说明已经到达上限10000或者超出用户数量
+				if (users.size() == 0) {
 					throw new ForbiddenGroupException(
 							"采集用户数为0，可能已经达到采集上限10000或者超出群组的总用户数");
 				}
-				
+
 				int num = 0;
 				// 将数据存储到数据库
 				for (TLAbsUser tluser : users) {
 					TLUser u = (TLUser) tluser;
 
-					if (u.isBot() || u.isDeleted() || u.isRestricted()
+					if (u.isSelf() || u.isBot() || u.isDeleted() || u.isRestricted()
 							|| u.isVerified()) {
 						logger.debug(
 								"忽略用户{},{}，isBot={},isDeleted={},isRestricted={},isVerified={}",
@@ -100,18 +152,17 @@ public class DefaultWorkService implements WorkService {
 						continue;
 					}
 
-					if (StringUtils.isBlank(u.getUserName())) {
-						logger.debug("用户没有username，忽略");
-						continue;
-					}
+//					if (StringUtils.isBlank(u.getUserName())) {
+//						logger.debug("用户没有username，忽略");
+//						continue;
+//					}
 
 					String firstName = XUtils.transChartset(u.getFirstName());
 					String lastName = XUtils.transChartset(u.getLastName());
-					if (firstName != null
-							&& ((firstName.length() > 50
-									|| lastName.length() > 50 || containForbiddenChar(
-										firstName, lastName)))) {
-						logger.debug("用户名长度大于50，存在  拉人  电报群、用户 字样，忽略");
+					String name = firstName + lastName;
+					if (name != null
+							&& (name.length() > 20 || containForbiddenChar(name))) {
+						logger.debug("用户名长度大于20，存在  拉人  电报群、用户 字样，忽略");
 						continue;
 					}
 
@@ -141,16 +192,18 @@ public class DefaultWorkService implements WorkService {
 		return list;
 	}
 
-	private boolean containForbiddenChar(String firstName, String lastName) {
-		boolean c = firstName.contains("拉人") || firstName.contains("电报群")
-				|| firstName.contains("用户") || firstName.contains("股票")
-				|| firstName.contains("微信") || firstName.contains("私聊")
-				|| firstName.contains("出售") || firstName.contains("管理");
-		if (lastName != null) {
-			c = c || lastName.contains("拉人") || lastName.contains("电报群")
-					|| lastName.contains("用户") || lastName.contains("股票")
-					|| lastName.contains("微信") || lastName.contains("私聊")
-					|| lastName.contains("出售") || lastName.contains("管理");
+	private boolean containForbiddenChar(String name) {
+		// boolean c = name.contains("拉人") || name.contains("电报群")
+		// || name.contains("用户") || name.contains("股票")
+		// || name.contains("微信") || name.contains("私聊")
+		// || name.contains("出售") || name.contains("管理");
+		boolean c = false;
+		for (String w : extWords) {
+			if (name.contains(w)) {
+				logger.debug("{}包含非法字符【{}】", name, w);
+				c = true;
+				break;
+			}
 		}
 		return c;
 	}
@@ -204,14 +257,16 @@ public class DefaultWorkService implements WorkService {
 		}
 		return updateNum;
 	}
-int mockTotal=0;
+
+	int mockTotal = 0;
+
 	private void mockCollectUser(XUserBot bot, TaskData data, List<JobUser> list) {
 		System.err.println(bot.getPhone() + ",模拟采集用户," + data.getSrcGroupUrl()
 				+ ",offset=" + data.getOffset() + "~~~~~~~~~~~~~~~~~~~~");
 		// TODO Auto-generated method stub
 		int size = RandomUtils.nextInt(1, Constants.FETCH_PAGE_SIZE);
-		mockTotal=mockTotal+size;
-		if(mockTotal>=150){
+		mockTotal = mockTotal + size;
+		if (mockTotal >= 150) {
 			throw new ForbiddenGroupException(
 					"mock,采集用户数为0，可能已经达到采集上限10000或者超出群组的总用户数");
 		}

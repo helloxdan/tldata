@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.thinkgem.jeesite.modules.tl.ex.SmsLoginException;
+
 /**
  * 极速卡商。http://www.js-yzm.com:9000/index.html
  * 
@@ -97,6 +99,9 @@ public class JsSmsCardService implements SmsCardService {
 				logger.warn("取号码失败：" + result);
 			}
 
+		} catch (SmsLoginException e) {
+			//登录异常，向上抛出
+			throw e;
 		} catch (Exception e) {
 			logger.error("取号码", e);
 			throw new RuntimeException(e.getMessage());
@@ -233,7 +238,7 @@ public class JsSmsCardService implements SmsCardService {
 
 		} catch (RestClientException e) {
 			logger.error("登录异常异常", e);
-			throw new RuntimeException("登录异常，" + e.getMessage());
+			throw new SmsLoginException("登录异常，" + e.getMessage());
 		}
 		return token;
 	}

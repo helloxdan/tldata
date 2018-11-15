@@ -42,6 +42,16 @@ public class RegTelegramBot extends TelegramBot {
 	// private MainHandler mainHandler;
 	// private IKernelComm kernelComm;
 	private static int TRY_NUM = -1;
+	// 账号认证是否取消，这个是在kernelComm回调方法中得到的
+	private boolean authCancel = false;
+
+	public boolean isAuthCancel() {
+		return authCancel;
+	}
+
+	public void setAuthCancel(boolean authCancel) {
+		this.authCancel = authCancel;
+	}
 
 	private static String phone = null;
 
@@ -112,7 +122,7 @@ public class RegTelegramBot extends TelegramBot {
 						logger.error("程序终止！！！！！,10秒钟后退出");
 						RegisteService.start = false;
 						BotPool.run = false;
-						
+
 						// 停止10秒，然后退出系统
 						try {
 							Thread.sleep(10000);
@@ -309,7 +319,8 @@ public class RegTelegramBot extends TelegramBot {
 		final long start = System.currentTimeMillis();
 		// this.kernelComm = new KernelComm(getApiKey(), getApiState());
 		XKernelComm kernelComm2 = new XKernelComm(getApiKey(), getApiState());
-		// kernelComm2.setBot(this);
+		 kernelComm2.setRegBot(this);
+		kernelComm2.setPhone(phone);
 		setKernelComm(kernelComm2);
 		BotLogger.info(LOGTAG, String.format("%s init in %d ms",
 				getKernelComm().getClass().getName(),

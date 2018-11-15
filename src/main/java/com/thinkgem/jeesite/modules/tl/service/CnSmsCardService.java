@@ -3,7 +3,9 @@ package com.thinkgem.jeesite.modules.tl.service;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,13 +18,13 @@ import org.springframework.web.client.RestTemplate;
 import com.thinkgem.jeesite.modules.tl.ex.SmsLoginException;
 
 /**
- * 找码。http://www.tay8.com/home
+ * 叮当。http://api2.sygeyq.com/apihelp.aspx
  * 
  * @author ThinkPad
  *
  */
-public class ZmSmsCardService implements SmsCardService {
-	private static final String GJDM = "86";
+public class CnSmsCardService implements SmsCardService {
+	// private static final String GJDM = "86";
 
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -30,7 +32,8 @@ public class ZmSmsCardService implements SmsCardService {
 	private RestTemplate restTemplate;
 
 	// telegram
-	String project = "18183";
+	String country;
+	String project;
 	String username;
 	String password;
 
@@ -38,6 +41,8 @@ public class ZmSmsCardService implements SmsCardService {
 	boolean run = true;
 	// 每次获取手机号 数量
 	int maxPhoneNum = 1;
+
+	private Map<String, String> pidMap = new HashMap<String, String>();
 
 	private String userid;
 
@@ -55,25 +60,33 @@ public class ZmSmsCardService implements SmsCardService {
 		String result = null;
 		try {
 			String token = getToken();
-			// http://api.tay8.com/msgcode/api/do.php
-			String url = "http://api.tay8.com/msgcode/api/do.php?action=getPhone&token=%s&sid=%s";
+			//
+			String url = "http://api.jydpt.com/yhapi.ashx?Action=getPhone&token=%s&i_id=%s&d_id=&p_operator=&p_qcellcore=&mobile=";
 			url = String.format(url, token, project);
 			result = restTemplate.getForObject(url, String.class);
 
-			// 返回示例：
+			// ：成功返回：OK|P_ID|获取时间|串口号|手机号|发送短信项目的接收号码|国家名称或区号
 			if (logger.isInfoEnabled()) {
 				logger.info("取号码结果：" + result);
 			}
-			if (result.startsWith("1")) {
-				String phone = result.split("\\|")[1];
-				list.add(GJDM + phone);
+			if (result.startsWith("OK")) {
+				String[] rs = result.split("\\|");
+				String phone = rs[4];
+				list.add(getCountry() + phone);
+				String p_id = rs[1];
+				// 存储，后续接口用到
+				pidMap.put(phone, p_id);
 			} else {
 				logger.error("获取号码失败," + result);
-				throw new RuntimeException(result);
+				if (result.contains("暂时无号") || result.contains("其他")) {
+					//如果这两个错误，忽略，10秒后再取号码
+				} else {
+					throw new SmsLoginException(result);
+				}
 			}
 
 		} catch (SmsLoginException e) {
-			//登录异常，向上抛出
+			// 登录异常，向上抛出
 			throw e;
 		} catch (Exception e) {
 			logger.error("取号码,{}", e.getMessage());
@@ -142,16 +155,16 @@ public class ZmSmsCardService implements SmsCardService {
 			logger.warn("取验证码的手机号为空");
 			return list;
 		}
-		if (phone.startsWith(GJDM)) {
+		if (phone.startsWith(getCountry())) {
 			phone = phone.substring(2);
 		}
 
 		String result = null;
 		try {
 			//
-			String url = "http://api.tay8.com/msgcode/api/do.php?action=getMessage&sid=%s&phone=%s&token=%s&author=";
-			url = String.format(url, project, phone, token);
-			// logger.info("取验证码url={}",url);
+			String url = "http://api.jydpt.com/yhapi.ashx?Action=getPhoneMessage&token=%s&p_id=%s";
+			url = String.format(url, token, pidMap.get(phone));
+			 logger.debug("取验证码url={}",url);
 			result = restTemplate.getForObject(url, String.class);
 			// 收到短信：success|短信内容
 			// 短信尚未到达：3001，应继续调用取短信接口，直到超时为止。
@@ -160,30 +173,22 @@ public class ZmSmsCardService implements SmsCardService {
 				logger.debug("{}取验证码结果：{}", phone, result);
 			}
 
-			if (result.startsWith("1")) {
-				String content = result.split("\\|")[1];
-				logger.info("{}获取验证码：{}", phone, content);
-				// 正则表达式，获取数字
-				String regEx = "[^0-9]";// 匹配指定范围内的数字
-				// Pattern是一个正则表达式经编译后的表现模式
-				Pattern p = Pattern.compile(regEx);
-				// 把前面的时间去掉
-				content = content.substring(10);
+			if (result.startsWith("OK")) {
+				String code = result.split("\\|")[1];
+				logger.info("{}获取验证码：{}", phone, code);
 
-				// 一个Matcher对象是一个状态机器，它依据Pattern对象做为匹配模式对字符串展开匹配检查。
-				Matcher m = p.matcher(content);
-
-				// 将输入的字符串中非数字部分用空格取代并存入一个字符串
-				String code = m.replaceAll(" ").trim();
-				list.add(new String[] { GJDM + phone, code });
+				list.add(new String[] { getCountry() + phone, code });
 				// 释放号码
 				freePhone(phone);
-			}  else {
+
+				pidMap.remove(phone);
+			} else {
 				logger.error("{}，[{}]获取验证码失败,{}", phone, getProject(), result);
-//				throw new RuntimeException(result);
+				// throw new RuntimeException(result);
 			}
 
 		} catch (Exception e) {
+			pidMap.remove(phone);
 			logger.error("取验证码失败：" + e.getMessage());
 			throw new RuntimeException(e.getMessage());
 		}
@@ -214,17 +219,16 @@ public class ZmSmsCardService implements SmsCardService {
 	 * 登录。
 	 */
 	private String login() {
-		// TODO Auto-generated method stub
 		String re = null;
-		String url = "http://api.tay8.com/msgcode/api/do.php?action=loginIn&name=%s&password=%s";
+		String url = "http://api.jydpt.com/yhapi.ashx?Action=userLogin&userName=%s&userPassword=%s";
 		url = String.format(url, getUsername(), getPassword());
 		try {
 			re = restTemplate.getForObject(url, String.class);
-			if (logger.isDebugEnabled()) {
-				logger.debug("登录结果：", re);
+			if (logger.isInfoEnabled()) {
+				logger.info("登录结果：", re);
 			}
 			// 登录成功：success|token
-			if (re.startsWith("1")) {
+			if (re.startsWith("OK")) {
 				token = re.split("\\|")[1];
 				// setUserid(ret.getString("UserID"));
 				logger.info("登录接码短信平台成功，token={}", token);
@@ -281,21 +285,21 @@ public class ZmSmsCardService implements SmsCardService {
 			return;
 		}
 
-		if (phone.startsWith(GJDM)) {
+		if (phone.startsWith(getCountry())) {
 			phone = phone.substring(2);
 		}
 
 		String result = null;
 		try {
-			String url = "http://api.tay8.com/msgcode/api/do.php?action=cancelRecv&sid=%s&phone=%s&token=%s";
-			url = String.format(url, project, phone, token);
+			String url = "http://api.jydpt.com/yhapi.ashx?Action=phoneRelease&token=%s&p_id=%s";
+			url = String.format(url, token, pidMap.get(phone));
 			logger.debug("释放url={}", url);
 			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("释放手机号结果：" + result);
 			}
 
-			if (result.startsWith("1")) {
+			if (result.startsWith("OK")) {
 				logger.info("釋放手机号成功");
 			} else {
 				logger.error("{}釋放手机号失败,{}", phone, result);
@@ -305,6 +309,8 @@ public class ZmSmsCardService implements SmsCardService {
 			logger.error("釋放手机号失败,{}", e.getMessage() == null ? "" : e
 					.getMessage().substring(0, 20));
 			// throw new RuntimeException(e.getMessage());
+		} finally {
+			pidMap.remove(phone);
 		}
 	}
 
@@ -315,20 +321,21 @@ public class ZmSmsCardService implements SmsCardService {
 			return;
 		}
 
-		if (phone.startsWith(GJDM)) {
+		if (phone.startsWith(getCountry())) {
 			phone = phone.substring(2);
 		}
 
 		String result = null;
 		try {
-			String url = "http://api.tay8.com/msgcode/api/do.php?action=addBlacklist&sid=%s&phone=%s&token=%s";
-			url = String.format(url, project, phone, token);
+			String url = "http://api.jydpt.com/yhapi.ashx?Action=phoneToBlack&token=%s&p_id=%s&i_id=%s&mobile=%s&reason=%s";
+			url = String.format(url, token, pidMap.get(phone), project, phone,
+					"账号已被使用");
 			logger.debug("拉黑url={}", url);
 			result = restTemplate.getForObject(url, String.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("{}加入黑名单结果：{}", phone, result);
 			}
-			if (result.startsWith("1")) {
+			if (result.startsWith("OK")) {
 				logger.info("加入黑名单成功");
 			} else {
 				// throw new RuntimeException("加入黑名单失败");
@@ -339,6 +346,8 @@ public class ZmSmsCardService implements SmsCardService {
 			logger.error("{}加入黑名单失败,{}", phone, e.getMessage() == null ? "" : e
 					.getMessage().substring(0, 20));
 			// throw new RuntimeException(e.getMessage());
+		} finally {
+			pidMap.remove(phone);
 		}
 	}
 
@@ -350,32 +359,17 @@ public class ZmSmsCardService implements SmsCardService {
 		this.project = project;
 	}
 
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
 	@Override
 	public void freeAllPhone() {
-		String result = null;
-		try {
-			String url = "http://api.tay8.com/msgcode/api/do.php?action=cancelAllRecv&token=%s";
-			url = String.format(url, getToken());
-			logger.debug("释放所有url={}", url);
-			result = restTemplate.getForObject(url, String.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("释放所有手机号结果：" + result);
-			}
 
-			if (result.startsWith("1")) {
-				logger.info("释放所有手机号成功");
-			} else {
-				logger.error("释放所有手机号失败,{}", result);
-			}
-
-		} catch (SmsLoginException e) {
-			//登录异常，向上抛出
-			throw e;
-		} catch (Exception e) {
-			logger.error("释放所有手机号失败,{}", e.getMessage() == null ? "" : e
-					.getMessage().substring(0, 20));
-			// throw new RuntimeException(e.getMessage());
-		}
 	}
 
 }

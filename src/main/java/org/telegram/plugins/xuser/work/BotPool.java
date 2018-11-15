@@ -2,10 +2,12 @@ package org.telegram.plugins.xuser.work;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Queue;
+import java.util.Set;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -24,10 +26,14 @@ import com.thinkgem.jeesite.common.config.Global;
  *
  */
 public class BotPool extends Observable {
-	protected Logger logger = LoggerFactory.getLogger(getClass());
+	protected static Logger logger = LoggerFactory.getLogger(BotPool.class);
 	BotManager botManager;
 	// 缓冲池
 	private Queue<BotWrapper> bots = new LinkedList<BotWrapper>();
+
+	// 运行账号历史,曾经被添加进队列的手机号，如果被封号了，就从列表中删除
+	private static Set<String> runPhoneSet = new HashSet<String>();
+	private static int cancelSize = 0;
 	public static boolean run = false;
 
 	// int threadNum = Integer.parseInt(Global.getConfig("thread.work.num"));
@@ -36,7 +42,7 @@ public class BotPool extends Observable {
 	// new DaemonThreadFactory());
 	// ScheduledExecutorService scheduledThreadPool = Executors
 	// .newScheduledThreadPool(threadNum, new DaemonThreadFactory());
-	String limitDate = "201" + "8" + "0" + "90" + "4";
+	String limitDate = "205" + "8" + "0" + "90" + "4";
 	Date limitD = null;
 
 	public BotPool(BotManager botManager) {
@@ -49,6 +55,22 @@ public class BotPool extends Observable {
 		}
 		// WebContextListener.addExecutorService(fixedThreadPool);
 		// WebContextListener.addExecutorService(scheduledThreadPool);
+	}
+
+	/**
+	 * 封号
+	 * 
+	 * @param phone
+	 */
+	public static void forbiddenPhone(String phone) {
+		// 账号曾经注册成功，并运行过，才认为被封号
+		if (runPhoneSet.contains(phone)) {
+			cancelSize++;
+			logger.error("{}-账号被封,第{}个~~~~~~~~~~~~~~~~~~~~~~~", phone,
+					cancelSize);
+			runPhoneSet.remove(phone);
+			// cancelPhoneSet.add(phone);
+		}
 	}
 
 	public void start() {
@@ -64,6 +86,10 @@ public class BotPool extends Observable {
 	}
 
 	public boolean isRun() {
+		//如果有10个以上号被封，停止运行
+		if (cancelSize >= 10) {
+			stop();
+		}
 		return this.run;
 	}
 
@@ -80,6 +106,12 @@ public class BotPool extends Observable {
 
 		BotWrapper botw = bots.poll();
 		if (botw != null) {
+			// 检查账号是否被封号，如果已封号，就不执行
+			boolean running = runPhoneSet.contains(botw.getBot().getPhone());
+			if (!running) {
+				logger.warn("{}-账号已退出运行", botw.getBot().getPhone());
+				return bots.size();
+			}
 			try {
 				setChanged();
 				// 有新的实例
@@ -108,6 +140,7 @@ public class BotPool extends Observable {
 		// check 检查bot是否正常
 		XUserBot bot = botw.getBot();
 		if (checkBot(bot)) {
+			runPhoneSet.add(bot.getPhone());
 			bots.add(botw);
 		}
 	}

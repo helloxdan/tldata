@@ -90,7 +90,7 @@ public class TaskExecutor implements Observer {
 		try {
 			users = getWorkService().collectUsers(bot, data);
 		} catch (ForbiddenGroupException e) {
-			logger.error("删除群组，{}", e.getMessage());
+			logger.error("删除群组，{}，{}",data.getSrcGroupUrl(), e.getMessage());
 			// 群组不允许拉人，删除群组
 			taskQuery.deleteTaskGroup(bot, data);
 

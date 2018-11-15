@@ -17,6 +17,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 import org.telegram.api.document.attribute.TLAbsDocumentAttribute;
 import org.telegram.api.document.attribute.TLDocumentAttributeFilename;
 import org.telegram.api.document.attribute.TLDocumentAttributeSticker;
@@ -61,6 +62,7 @@ import org.telegram.bot.services.NotificationsService;
 import org.telegram.bot.structure.Chat;
 import org.telegram.bot.structure.IUser;
 import org.telegram.plugins.xuser.support.CreateRandomField;
+import org.telegram.plugins.xuser.work.BotPool;
 import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
 import org.telegram.tl.TLVector;
@@ -75,6 +77,10 @@ import com.thinkgem.jeesite.modules.tl.support.DaemonThreadFactory;
  * @date 16.03.14
  */
 public class XKernelComm implements IKernelComm {
+	
+	protected static org.slf4j.Logger logger = LoggerFactory
+			.getLogger(RegTelegramBot.class);
+	
 	private static final String LOGTAG = "KERNELCOMM";
 	private static final String LANGUAGE_EN = "en";
 	private static final String botVersion = "1.1";
@@ -97,6 +103,8 @@ public class XKernelComm implements IKernelComm {
 	private MainHandler mainHandler;
 	// 用于回写auth cancel
 	private XTelegramBot bot;
+	private RegTelegramBot regBot;
+	private String phone;
 
 	public XKernelComm(int apiKey, AbsApiState apiState) {
 		NotificationsService.getInstance().addObserver(this,
@@ -135,17 +143,24 @@ public class XKernelComm implements IKernelComm {
 		String botVersion = String.format("%d.%d.%d",
 				RandomUtils.nextInt(1, 5), RandomUtils.nextInt(1, 10),
 				RandomUtils.nextInt(1, 10));
-		String systemVersion = botName + RandomUtils.nextInt(1, 10);// CreateRandomField.getRandomEnglishFirstName();
+		String systemVersion =  botName + RandomUtils.nextInt(1, 10);// CreateRandomField.getRandomEnglishFirstName();
 		this.api = new TelegramApi(apiState, new AppInfo(apiKey, "bot",
 				systemVersion, botVersion, LANGUAGE_EN), new ApiCallback() {
 
 			@Override
 			public void onAuthCancelled(TelegramApi api) {
 				apiState.resetAuth();
+				logger.warn("{}-账号认证被取消！！",phone);
+				//禁用
+				BotPool.forbiddenPhone(phone);
+				
 				BotLogger.severe(LOGTAG, "Auth cancelled");
 				// 取消認證
 				if (bot != null) {
 					bot.setAuthCancel(true);
+				}
+				if (regBot != null) {
+					regBot.setAuthCancel(true);
 				}
 				// throw new RuntimeException("Auth cancelled");
 			}
@@ -1034,7 +1049,9 @@ public class XKernelComm implements IKernelComm {
 
 	@Override
 	public void onNotificationReceived(int notificationId, Object... args) {
-		if (notificationId == NotificationsService.updatesInvalidated) {
+		// edit by xdan 20180906,这段代码，有时抛异常，屏蔽调
+		
+		/*if (notificationId == NotificationsService.updatesInvalidated) {
 			if (args.length == 1) {
 				try {
 					((TelegramApi) args[0])
@@ -1048,7 +1065,7 @@ public class XKernelComm implements IKernelComm {
 				NotificationsService.getInstance().postNotification(
 						NotificationsService.needGetUpdates);
 			}
-		}
+		}*/
 	}
 
 	@Override
@@ -1095,4 +1112,21 @@ public class XKernelComm implements IKernelComm {
 	public void setBot(XTelegramBot telegramBot) {
 		this.bot = telegramBot;
 	}
+
+	public RegTelegramBot getRegBot() {
+		return regBot;
+	}
+
+	public void setRegBot(RegTelegramBot regBot) {
+		this.regBot = regBot;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+	
 }

@@ -1,17 +1,16 @@
 package org.telegram.bot.kernel;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.telegram.api.engine.LoggerInterface;
 import org.telegram.api.engine.storage.AbsApiState;
 import org.telegram.bot.ChatUpdatesBuilder;
-import org.telegram.bot.kernel.differenceparameters.DifferenceParametersService;
 import org.telegram.bot.kernel.engine.MemoryApiState;
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
 import org.telegram.bot.structure.LoginStatus;
 import org.telegram.mtproto.log.LogInterface;
 import org.telegram.mtproto.log.Logger;
-
-import java.lang.reflect.InvocationTargetException;
 
 
 /**

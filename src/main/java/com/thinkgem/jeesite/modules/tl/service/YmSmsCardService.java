@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 
+import com.thinkgem.jeesite.modules.tl.ex.SmsLoginException;
+
 /**
  * 易码。http://www.51ym.me/User/apidocs.html
  * 
@@ -104,6 +106,9 @@ public class YmSmsCardService implements SmsCardService {
 				throw new RuntimeException(result);
 			}
 
+		} catch (SmsLoginException e) {
+			//登录异常，向上抛出
+			throw e;
 		} catch (Exception e) {
 			logger.error("取号码,{}", e.getMessage());
 			throw new RuntimeException(e.getMessage());
@@ -266,7 +271,7 @@ public class YmSmsCardService implements SmsCardService {
 
 		} catch (Exception e) {
 			logger.error("登录异常:" + e.getMessage());
-			throw new RuntimeException("登录异常，" + e.getMessage());
+			throw new SmsLoginException("登录异常，" + e.getMessage());
 		}
 		return token;
 	}

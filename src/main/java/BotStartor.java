@@ -53,16 +53,16 @@ public class BotStartor {
 			String proxyHost = System.getProperty("proxyHost");
 			String proxyPort = System.getProperty("proxyPort");
 			if (StringUtils.isNotBlank(proxyHost)) {
-				 System.out.println("设置代理:"+proxyHost+":"+proxyPort);
-				 System.setProperty("socksProxyHost", proxyHost);
-				 System.setProperty("socksProxyPort", proxyPort);
+//				System.out.println("设置代理:" + proxyHost + ":" + proxyPort);
+//				System.setProperty("socksProxyHost", proxyHost);
+//				System.setProperty("socksProxyPort", proxyPort);
 				// System.setProperty("https.proxyHost",proxyHost);
 				// System.setProperty("https.proxyPort",proxyPort);
-				 
-//				 System.setProperty("java.nio.channels.spi.SelectorProvider", "sun.nio.ch.XuSelectorProvider");
+
+				// System.setProperty("java.nio.channels.spi.SelectorProvider",
+				// "sun.nio.ch.XuSelectorProvider");
 			}
-			
-			 
+
 			String isdemo = System.getProperty("demo");
 			String factorstr = System.getProperty("factor");
 			if (StringUtils.isNotBlank(factorstr))
@@ -81,12 +81,14 @@ public class BotStartor {
 				cardCode = "mock";
 			}
 			logger.info("使用卡商编码：{}", cardCode);
-			//释放所有号码
+			// 释放所有号码
 			String cardFreeAll = System.getProperty("cardFreeAll");
 			if (StringUtils.isNotBlank(cardFreeAll)
 					&& "true".equals(cardFreeAll)) {
 				RegisteService.freeAllPhone = true;
 			}
+
+			readExcludeWords();
 
 			// FIXME
 			initContext();
@@ -106,6 +108,23 @@ public class BotStartor {
 		} catch (Exception e) {
 			logger.error("程序移除，退出运行", e);
 			System.exit(0);
+		}
+
+	}
+
+	/**
+	 * 读取要过滤的关键字配置文件；
+	 */
+	private static void readExcludeWords() {
+		try {
+			File efile = new File("excludes.txt");
+			if (efile.exists()) {
+				String words = FileUtils.readFileToString(efile, "UTF-8");
+				logger.info("过滤非法字符:{}",words);
+				DefaultWorkService.setExtWords(words);
+			}
+		} catch (IOException e) {
+			logger.error("读取过滤关键字文件失败", e);
 		}
 
 	}

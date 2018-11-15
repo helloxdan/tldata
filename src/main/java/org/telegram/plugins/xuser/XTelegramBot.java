@@ -7,13 +7,10 @@ import java.util.TimerTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.telegram.api.engine.LoggerInterface;
-import org.telegram.api.engine.storage.AbsApiState;
 import org.telegram.bot.ChatUpdatesBuilder;
-import org.telegram.bot.kernel.IKernelComm;
 import org.telegram.bot.kernel.KernelAuth;
 import org.telegram.bot.kernel.MainHandler;
 import org.telegram.bot.kernel.TelegramBot;
-import org.telegram.bot.kernel.differenceparameters.DifferenceParametersService;
 import org.telegram.bot.kernel.engine.MemoryApiState;
 import org.telegram.bot.services.BotLogger;
 import org.telegram.bot.structure.BotConfig;
@@ -23,7 +20,6 @@ import org.telegram.mtproto.log.Logger;
 import org.telegram.plugins.xuser.work.BotPool;
 
 import com.thinkgem.jeesite.common.config.Global;
-import com.thinkgem.jeesite.modules.tl.service.RegistePoolService;
 
 /**
  * @author Hendrik Hofstadt

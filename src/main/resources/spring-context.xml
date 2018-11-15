@@ -75,6 +75,7 @@
 	<bean id="m60SmsCardService"
 		class="com.thinkgem.jeesite.modules.tl.service.M60SmsCardService">
 		<property name="restTemplate" ref="restTemplate" />
+		<property name="country" value="${tl.sms.60m.country}" />
 		<property name="project" value="${tl.sms.60m.project}" />
 		<property name="username" value="${tl.sms.60m.username}" />
 		<property name="password" value="${tl.sms.60m.password}" />
@@ -93,6 +94,22 @@
 		<property name="username" value="${tl.sms.zm.username}" />
 		<property name="password" value="${tl.sms.zm.password}" />
 	</bean>
+	<bean id="ddSmsCardService"
+		class="com.thinkgem.jeesite.modules.tl.service.DdSmsCardService">
+		<property name="restTemplate" ref="restTemplate" />
+		<property name="country" value="${tl.sms.dd.country}" />
+		<property name="project" value="${tl.sms.dd.project}" />
+		<property name="username" value="${tl.sms.dd.username}" />
+		<property name="password" value="${tl.sms.dd.password}" />
+	</bean>
+	<bean id="cnSmsCardService"
+		class="com.thinkgem.jeesite.modules.tl.service.CnSmsCardService">
+		<property name="restTemplate" ref="restTemplate" />
+		<property name="country" value="${tl.sms.cn.country}" />
+		<property name="project" value="${tl.sms.cn.project}" />
+		<property name="username" value="${tl.sms.cn.username}" />
+		<property name="password" value="${tl.sms.cn.password}" />
+	</bean>
 
   <!-- map集合的注入 -->
     <util:map id="cardMaps">
@@ -100,6 +117,8 @@
 		<entry key="60m" value-ref="m60SmsCardService"/>
 		<entry key="ym" value-ref="ymSmsCardService"/>
 		<entry key="zm" value-ref="zmSmsCardService"/>
+		<entry key="dd" value-ref="ddSmsCardService"/>
+		<entry key="cn" value-ref="cnSmsCardService"/>
     </util:map>
 	<bean id="registePoolService"
 		class="com.thinkgem.jeesite.modules.tl.service.RegistePoolService">

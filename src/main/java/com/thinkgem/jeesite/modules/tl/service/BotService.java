@@ -716,8 +716,10 @@ public class BotService implements BotManager {
 	public void deleteBot(XUserBot bot, String error) {
 		logger.info("{}，{}任务失败，删除账号,error={}", bot.getJobid(), bot.getPhone(),
 				error);
-		stopJob(bot.getJobid());
-		System.out.println("删除账号");
+		destroy(bot);
+		
+//		stopJob(bot.getJobid());
+//		System.out.println("删除账号");
 	}
 
 	/**
